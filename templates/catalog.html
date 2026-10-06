@@ -11,6 +11,14 @@
     <a class="btn" href="{{ url_for('catalog_index', q='upgrade') }}">Show upgrades and mods</a>
   </div>
 </form>
+<section class="card">
+  <h2>iFixit prices</h2>
+  <p>{{ ifixit_count }} parts have an iFixit product page saved.{% if ifixit_oldest %} The oldest price was checked {{ ifixit_oldest|date }}.{% endif %}</p>
+  <form method="post" action="{{ url_for('ifixit_refresh') }}">
+    <button type="submit">Check all iFixit prices</button>
+    <span class="muted small">Reads each product page once, with a pause between pages, so it takes a few minutes. You can keep using Bench Log meanwhile.</span>
+  </form>
+</section>
 {% if q %}
 <section class="card">
   <h2>Parts matching "{{ q }}"</h2>

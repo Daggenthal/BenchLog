@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Common repairs - Bench Log{% endblock %}
+{% block content %}
+<h1>Common repairs</h1>
+<p class="muted">Pick a device to see what usually needs fixing on it, what the part costs, where to buy it, and the iFixit guide where there is one.</p>
+<section class="card">
+  <ul class="stack">
+  {% for t in types %}
+    <li><a href="{{ url_for('common_repairs_type', type_id=t.id) }}"><strong>{{ t.name }}</strong></a>
+      <span class="muted small">{{ t.repair_count }} common repairs{% if t.device_count %}, {{ t.device_count }} logged here{% endif %}</span></li>
+  {% else %}
+    <li class="muted">The common repairs list is missing. Update Bench Log from the System page to restore it.</li>
+  {% endfor %}
+  </ul>
+</section>
+{% if other %}
+<p class="muted small">No common repairs listed yet for: {% for t in other %}<a href="{{ url_for('catalog_type', type_id=t.id) }}">{{ t.name }}</a>{{ ', ' if not loop.last }}{% endfor %}. Their full parts lists are under Parts.</p>
+{% endif %}
+{% endblock %}

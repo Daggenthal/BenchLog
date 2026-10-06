@@ -332,7 +332,7 @@ def test_reports_group_repair_types(client):
 def test_every_plain_page_renders_as_a_full_page(client):
     """Guards against a template losing its layout, which once broke Settings."""
     for path in ("/", "/devices", "/devices/new", "/boxes", "/lots", "/catalog", "/reports",
-                 "/settings", "/system", "/tickets", "/tickets/new", "/customers", "/labels"):
+                 "/settings", "/system", "/repairs", "/tickets", "/tickets/new", "/customers", "/labels"):
         response = client.get(path)
         assert response.status_code == 200, path
         html = response.get_data(as_text=True)

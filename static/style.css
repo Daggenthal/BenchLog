@@ -201,3 +201,8 @@ details summary { cursor: pointer; color: var(--muted); padding: 6px 0; }
 pre.log { background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 12px; overflow: auto; max-height: 60vh; font: 0.82rem/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace; white-space: pre-wrap; word-break: break-word; }
 .part-links { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
 input[type=password] { width: 100%; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; min-height: 44px; }
+
+/* Plain stacked list, used on Common repairs */
+.stack { list-style: none; margin: 0; padding: 0; }
+.stack li { padding: 10px 0; border-bottom: 1px solid var(--line, #e3e3e3); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.stack li:last-child { border-bottom: 0; }

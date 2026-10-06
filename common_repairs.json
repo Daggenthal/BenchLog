@@ -1,0 +1,1076 @@
+{
+ "checked": "2026-10-06",
+ "repairs": [
+  {
+   "type": "DualSense (PS5 controller)",
+   "part": "Analog stick module (left)",
+   "title": "Stick drift (left stick)",
+   "symptom": "My character walks on its own when I am not touching the left stick.",
+   "tip": "Confirm the drift in a gamepad tester first, then desolder all 14 joints with plenty of flux and low melt solder so the pads do not lift.",
+   "guide_title": "DualSense Joystick Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/DualSense+Joystick+Replacement/142488"
+  },
+  {
+   "type": "DualSense (PS5 controller)",
+   "part": "Analog stick module (right)",
+   "title": "Stick drift (right stick)",
+   "symptom": "The camera slowly turns by itself.",
+   "tip": "Test both sticks before quoting because the second stick is often close to failing too.",
+   "guide_title": "DualSense Joystick Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/DualSense+Joystick+Replacement/142488"
+  },
+  {
+   "type": "DualSense (PS5 controller)",
+   "part": "Battery",
+   "title": "Battery will not hold a charge",
+   "symptom": "It dies after an hour or two even when fully charged.",
+   "tip": "Rule out the cable and charging port before blaming the battery, and never pry against a swollen cell.",
+   "guide_title": "Sony DualSense Controller Battery Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Sony+DualSense+Controller+Battery+Replacement/142053"
+  },
+  {
+   "type": "DualSense (PS5 controller)",
+   "part": "USB-C charging port",
+   "title": "Will not charge",
+   "symptom": "It does not charge or connect when I plug in the cable.",
+   "tip": "Inspect the port for lint and bent pins under magnification and try a known good cable before soldering.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "DualSense (PS5 controller)",
+   "part": "R2 adaptive trigger assembly",
+   "title": "R2 trigger weak or grinding",
+   "symptom": "The right trigger feels loose and makes a clicking noise.",
+   "tip": "Check for a broken trigger spring first since that is a much cheaper fix than the whole adaptive assembly.",
+   "guide_title": "Sony DualSense Controller Trigger Assembly Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Sony+DualSense+Controller+Trigger+Assembly+Replacement/142071"
+  },
+  {
+   "type": "DualSense (PS5 controller)",
+   "part": "L1 / R1 buttons and flex",
+   "title": "L1 or R1 not responding",
+   "symptom": "The bumper button only works if I press really hard.",
+   "tip": "Release the L1 and R1 buttons gently because their plastic clips snap easily.",
+   "guide_title": "Sony DualSense Controller L1 and R1 Button Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Sony+DualSense+Controller+L1+and+R1+Button+Replacement/142049"
+  },
+  {
+   "type": "DualSense (PS5 controller)",
+   "part": "Thumbstick caps",
+   "title": "Worn or torn thumbstick rubber",
+   "symptom": "The rubber on my stick is peeling off.",
+   "tip": "Caps pull straight off the stick shaft once the board is out, so check the shaft for wear while you are there.",
+   "guide_title": "Sony DualSense Controller Joystick Cover Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Sony+DualSense+Controller+Joystick+Cover+Replacement/142063"
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "Analog stick module (left)",
+   "title": "Stick drift (left stick)",
+   "symptom": "My character moves without me touching the left stick.",
+   "tip": "Check the board revision before ordering parts and use flux and low melt solder on the 14 joints.",
+   "guide_title": "DualShock 4 Left Analog Stick Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/DualShock+4+Left+Analog+Stick+Replacement/27764"
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "Analog stick module (right)",
+   "title": "Stick drift (right stick)",
+   "symptom": "The camera drifts on its own.",
+   "tip": "Clean the stick with contact cleaner and retest before committing to desoldering.",
+   "guide_title": "DualShock 4 Right Analog Stick Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/DualShock+4+Right+Analog+Stick+Replacement/27763"
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "Micro-USB charging port board",
+   "title": "Will not charge",
+   "symptom": "It only charges if I hold the cable at an angle.",
+   "tip": "Match the board code printed on the old charging board, such as JDS 001 or JDS 040, because the versions are not interchangeable.",
+   "guide_title": "DualShock 4 (CUH-ZCT1U) Charging Assembly Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/DualShock+4+(CUH-ZCT1U)+Charging+Assembly+Replacement/156960"
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "Battery",
+   "title": "Battery will not hold a charge",
+   "symptom": "It dies really fast even after charging all night.",
+   "tip": "Confirm it charges over a known good cable first, and check the battery connector type matches the controller revision.",
+   "guide_title": "DualShock 4 (CUH-ZCT1U) Battery Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/DualShock+4+(CUH-ZCT1U)+Battery+Replacement/22074"
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "Conductive button film",
+   "title": "Buttons not registering",
+   "symptom": "Some of my buttons do nothing or several fire at once.",
+   "tip": "Look for cracked or worn carbon traces on the film and seat its tail squarely on the board contacts when reassembling.",
+   "guide_title": "DualShock 4 (CUH-ZCT1U) Button Circuit Membrane Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/DualShock+4+(CUH-ZCT1U)+Button+Circuit+Membrane+Replacement/121986"
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "Thumbstick caps",
+   "title": "Worn or torn thumbstick rubber",
+   "symptom": "The rubber on my thumbstick has worn through.",
+   "tip": "Caps pull straight off the stick shaft once the board is lifted, with no soldering needed.",
+   "guide_title": "DualShock 4 (CUH-ZCT1U) Analog Stick Covers Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/DualShock+4+(CUH-ZCT1U)+Analog+Stick+Covers+Replacement/22675"
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "L2 / R2 triggers and springs",
+   "title": "Trigger loose or not springing back",
+   "symptom": "My trigger stays pressed down and feels floppy.",
+   "tip": "A slipped or broken spring is the usual cause, so check how the spring sits before replacing the trigger.",
+   "guide_title": "DualShock 4 (CUH-ZCT1U) R2 and L2 Buttons Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/DualShock+4+(CUH-ZCT1U)+R2+and+L2+Buttons+Replacement/105553"
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "Analog stick module (left)",
+   "title": "Stick drift (left stick)",
+   "symptom": "My character keeps moving when I let go of the left stick.",
+   "tip": "Verify drift in a gamepad tester, then separate the two boards before desoldering the module.",
+   "guide_title": "Xbox Series X/S Wireless Controller Joystick Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Xbox+Series+X-S+Wireless+Controller+Joystick+Replacement/179645"
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "Analog stick module (right)",
+   "title": "Stick drift (right stick)",
+   "symptom": "My aim drifts upward by itself.",
+   "tip": "Test the stick click as well as the axes since the same module contains the click switch.",
+   "guide_title": "Xbox Series X/S Wireless Controller Joystick Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Xbox+Series+X-S+Wireless+Controller+Joystick+Replacement/179645"
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "LB / RB bumper assembly",
+   "title": "Bumper broken or not clicking",
+   "symptom": "The LB button is stuck and does not click anymore.",
+   "tip": "Check whether the plastic bumper piece is cracked before assuming the switch on the board has failed.",
+   "guide_title": "Xbox Series X|S Controller (Model 1914) Bumper Cover Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Xbox+Series+X%7CS+Controller+(Model+1914)+Bumper+Cover+Replacement/160499"
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "LB / RB tactile switches",
+   "title": "Bumper clicks but does not register",
+   "symptom": "RB clicks but nothing happens in the game.",
+   "tip": "If the bumper plastic is intact and the press is mushy or dead, the surface mount switch on the board needs replacing.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "USB-C port",
+   "title": "Will not connect over USB",
+   "symptom": "It does not get power or connect when I plug in the cable.",
+   "tip": "Try a known good data cable and inspect the port for debris and bent pins before soldering.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "Thumbstick caps",
+   "title": "Worn or torn thumbstick rubber",
+   "symptom": "The grip on my thumbstick is worn smooth.",
+   "tip": "Caps pull straight off the stick shaft once the faceplate is removed.",
+   "guide_title": "Xbox Series X|S Controller (Model 1914) Thumbstick Covers Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Xbox+Series+X%7CS+Controller+(Model+1914)+Thumbstick+Covers+Replacement/160497"
+  },
+  {
+   "type": "Xbox One controller",
+   "part": "Analog stick module (left)",
+   "title": "Stick drift (left stick)",
+   "symptom": "My character walks by itself.",
+   "tip": "Identify the model number inside the battery bay first because the board layout differs between revisions.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Xbox One controller",
+   "part": "Analog stick module (right)",
+   "title": "Stick drift (right stick)",
+   "symptom": "The camera spins slowly on its own.",
+   "tip": "Verify drift in a gamepad tester and try cleaning the stick before desoldering.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Xbox One controller",
+   "part": "LB / RB bumper assembly",
+   "title": "Bumper broken or not clicking",
+   "symptom": "My RB button is stuck down and will not click.",
+   "tip": "The plastic bumper bar cracks at its center mount, so inspect it before suspecting the switch.",
+   "guide_title": "Wireless Xbox One Controller Bumper Assembly Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Wireless+Xbox+One+Controller+Bumper+Assembly+Replacement/157833"
+  },
+  {
+   "type": "Xbox One controller",
+   "part": "Micro-USB port",
+   "title": "Will not connect over USB",
+   "symptom": "It will not stay connected when I use the cable.",
+   "tip": "Try a known good data cable and check whether the port is loose on the board before replacing it.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Xbox One controller",
+   "part": "Headphone jack",
+   "title": "No headset audio",
+   "symptom": "My headset has no sound or cuts out when I move the plug.",
+   "tip": "Test with a known good headset and update the controller firmware before replacing the jack.",
+   "guide_title": "Xbox One Wireless Controller Model 1708 3.5 mm Audio Port Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Xbox+One+Wireless+Controller+Model+1708+3.5+mm+Audio+Port+Replacement/98307"
+  },
+  {
+   "type": "Xbox One controller",
+   "part": "Thumbstick caps",
+   "title": "Worn or torn thumbstick rubber",
+   "symptom": "The rubber on my thumbstick is torn.",
+   "tip": "Caps pull straight off the stick shaft once the faceplate is removed.",
+   "guide_title": "Xbox One Wireless Controller Model 1708 Joystick Cap Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Xbox+One+Wireless+Controller+Model+1708+Joystick+Cap+Replacement/98309"
+  },
+  {
+   "type": "Xbox One controller",
+   "part": "D-pad and conductive pad",
+   "title": "D-pad not responding",
+   "symptom": "Pressing left on the directional pad does not always work.",
+   "tip": "Clean the board contacts with isopropyl alcohol first because dirt is a common cause.",
+   "guide_title": "Xbox One Wireless Controller Model 1708 Directional Pad Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Xbox+One+Wireless+Controller+Model+1708+Directional+Pad+Replacement/98147"
+  },
+  {
+   "type": "Joy-Con (L)",
+   "part": "Analog stick module",
+   "title": "Stick drift (left stick)",
+   "symptom": "My character moves on its own without me touching the stick.",
+   "tip": "Try recalibrating and cleaning under the stick skirt first, then replace the module if drift returns.",
+   "guide_title": "Left Joy-Con Joystick Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Left+Joy-Con+Joystick+Replacement/113182"
+  },
+  {
+   "type": "Joy-Con (L)",
+   "part": "Slider rail with flex cable",
+   "title": "Will not charge or connect on the console",
+   "symptom": "It works wirelessly but does not charge or register when slid onto the console.",
+   "tip": "Test on a known good console first because the console side rail fails too.",
+   "guide_title": "Left Joy-Con Charging Rail Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Left+Joy-Con+Charging+Rail+Replacement/142938"
+  },
+  {
+   "type": "Joy-Con (L)",
+   "part": "Shoulder and trigger flex cable",
+   "title": "L or ZL button not working",
+   "symptom": "The L or ZL button does nothing or only works sometimes.",
+   "tip": "The trigger spring is tiny and loves to fly away, so open it over a tray.",
+   "guide_title": "Joy-Con ZL Switch Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Joy-Con+ZL+Switch+Replacement/143669"
+  },
+  {
+   "type": "Joy-Con (L)",
+   "part": "Battery",
+   "title": "Battery dies fast",
+   "symptom": "The controller only lasts a short time before it shuts off.",
+   "tip": "Pry the battery up gently with a plastic tool because it is held with adhesive and must not be punctured.",
+   "guide_title": "Joy-Con Battery Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Joy-Con+Battery+Replacement/113634"
+  },
+  {
+   "type": "Joy-Con (L)",
+   "part": "Lock latch (metal buckle)",
+   "title": "Slides off the console",
+   "symptom": "The controller slides off the console without pressing the release button.",
+   "tip": "Watch for the small spring behind the latch when you lift it out.",
+   "guide_title": "Joy-Con Buckle Lock Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Joy-Con+Buckle+Lock+Replacement/103997"
+  },
+  {
+   "type": "Joy-Con (L)",
+   "part": "Conductive button pad",
+   "title": "Direction buttons unresponsive",
+   "symptom": "The direction buttons need a hard press or do not register.",
+   "tip": "Clean the board contacts with isopropyl alcohol before fitting the new pad.",
+   "guide_title": "Left Joy-Con Buttons Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Left+Joy-Con+Buttons+Replacement/115174"
+  },
+  {
+   "type": "Joy-Con (L)",
+   "part": "SL / SR and LED flex cable",
+   "title": "SL, SR or sync button not working",
+   "symptom": "The small side buttons do not work and the player lights stay off.",
+   "tip": "This flex also carries the sync button and player lights, so test all of them after the swap.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Joy-Con (R)",
+   "part": "Analog stick module",
+   "title": "Stick drift (right stick)",
+   "symptom": "The camera spins on its own without me touching the stick.",
+   "tip": "Try recalibrating and cleaning under the stick skirt first, then replace the module if drift returns.",
+   "guide_title": "Right Joy-Con Joystick Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Right+Joy-Con+Joystick+Replacement/113185"
+  },
+  {
+   "type": "Joy-Con (R)",
+   "part": "Slider rail with flex cable",
+   "title": "Will not charge or connect on the console",
+   "symptom": "It works wirelessly but does not charge or register when slid onto the console.",
+   "tip": "Test on a known good console first because the console side rail fails too.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Joy-Con (R)",
+   "part": "Shoulder and trigger flex cable",
+   "title": "R or ZR button not working",
+   "symptom": "The R or ZR button does nothing or only works sometimes.",
+   "tip": "The trigger spring is tiny and loves to fly away, so open it over a tray.",
+   "guide_title": "Joy-Con ZR button flex Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Joy-Con+ZR+button+flex+Replacement/116466"
+  },
+  {
+   "type": "Joy-Con (R)",
+   "part": "Battery",
+   "title": "Battery dies fast",
+   "symptom": "The controller only lasts a short time before it shuts off.",
+   "tip": "Pry the battery up gently with a plastic tool because it is held with adhesive and must not be punctured.",
+   "guide_title": "Joy-Con Battery Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Joy-Con+Battery+Replacement/113634"
+  },
+  {
+   "type": "Joy-Con (R)",
+   "part": "Lock latch (metal buckle)",
+   "title": "Slides off the console",
+   "symptom": "The controller slides off the console without pressing the release button.",
+   "tip": "Watch for the small spring behind the latch when you lift it out.",
+   "guide_title": "Joy-Con Buckle Lock Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Joy-Con+Buckle+Lock+Replacement/103997"
+  },
+  {
+   "type": "Joy-Con (R)",
+   "part": "SL / SR and LED flex cable",
+   "title": "SL, SR or sync button not working",
+   "symptom": "The small side buttons do not work and the player lights stay off.",
+   "tip": "This flex also carries the sync button and player lights, so test all of them after the swap.",
+   "guide_title": "Nintendo Switch Right Joy-Con SL/SR Button Board Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+Right+Joy-Con+SL-SR+Button+Board+Replacement/148909"
+  },
+  {
+   "type": "Joy-Con (R)",
+   "part": "Conductive button pad",
+   "title": "A B X Y buttons unresponsive",
+   "symptom": "The face buttons need a hard press or do not register.",
+   "tip": "Clean the board contacts with isopropyl alcohol before fitting the new pad.",
+   "guide_title": "Nintendo Switch Right Joy-Con Buttons Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+Right+Joy-Con+Buttons+Replacement/133803"
+  },
+  {
+   "type": "Switch Pro Controller",
+   "part": "Analog stick module (left)",
+   "title": "Stick drift (left stick)",
+   "symptom": "My character moves on its own without me touching the left stick.",
+   "tip": "Recalibrate the sticks in the Switch system settings first, and disconnect the battery before soldering.",
+   "guide_title": "Nintendo Switch Pro Controller Joystick Module Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+Pro+Controller+Joystick+Module+Replacement/127716"
+  },
+  {
+   "type": "Switch Pro Controller",
+   "part": "Analog stick module (right)",
+   "title": "Stick drift (right stick)",
+   "symptom": "The camera drifts by itself.",
+   "tip": "Recalibrate in system settings and retest before desoldering the module.",
+   "guide_title": "Nintendo Switch Pro Controller Joystick Module Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+Pro+Controller+Joystick+Module+Replacement/127716"
+  },
+  {
+   "type": "Switch Pro Controller",
+   "part": "Battery",
+   "title": "Battery will not hold a charge",
+   "symptom": "It dies much faster than it used to.",
+   "tip": "The battery sits under the back cover and lifts out without soldering, so rule out the cable and port first.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Switch Pro Controller",
+   "part": "USB-C charging port",
+   "title": "Will not charge",
+   "symptom": "The charging light does not come on when I plug it in.",
+   "tip": "Try a known good cable and inspect the port for debris and bent pins before soldering.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Switch Pro Controller",
+   "part": "Thumbstick caps",
+   "title": "Worn or torn thumbstick rubber",
+   "symptom": "The rubber on my stick is worn down and slippery.",
+   "tip": "Check the stick shaft and the shell ring around it for wear dust while the cap is off.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Switch Pro Controller",
+   "part": "Face button conductive pad",
+   "title": "Buttons not registering",
+   "symptom": "My A button only works when I press it hard.",
+   "tip": "Clean the board contacts and the pad with isopropyl alcohol before replacing the pad.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Joy-Con 2 (L)",
+   "part": "Analog stick module",
+   "title": "Stick drift (left stick)",
+   "symptom": "My character moves on its own without me touching the stick.",
+   "tip": "Recalibrate the stick in system settings first, then replace the module if drift returns.",
+   "guide_title": "Joy-Con 2 (Left) Joystick Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Joy-Con+2+(Left)+Joystick+Replacement/188976"
+  },
+  {
+   "type": "Joy-Con 2 (L)",
+   "part": "Battery",
+   "title": "Battery dies fast",
+   "symptom": "The controller only lasts a short time before it shuts off.",
+   "tip": "Disconnect the battery before touching any other connector.",
+   "guide_title": "Joy-Con 2 (Left) Battery Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Joy-Con+2+(Left)+Battery+Replacement/189109"
+  },
+  {
+   "type": "Joy-Con 2 (L)",
+   "part": "Magnetic connector assembly",
+   "title": "Will not charge or connect on the console",
+   "symptom": "It does not charge or register when attached to the console.",
+   "tip": "Test on a known good console first and inspect the connector contacts for dirt or corrosion.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Joy-Con 2 (L)",
+   "part": "SL / SR and LED flex cable",
+   "title": "SL or SR button not working",
+   "symptom": "The side buttons do not work when I hold the controller sideways.",
+   "tip": "Check that the flex is fully seated before ordering a part.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Joy-Con 2 (L)",
+   "part": "Shoulder and trigger flex cable",
+   "title": "L or ZL button not working",
+   "symptom": "The L or ZL button does nothing or only works sometimes.",
+   "tip": "Check for a loose or torn flex before replacing anything.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Joy-Con 2 (L)",
+   "part": "Shell and midframe",
+   "title": "Cracked or damaged shell",
+   "symptom": "The housing is cracked after a drop.",
+   "tip": "Move every screw and small part across in order and keep them sorted by length.",
+   "guide_title": "Nintendo Switch 2 Joy-Con Left Back Cover Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+2+Joy-Con+Left+Back+Cover+Replacement/214121"
+  },
+  {
+   "type": "Joy-Con 2 (R)",
+   "part": "Analog stick module",
+   "title": "Stick drift (right stick)",
+   "symptom": "The camera spins on its own without me touching the stick.",
+   "tip": "Recalibrate the stick in system settings first, then replace the module if drift returns.",
+   "guide_title": "Joy-Con 2 (Right) Joystick Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Joy-Con+2+(Right)+Joystick+Replacement/188978"
+  },
+  {
+   "type": "Joy-Con 2 (R)",
+   "part": "Battery",
+   "title": "Battery dies fast",
+   "symptom": "The controller only lasts a short time before it shuts off.",
+   "tip": "Disconnect the battery before touching any other connector.",
+   "guide_title": "Joy-Con 2 (Right) Battery Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Joy-Con+2+(Right)+Battery+Replacement/189066"
+  },
+  {
+   "type": "Joy-Con 2 (R)",
+   "part": "Magnetic connector assembly",
+   "title": "Will not charge or connect on the console",
+   "symptom": "It does not charge or register when attached to the console.",
+   "tip": "Test on a known good console first and inspect the connector contacts for dirt or corrosion.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Joy-Con 2 (R)",
+   "part": "Conductive button pad",
+   "title": "A B X Y buttons unresponsive",
+   "symptom": "The face buttons need a hard press or do not register.",
+   "tip": "Clean the board contacts with isopropyl alcohol before fitting the new pad.",
+   "guide_title": "Nintendo Switch 2 Joy-Con Action Buttons (ABXY) Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+2+Joy-Con+Action+Buttons+(ABXY)+Replacement/213996"
+  },
+  {
+   "type": "Joy-Con 2 (R)",
+   "part": "SL / SR and LED flex cable",
+   "title": "SL or SR button not working",
+   "symptom": "The side buttons do not work when I hold the controller sideways.",
+   "tip": "Check that the flex is fully seated before ordering a part.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Joy-Con 2 (R)",
+   "part": "Shoulder and trigger flex cable",
+   "title": "R or ZR button not working",
+   "symptom": "The R or ZR button does nothing or only works sometimes.",
+   "tip": "Check for a loose or torn flex before replacing anything.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "USB-C charging port",
+   "title": "Will not charge",
+   "symptom": "It will not charge or only charges if I hold the cable at an angle.",
+   "tip": "Inspect the port pins under magnification and measure charge current with a meter before soldering.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "USB-C power delivery IC",
+   "title": "Charges but will not dock to TV",
+   "symptom": "It charges slowly and shows nothing on the TV when docked.",
+   "tip": "The M92T36 chip is often killed by third party docks or a damaged port, so inspect the port too.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "Touch digitizer",
+   "title": "Cracked glass or touch not working",
+   "symptom": "The glass is cracked or touch does not respond.",
+   "tip": "The digitizer is glued to the frame and separate from the LCD, so heat it well and pry slowly.",
+   "guide_title": "Nintendo Switch Digitizer Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+Digitizer+Replacement/140040"
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "LCD panel",
+   "title": "Screen damaged or no picture",
+   "symptom": "The screen has lines or black blotches or shows no picture.",
+   "tip": "Confirm the console outputs to a TV when docked so you know the fault is the panel and not the board.",
+   "guide_title": "Nintendo Switch LCD Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+LCD+Replacement/117395"
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "Battery",
+   "title": "Battery dies fast",
+   "symptom": "The battery drains quickly or the console shuts off early.",
+   "tip": "The battery is glued down hard, so soften the adhesive with isopropyl alcohol and never bend the cell.",
+   "guide_title": "Nintendo Switch Battery Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+Battery+Replacement/112995"
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "Game card reader board (with headphone jack)",
+   "title": "Will not read game cards",
+   "symptom": "It says the game card could not be read or shows no game at all.",
+   "tip": "Reseat the reader board connector and try a known good card before replacing the board.",
+   "guide_title": "Nintendo Switch Headphone Jack and Game Card Reader Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+Headphone+Jack+and+Game+Card+Reader+Replacement/113113"
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "Fan",
+   "title": "Loud fan or overheating",
+   "symptom": "The fan is loud or the console gets hot and shuts down.",
+   "tip": "Clear dust from the vents and heatsink first and renew the thermal paste while you are in there.",
+   "guide_title": "Nintendo Switch Fan Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+Fan+Replacement/113058"
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "Left Joy-Con rail (with flex)",
+   "title": "Left controller not detected when attached",
+   "symptom": "The left controller does not charge or connect when attached.",
+   "tip": "Test with a known good controller first and check the rail flex connector for tears.",
+   "guide_title": "Nintendo Switch Left Joy Con Sensor Rail Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+Left+Joy+Con+Sensor+Rail+Replacement/113429"
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "USB-C charging port",
+   "title": "Will not charge",
+   "symptom": "It will not charge or only charges if I hold the cable at an angle.",
+   "tip": "Inspect the port pins under magnification and measure charge current with a meter before soldering.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "Analog stick module (left)",
+   "title": "Stick drift (left stick)",
+   "symptom": "My character moves on its own without me touching the stick.",
+   "tip": "Recalibrate first, and note the stick module is the same style used in the detachable controllers.",
+   "guide_title": "Nintendo Switch Lite Left Joystick Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+Lite+Left+Joystick+Replacement/137385"
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "Analog stick module (right)",
+   "title": "Stick drift (right stick)",
+   "symptom": "The camera spins on its own without me touching the stick.",
+   "tip": "Recalibrate first, and note the stick module is the same style used in the detachable controllers.",
+   "guide_title": "Nintendo Switch Lite Right Joystick Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+Lite+Right+Joystick+Replacement/137374"
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "Touch digitizer",
+   "title": "Cracked glass or touch not working",
+   "symptom": "The glass is cracked or touch does not respond.",
+   "tip": "The digitizer is glued to the front shell, so heat it evenly and pry slowly.",
+   "guide_title": "Nintendo Switch Lite Digitizer Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+Lite+Digitizer+Replacement/137500"
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "LCD panel",
+   "title": "Screen damaged or no picture",
+   "symptom": "The screen has lines or black blotches or shows no picture.",
+   "tip": "Reseat the display connector and check for backlight glow before ordering a panel.",
+   "guide_title": "Nintendo Switch Lite LCD Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+Lite+LCD+Replacement/137376"
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "Battery",
+   "title": "Battery dies fast",
+   "symptom": "The battery drains quickly or the console shuts off early.",
+   "tip": "Soften the battery adhesive with isopropyl alcohol and never bend the cell.",
+   "guide_title": "Nintendo Switch Lite Battery Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+Lite+Battery+Replacement/137383"
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "Game card reader",
+   "title": "Will not read game cards",
+   "symptom": "It says the game card could not be read or shows no game at all.",
+   "tip": "Reseat the reader connector and try a known good card before replacing the part.",
+   "guide_title": "Nintendo Switch Lite Game Card Reader and Headphone Jack Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+Lite+Game+Card+Reader+and+Headphone+Jack+Replacement/137370"
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "Fan",
+   "title": "Loud fan or overheating",
+   "symptom": "The fan is loud or the console gets hot and shuts down.",
+   "tip": "Clear dust from the vents and heatsink first and renew the thermal paste while you are in there.",
+   "guide_title": "Nintendo Switch Lite Fan Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+Lite+Fan+Replacement/137369"
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "USB-C charging port",
+   "title": "Will not charge",
+   "symptom": "It will not charge or only charges if I hold the cable at an angle.",
+   "tip": "Inspect the port pins under magnification and measure charge current with a meter before soldering.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "OLED panel (with touch)",
+   "title": "Cracked or dead screen",
+   "symptom": "The screen is cracked or has lines or stays black.",
+   "tip": "The panel is thin and glued in, so heat evenly and confirm TV output in the dock before ordering one.",
+   "guide_title": "Nintendo Switch OLED Model Screen Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+OLED+Model+Screen+Replacement/150112"
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "Battery",
+   "title": "Battery dies fast",
+   "symptom": "The battery drains quickly or the console shuts off early.",
+   "tip": "Soften the battery adhesive with isopropyl alcohol and never bend the cell.",
+   "guide_title": "Nintendo Switch OLED Model Battery Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+OLED+Model+Battery+Replacement/150093"
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "Game card reader board (with headphone jack)",
+   "title": "Will not read game cards",
+   "symptom": "It says the game card could not be read or shows no game at all.",
+   "tip": "Reseat the reader board connector and try a known good card before replacing the board.",
+   "guide_title": "Nintendo Switch OLED Model Game Card Reader Daughterboard Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+OLED+Model+Game+Card+Reader+Daughterboard+Replacement/150094"
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "Left Joy-Con rail (with flex)",
+   "title": "Left controller not detected when attached",
+   "symptom": "The left controller does not charge or connect when attached.",
+   "tip": "Test with a known good controller first and check the rail flex connector for tears.",
+   "guide_title": "Nintendo Switch OLED Model Left Joy-Con Sensor Rail Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+OLED+Model+Left+Joy-Con+Sensor+Rail+Replacement/150105"
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "Right Joy-Con rail (with flex)",
+   "title": "Right controller not detected when attached",
+   "symptom": "The right controller does not charge or connect when attached.",
+   "tip": "Test with a known good controller first and check the rail flex connector for tears.",
+   "guide_title": "Nintendo Switch OLED Model Right Joy-Con Sensor Rail Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+OLED+Model+Right+Joy-Con+Sensor+Rail+Replacement/150104"
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "Fan",
+   "title": "Loud fan or overheating",
+   "symptom": "The fan is loud or the console gets hot and shuts down.",
+   "tip": "Clear dust from the vents and heatsink first and renew the thermal paste while you are in there.",
+   "guide_title": "Nintendo Switch OLED Model Fan Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+OLED+Model+Fan+Replacement/150096"
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "USB-C power delivery IC",
+   "title": "Charges but will not dock to TV",
+   "symptom": "It charges slowly and shows nothing on the TV when docked.",
+   "tip": "This chip is often killed by third party docks or a damaged port, so inspect the port too.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "USB-C charging port",
+   "title": "Will not charge from the bottom port",
+   "symptom": "It will not charge or dock from the bottom port.",
+   "tip": "Try charging from the top port to tell a port fault from a board fault.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "LCD panel",
+   "title": "Cracked or dead screen",
+   "symptom": "The screen is cracked or has lines or stays black.",
+   "tip": "Confirm the console outputs to a TV when docked before ordering a panel.",
+   "guide_title": "Nintendo Switch 2 Screen Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+2+Screen+Replacement/194216"
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "Battery",
+   "title": "Battery dies fast",
+   "symptom": "The battery drains quickly or the console shuts off early.",
+   "tip": "The battery is glued down hard, so soften the adhesive with isopropyl alcohol and never bend the cell.",
+   "guide_title": "Nintendo Switch 2 Battery Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+2+Battery+Replacement/190141"
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "Left Joy-Con magnetic connector",
+   "title": "Left controller not detected when attached",
+   "symptom": "The left controller does not charge or connect when attached.",
+   "tip": "Test with a known good controller first and look for bent or dirty connector pins.",
+   "guide_title": "Nintendo Switch 2 Left Joy-Con 2 Connector Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+2+Left+Joy-Con+2+Connector+Replacement/194286"
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "Right Joy-Con magnetic connector",
+   "title": "Right controller not detected when attached",
+   "symptom": "The right controller does not charge or connect when attached.",
+   "tip": "Test with a known good controller first and look for bent or dirty connector pins.",
+   "guide_title": "Nintendo Switch 2 Right Joy-Con 2 Connector Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+2+Right+Joy-Con+2+Connector+Replacement/194221"
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "Fan",
+   "title": "Loud fan or overheating",
+   "symptom": "The fan is loud or the console gets hot and shuts down.",
+   "tip": "Clear dust from the vents and heatsink before replacing the fan.",
+   "guide_title": "Nintendo Switch 2 Fan Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+2+Fan+Replacement/194217"
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "microSD reader",
+   "title": "Memory card not detected",
+   "symptom": "It does not see my memory card.",
+   "tip": "This console only accepts microSD Express cards for games, so confirm the card type first.",
+   "guide_title": "Nintendo Switch 2 MicroSD Card Reader Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+2+MicroSD+Card+Reader+Replacement/194233"
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "Headphone jack",
+   "title": "No sound from headphones",
+   "symptom": "I get no sound or crackling sound through wired headphones.",
+   "tip": "Check the jack for lint and test with known good headphones first.",
+   "guide_title": "Nintendo Switch 2 Headphone Jack Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Nintendo+Switch+2+Headphone+Jack+Replacement/194225"
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "Thumbstick module (left)",
+   "title": "Stick drift (left stick)",
+   "symptom": "My left stick moves on its own.",
+   "tip": "Check the Controller ID in Settings to tell Type A from Type B sticks before ordering, and calibrate the new stick after fitting.",
+   "guide_title": "Steam Deck Left Thumbstick Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Steam+Deck+Left+Thumbstick+Replacement/148896"
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "Thumbstick module (right)",
+   "title": "Stick drift (right stick)",
+   "symptom": "My camera keeps drifting by itself.",
+   "tip": "Check the Controller ID in Settings to tell Type A from Type B sticks before ordering, and calibrate the new stick after fitting.",
+   "guide_title": "Steam Deck Right Thumbstick Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Steam+Deck+Right+Thumbstick+Replacement/148895"
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "USB-C charging port",
+   "title": "Will not charge",
+   "symptom": "It will not charge or only charges if I wiggle the cable.",
+   "tip": "Test with a known good charger and cable first, because the port is soldered to the main board and needs hot air rework.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "Battery",
+   "title": "Battery drains fast",
+   "symptom": "The battery dies much faster than it used to.",
+   "tip": "Discharge the battery below 5 percent and use a heat gun, because the adhesive is strong and the cell must not be bent.",
+   "guide_title": "Steam Deck Battery Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Steam+Deck+Battery+Replacement/149070"
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "Display assembly (LCD)",
+   "title": "Cracked or dead screen",
+   "symptom": "I dropped it and the screen is cracked.",
+   "tip": "Confirm whether the unit has the standard glass or the anti glare etched glass before ordering the screen.",
+   "guide_title": "Steam Deck Screen Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Steam+Deck+Screen+Replacement/148986"
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "Fan",
+   "title": "Loud or whining fan",
+   "symptom": "The fan makes a loud whining noise.",
+   "tip": "Units from early 2023 onward have a refreshed internal design with a different fan, so match the new fan to the unit.",
+   "guide_title": "Steam Deck Fan Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Steam+Deck+Fan+Replacement/148903"
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "SSD (M.2 2230)",
+   "title": "Storage upgrade or failed SSD",
+   "symptom": "I want more storage or it will not boot.",
+   "tip": "The new drive is blank, so SteamOS must be reinstalled from a recovery USB stick after fitting.",
+   "guide_title": "Steam Deck SSD Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Steam+Deck+SSD+Replacement/148989"
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "L1 / R1 bumper button",
+   "title": "Bumper not working (L1 or R1)",
+   "symptom": "My bumper button does not click or respond.",
+   "tip": "Confirm which side failed, because the left and right bumpers are different parts with separate guides, and this guide covers the left.",
+   "guide_title": "Steam Deck Left Bumper Button Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Steam+Deck+Left+Bumper+Button+Replacement/148936"
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "Thumbstick module (left)",
+   "title": "Stick drift (left stick)",
+   "symptom": "My left stick moves on its own.",
+   "tip": "The stick is replaced as a complete module, so disconnect the battery first and test for drift and full range before closing up.",
+   "guide_title": "Steam Deck OLED Left Thumbstick Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Steam+Deck+OLED+Left+Thumbstick+Replacement/168652"
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "Thumbstick module (right)",
+   "title": "Stick drift (right stick)",
+   "symptom": "My camera keeps drifting by itself.",
+   "tip": "The stick is replaced as a complete module, so disconnect the battery first and test for drift and full range before closing up.",
+   "guide_title": "Steam Deck OLED Right Thumbstick Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Steam+Deck+OLED+Right+Thumbstick+Replacement/168609"
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "USB-C charging port",
+   "title": "Will not charge",
+   "symptom": "It will not charge or only charges if I wiggle the cable.",
+   "tip": "Test with a known good charger and cable first, because the port is soldered to the main board and needs hot air rework.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "Battery",
+   "title": "Battery drains fast",
+   "symptom": "The battery dies much faster than it used to.",
+   "tip": "Discharge the battery below 5 percent before starting and fit fresh adhesive strips under the new cell.",
+   "guide_title": "Steam Deck OLED Battery Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Steam+Deck+OLED+Battery+Replacement/168676"
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "Display assembly (OLED)",
+   "title": "Cracked or dead screen",
+   "symptom": "I dropped it and the screen is cracked.",
+   "tip": "The screen comes off from the front with heat and picks, so warm every edge evenly before prying.",
+   "guide_title": "Steam Deck OLED Screen Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Steam+Deck+OLED+Screen+Replacement/168677"
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "Fan",
+   "title": "Loud or whining fan",
+   "symptom": "The fan makes a loud whining noise.",
+   "tip": "Check for dust in the fan and heatsink fins before replacing the fan.",
+   "guide_title": "Steam Deck OLED Fan Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Steam+Deck+OLED+Fan+Replacement/168674"
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "SSD (M.2 2230)",
+   "title": "Storage upgrade or failed SSD",
+   "symptom": "I want more storage or it will not boot.",
+   "tip": "The new drive is blank, so SteamOS must be reinstalled from a recovery USB stick after fitting.",
+   "guide_title": "Steam Deck OLED SSD Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Steam+Deck+OLED+SSD+Replacement/168255"
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "L1 / R1 bumper button",
+   "title": "Bumper not working (L1 or R1)",
+   "symptom": "My bumper button does not click or respond.",
+   "tip": "Confirm which side failed before ordering, because the left and right bumpers are different parts.",
+   "guide_title": "Steam Deck OLED Left Bumper Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/Steam+Deck+OLED+Left+Bumper+Replacement/168661"
+  },
+  {
+   "type": "PlayStation 5 console",
+   "part": "HDMI port",
+   "title": "No picture (HDMI port)",
+   "symptom": "The console turns on but there is no picture on my TV.",
+   "tip": "Inspect the port pins under magnification and try another cable and TV first, because bent pins are the usual cause.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "PlayStation 5 console",
+   "part": "Power supply unit",
+   "title": "Will not power on",
+   "symptom": "It is completely dead and will not turn on.",
+   "tip": "Try a known good power cord and a different outlet first, then confirm with a known good supply before ordering.",
+   "guide_title": "PlayStation 5 Power Supply Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/PlayStation+5+Power+Supply+Replacement/141729"
+  },
+  {
+   "type": "PlayStation 5 console",
+   "part": "Fan",
+   "title": "Loud fan",
+   "symptom": "The fan is really loud when I play.",
+   "tip": "Clean the dust from the fan and heatsink first, because buildup causes most fan noise.",
+   "guide_title": "PlayStation 5 Fan Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/PlayStation+5+Fan+Replacement/141723"
+  },
+  {
+   "type": "PlayStation 5 console",
+   "part": "Liquid metal reapplication",
+   "title": "Overheating shutdown",
+   "symptom": "It says it is too hot and shuts off.",
+   "tip": "Liquid metal conducts electricity, so keep it inside the foam barrier and remove any stray beads before closing up.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "PlayStation 5 console",
+   "part": "Disc drive laser",
+   "title": "Will not read discs",
+   "symptom": "It takes my discs but will not read them.",
+   "tip": "Keep the original drive daughterboard with the console, because it is paired to the main board.",
+   "guide_title": "PlayStation 5 Optical Drive Laser Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/PlayStation+5+Optical+Drive+Laser+Replacement/159080"
+  },
+  {
+   "type": "PlayStation 5 console",
+   "part": "USB port (front or rear)",
+   "title": "USB port not working",
+   "symptom": "My controller will not charge or connect from the USB port.",
+   "tip": "Check the port for bent pins or debris and try another cable before any board work.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "PlayStation 4 console",
+   "part": "HDMI port",
+   "title": "No picture (HDMI port)",
+   "symptom": "The console turns on but there is no picture on my TV.",
+   "tip": "Inspect the port pins under magnification and try another cable and TV first, because bent pins are the usual cause.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "PlayStation 4 console",
+   "part": "Thermal paste and pads",
+   "title": "Overheating and loud",
+   "symptom": "It sounds like a jet engine and sometimes shuts off.",
+   "tip": "Clean the heatsink fins and fan while it is apart, because dust is usually part of the overheating.",
+   "guide_title": "PlayStation 4 Thermal Paste Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/PlayStation+4+Thermal+Paste+Replacement/139167"
+  },
+  {
+   "type": "PlayStation 4 console",
+   "part": "Fan",
+   "title": "Fan noise or fan failure",
+   "symptom": "The fan rattles or does not spin.",
+   "tip": "Clear the dust first and check that the fan spins freely before ordering a new one.",
+   "guide_title": "PlayStation 4 Fan Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/PlayStation+4+Fan+Replacement/24722"
+  },
+  {
+   "type": "PlayStation 4 console",
+   "part": "Power supply unit",
+   "title": "Will not power on",
+   "symptom": "It is completely dead and will not turn on.",
+   "tip": "Read the exact console model number first, because power supplies differ between PS4 revisions.",
+   "guide_title": "PlayStation 4 Power Supply Replacement",
+   "guide_url": "https://www.ifixit.com/Guide/PlayStation+4+Power+Supply+Replacement/24719"
+  },
+  {
+   "type": "PlayStation 4 console",
+   "part": "Hard drive (2.5 inch SATA)",
+   "title": "Failed or full hard drive",
+   "symptom": "It is very slow or says it cannot start the PS4.",
+   "tip": "The new drive is blank, so the full system software must be reinstalled from a USB stick.",
+   "guide_title": "",
+   "guide_url": ""
+  },
+  {
+   "type": "PlayStation 4 console",
+   "part": "Disc drive laser",
+   "title": "Will not read discs",
+   "symptom": "It takes my discs but will not read them.",
+   "tip": "Keep the original drive board with the console, because it is paired to the main board.",
+   "guide_title": "",
+   "guide_url": ""
+  }
+ ]
+}

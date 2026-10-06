@@ -6,6 +6,7 @@ Data (database and photos) lives in ./data unless BENCHLOG_DATA is set.
 
 import csv
 import io
+import json
 import os
 import secrets
 import sqlite3
@@ -20,12 +21,13 @@ from flask import (Flask, Response, abort, flash, g, jsonify, redirect, render_t
 import alerts
 import db as dbm
 import labels
+import ifixit
 import pricing
 import printing
 import remote
 import system
 
-VERSION = "1.4.0"
+VERSION = "1.6.0"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.environ.get("BENCHLOG_DATA", os.path.join(BASE_DIR, "data"))
@@ -480,6 +482,70 @@ def find_parts(q, type_id=None):
             " ORDER BY dp.state, d.code", (part["id"],)).fetchall()
         results.append({"part": part, "fixes": fixes, "donors": donors})
     return results
+
+
+# ----------------------------------------------------------- common repairs
+
+COMMON_REPAIRS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "common_repairs.json")
+_common_repairs = {"mtime": None, "by_type": {}}
+
+
+def common_repairs_data():
+    """The shipped list of common repairs, as {device type name: [repair, ...]}. Reloaded when the file changes."""
+    try:
+        mtime = os.path.getmtime(COMMON_REPAIRS_FILE)
+        if mtime != _common_repairs["mtime"]:
+            with open(COMMON_REPAIRS_FILE, encoding="utf-8") as handle:
+                by_type = {}
+                for item in json.load(handle).get("repairs") or []:
+                    by_type.setdefault(item["type"], []).append(item)
+            _common_repairs.update(mtime=mtime, by_type=by_type)
+    except (OSError, ValueError, KeyError):
+        return {}
+    return _common_repairs["by_type"]
+
+
+def common_repairs_for(device_type):
+    """Common repairs for one device type row, each joined to its part, prices, and donors."""
+    conn = get_db()
+    rows = []
+    for item in common_repairs_data().get(device_type["name"], []):
+        part = conn.execute(
+            "SELECT p.*, t.name AS type_name FROM parts p JOIN device_types t ON t.id = p.device_type_id"
+            " WHERE p.device_type_id = ? AND p.name = ?", (device_type["id"], item["part"])).fetchone()
+        if part is None:  # renamed or removed here, so there is nothing to price
+            continue
+        done = conn.execute(
+            "SELECT COUNT(*) AS n, COALESCE(AVG(CASE WHEN source = 'purchased' THEN cost END), 0) AS avg,"
+            " SUM(CASE WHEN source = 'purchased' THEN 1 ELSE 0 END) AS bought"
+            " FROM repair_items WHERE part_id = ?", (part["id"],)).fetchone()
+        donors = conn.execute(
+            "SELECT d.code FROM device_parts dp JOIN devices d ON d.id = dp.device_id"
+            " WHERE dp.part_id = ? AND d.status = 'parts' AND dp.state = 'good' ORDER BY d.code LIMIT 6",
+            (part["id"],)).fetchall()
+        rows.append({"item": item, "part": part, "done": done, "donors": donors,
+                     "links": part_links(part["name"], part["part_number"], part["type_name"]),
+                     "gap": pricing.compare(part["last_price"], part["ifixit_price"])})
+    return rows
+
+
+@app.route("/repairs")
+def common_repairs():
+    data = common_repairs_data()
+    types = [dict(t, repair_count=len(data.get(t["name"], []))) for t in get_db().execute(
+        "SELECT t.*, (SELECT COUNT(*) FROM devices WHERE device_type_id = t.id) AS device_count"
+        " FROM device_types t ORDER BY t.sort, t.name")]
+    return render_template("repairs.html", types=[t for t in types if t["repair_count"]],
+                           other=[t for t in types if not t["repair_count"]])
+
+
+@app.route("/repairs/<int:type_id>")
+def common_repairs_type(type_id):
+    t = get_db().execute("SELECT * FROM device_types WHERE id = ?", (type_id,)).fetchone()
+    if t is None:
+        abort(404)
+    return render_template("repairs_type.html", t=t, repairs=common_repairs_for(t),
+                           parts_page=pricing.ifixit_link("", t["name"]))
 
 
 # ------------------------------------------------------------------ devices
@@ -1305,7 +1371,10 @@ def catalog_index():
         " (SELECT COUNT(*) FROM functions WHERE device_type_id = t.id) AS function_count,"
         " (SELECT COUNT(*) FROM devices WHERE device_type_id = t.id) AS device_count"
         " FROM device_types t ORDER BY t.sort, t.name").fetchall()
-    return render_template("catalog.html", types=types, q=q, results=find_parts(q) if q else [])
+    stats = conn.execute("SELECT COUNT(*) AS n, MIN(ifixit_checked_at) AS oldest FROM parts"
+                         " WHERE ifixit_url LIKE 'https://www.ifixit.com/products/%'").fetchone()
+    return render_template("catalog.html", types=types, q=q, results=find_parts(q) if q else [],
+                           ifixit_count=stats["n"], ifixit_oldest=stats["oldest"])
 
 
 @app.route("/catalog/<int:type_id>", methods=["GET", "POST"])
@@ -1551,6 +1620,7 @@ def render_part(part, **extra):
         "part.html", p=part, fixes=fixes, donors=donors, used=used, query=query,
         ebay_ready=bool(keys.get("client_id") and keys.get("client_secret")),
         price_gap=pricing.compare(part["last_price"], part["ifixit_price"]),
+        ifixit_checkable=ifixit.is_product_url(part["ifixit_url"]),
         search_links=pricing.links(part["name"], part["part_number"], part["type_name"],
                                    setting("ebay_marketplace", "EBAY_US"), query=query),
         **extra)
@@ -1569,7 +1639,7 @@ def part(part_id):
                 url = "https://" + url
             # Marked as typed in, so the price list shipped with updates never overwrites it.
             conn.execute("UPDATE parts SET ifixit_price = ?, ifixit_url = ?, ifixit_checked_at = ?, ifixit_name = '',"
-                         " ifixit_note = '', ifixit_kit_price = 0, ifixit_source = 'manual' WHERE id = ?",
+                         " ifixit_note = '', ifixit_kit_price = 0, ifixit_in_stock = NULL, ifixit_source = 'manual' WHERE id = ?",
                          (price, url, now() if price is not None else None, part_id))
             flash("iFixit price saved." if price is not None else "iFixit price cleared.", "ok")
         elif "use_price" in request.form:
@@ -1590,6 +1660,63 @@ def part(part_id):
         conn.commit()
         return redirect(url_for("part", part_id=part_id))
     return render_part(p)
+
+
+def save_ifixit_price(conn, part_id, result):
+    """Store a price read from iFixit. Who entered the link stays as it was."""
+    conn.execute("UPDATE parts SET ifixit_price = ?, ifixit_checked_at = ?, ifixit_in_stock = ? WHERE id = ?",
+                 (result["price"], now(), 1 if result["in_stock"] else 0, part_id))
+
+
+@app.route("/part/<int:part_id>/ifixit-check", methods=["POST"])
+def part_ifixit_check(part_id):
+    """Read the current price from this part's iFixit product page."""
+    conn = get_db()
+    p = part_or_404(part_id)
+    try:
+        result = ifixit.fetch(p["ifixit_url"])
+    except ifixit.IfixitError as exc:
+        flash(str(exc), "error")
+        return redirect(url_for("part", part_id=part_id))
+    old = p["ifixit_price"]
+    save_ifixit_price(conn, part_id, result)
+    conn.commit()
+    stock = "" if result["in_stock"] else " It is out of stock right now."
+    if old is not None and abs(old - result["price"]) >= 0.005:
+        flash("iFixit price changed from %s to %s.%s" % (money_filter(old), money_filter(result["price"]), stock), "ok")
+    else:
+        flash("iFixit price is %s.%s" % (money_filter(result["price"]), stock), "ok")
+    return redirect(url_for("part", part_id=part_id))
+
+
+@app.route("/catalog/ifixit-refresh", methods=["POST"])
+def ifixit_refresh():
+    """Check every part that has an iFixit product page, slowly, as a background task."""
+    rows = [(r["id"], "%s, %s" % (r["type_name"], r["name"]), r["ifixit_url"], r["ifixit_price"])
+            for r in get_db().execute(
+                "SELECT p.id, p.name, p.ifixit_url, p.ifixit_price, t.name AS type_name FROM parts p"
+                " JOIN device_types t ON t.id = p.device_type_id WHERE p.ifixit_url != ''"
+                " ORDER BY t.sort, p.sort")
+            if ifixit.is_product_url(r["ifixit_url"])]
+    if not rows:
+        flash("No parts have an iFixit product page saved.", "error")
+        return redirect(url_for("catalog_index"))
+
+    def work(log):
+        conn = dbm.connect(DB_PATH)
+        try:
+            def save(part_id, result):
+                save_ifixit_price(conn, part_id, result)
+                conn.commit()
+            summary = ifixit.refresh_all(rows, save, log=log)
+        finally:
+            conn.close()
+        return summary["checked"] > 0
+
+    pages = len({r[2] for r in rows})
+    return launch("ifixit-prices", "Checking iFixit prices (%d parts, about %d minutes)"
+                  % (len(rows), max(1, round(pages * (ifixit.PAUSE_SECONDS + 1) / 60))),
+                  [system.Step("Read each iFixit product page", func=work)])
 
 
 @app.route("/part/<int:part_id>/price", methods=["POST"])

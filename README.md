@@ -24,6 +24,8 @@ gets a QR label that links straight to its page.
 - Reverse search by part name, part number, or symptom ("drift", "no charge", "M92T36")
 - Part names link to a web search, Google Shopping, eBay buy-it-now, and iFixit
 - iFixit and eBay prices side by side for each part, with the difference worked out
+- iFixit prices for about 150 parts, with a button to fetch current ones
+- Common repairs for each device, with prices, buy links, and iFixit guides
 - A saved supplier link per part
 - Upgrades and mods listed beside like-for-like parts, starting with GuliKit drift-proof sticks for the Steam Deck, Joy-Con, Switch Lite, DualSense, DualShock 4, Xbox, and Switch Pro controllers
 - Optional live price check through the eBay Browse API, with the result shown as a suggestion you confirm
@@ -316,18 +318,34 @@ cheap results for small parts are often the wrong item or a bulk lot.
 ### iFixit prices
 
 Bench Log ships with a list of iFixit's prices for the parts it sells, in
-`ifixit_prices.json`. It was read from iFixit's parts pages for each supported
-device, uses the "Part Only" price where iFixit offers one, and carries the date
-it was checked. About 150 parts have a match. Chip-level parts mostly do not,
-because iFixit does not sell them.
+`ifixit_prices.json`. It uses the "Part Only" price where iFixit offers one.
+About 150 parts have a match. Chip-level parts mostly do not, because iFixit
+does not sell them.
 
-The list is a snapshot, not a live feed. It is refreshed with app updates, and
-a newer list replaces older list prices. A price or link you type in on the
-part page is never overwritten, and neither is one you cleared.
+To get current numbers on your own device:
+
+- **One part:** open the part and press "Check iFixit price now".
+- **All of them:** open Parts and press "Check all iFixit prices". It reads each
+  product page once with a pause in between, so it takes a few minutes and runs
+  in the background.
+
+Both read the price that iFixit publishes on the product page itself. Only
+product pages are requested, never search or the API, and only when you press
+the button. If iFixit asks the app to slow down, the check stops and can be run
+again later. A price or link you type in is never overwritten by the shipped
+list, and neither is one you cleared.
 
 The iFixit button on a part opens its product page when one is known, and
 iFixit's parts page for that device otherwise. The part page shows iFixit and
 eBay side by side and says which is cheaper and by how much.
+
+### Common repairs
+
+The Repairs page lists, for each supported device, the repairs that come up
+most often, most common first. Each one shows the part, your usual cost, the
+eBay and iFixit prices, what you have actually paid, the same search and buy
+links as the part page, any good donor parts you hold, and a link to the iFixit
+guide where one exists. The list ships in `common_repairs.json`.
 
 ## Security
 

@@ -209,6 +209,7 @@ MIGRATIONS = [
     ("parts", "ifixit_name", "TEXT NOT NULL DEFAULT ''"),
     ("parts", "ifixit_note", "TEXT NOT NULL DEFAULT ''"),
     ("parts", "ifixit_kit_price", "INTEGER NOT NULL DEFAULT 0"),
+    ("parts", "ifixit_in_stock", "INTEGER"),
     ("parts", "ifixit_source", "TEXT NOT NULL DEFAULT ''"),  # '' none, 'list' shipped list, 'manual' typed in
     ("devices", "customer_id", "INTEGER REFERENCES customers(id)"),
 ]
@@ -305,7 +306,9 @@ def sync_ifixit(conn, path=None):
     try:
         with open(path or IFIXIT_FILE, encoding="utf-8") as handle:
             data = json.load(handle)
-        checked = int(calendar.timegm(time.strptime(data["checked"], "%Y-%m-%d"))) + 12 * 3600
+        # "checked_at" is the exact moment the list was read. Older lists only carried the day.
+        checked = int(data.get("checked_at") or
+                      calendar.timegm(time.strptime(data["checked"], "%Y-%m-%d")) + 12 * 3600)
     except (OSError, ValueError, KeyError):
         return 0
     changed = 0
@@ -322,9 +325,10 @@ def sync_ifixit(conn, path=None):
             continue
         conn.execute(
             "UPDATE parts SET ifixit_price = ?, ifixit_url = ?, ifixit_checked_at = ?, ifixit_name = ?,"
-            " ifixit_note = ?, ifixit_kit_price = ?, ifixit_source = 'list' WHERE id = ?",
+            " ifixit_note = ?, ifixit_kit_price = ?, ifixit_in_stock = ?, ifixit_source = 'list' WHERE id = ?",
             (item["price"], item["url"], checked, item.get("name", ""), item.get("note", ""),
-             1 if item.get("kit_price") else 0, row[0]))
+             1 if item.get("kit_price") else 0,
+             None if item.get("in_stock") is None else int(bool(item["in_stock"])), row[0]))
         changed += 1
     return changed
 

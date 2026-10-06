@@ -34,8 +34,8 @@
         <td class="right">{% if p.last_price is not none %}<form method="post" action="{{ url_for('part', part_id=p.id) }}"><button class="small" type="submit" name="use_price" value="{{ '%.2f'|format(p.last_price) }}">Use</button></form>{% endif %}</td>
       </tr>
       <tr>
-        <td><a href="{{ p.ifixit_url or search_links.ifixit }}" target="_blank" rel="noopener">iFixit</a> <span class="muted small">{% if p.ifixit_source == 'list' %}{{ 'Fix Kit price, the bare part may cost less' if p.ifixit_kit_price else 'part only, from iFixit\'s parts list' }}{% elif p.ifixit_price is not none %}entered by you{% endif %}</span></td>
-        <td class="num">{% if p.ifixit_price is not none %}{{ p.ifixit_price|money }}{% else %}<span class="muted">n/a</span>{% endif %}</td>
+        <td><a href="{{ p.ifixit_url or search_links.ifixit }}" target="_blank" rel="noopener">iFixit</a> <span class="muted small">{% if p.ifixit_source == 'list' %}{{ 'Fix Kit price, the bare part may cost less' if p.ifixit_kit_price else 'part only, from iFixit' }}{% elif p.ifixit_price is not none %}entered by you{% endif %}</span></td>
+        <td class="num">{% if p.ifixit_price is not none %}{{ p.ifixit_price|money }}{% if p.ifixit_in_stock == 0 %}<br><span class="muted small">out of stock</span>{% endif %}{% else %}<span class="muted">n/a</span>{% endif %}</td>
         <td class="muted small">{{ p.ifixit_checked_at|date }}</td>
         <td class="right">{% if p.ifixit_price is not none %}<form method="post" action="{{ url_for('part', part_id=p.id) }}"><button class="small" type="submit" name="use_price" value="{{ '%.2f'|format(p.ifixit_price) }}">Use</button></form>{% endif %}</td>
       </tr>
@@ -58,6 +58,12 @@
     </div>
     <button type="submit">Save iFixit price</button>
   </form>
+  {% if ifixit_checkable %}
+  <form method="post" action="{{ url_for('part_ifixit_check', part_id=p.id) }}" style="margin-top:10px">
+    <button class="primary" type="submit">Check iFixit price now</button>
+    <span class="muted small">Reads the price from the saved iFixit product page.</span>
+  </form>
+  {% endif %}
   <p class="muted small" style="margin-top:8px">Where iFixit sells a part, its price is filled in from a list that ships with Bench Log and is refreshed with app updates. It is not live, so check the date. Type a price here to replace it. Leave the price blank and save to clear it.</p>
 
   <h3>Check the current eBay price</h3>

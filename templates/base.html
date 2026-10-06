@@ -17,6 +17,7 @@
       <a href="{{ url_for('tickets') }}" class="{{ 'active' if ep.startswith('ticket') or ep.startswith('customer') }}">Tickets</a>
       <a href="{{ url_for('boxes') }}" class="{{ 'active' if ep.startswith('box') }}">Boxes</a>
       <a href="{{ url_for('lots') }}" class="{{ 'active' if ep.startswith('lot') }}">Lots</a>
+      <a href="{{ url_for('common_repairs') }}" class="{{ 'active' if ep.startswith('common') }}">Repairs</a>
       <a href="{{ url_for('catalog_index') }}" class="{{ 'active' if ep.startswith('catalog') or ep.startswith('part') }}">Parts</a>
       <a href="{{ url_for('reports') }}" class="{{ 'active' if ep == 'reports' }}">Reports</a>
       <a href="{{ url_for('settings') }}" class="{{ 'active' if ep == 'settings' }}">Settings</a>

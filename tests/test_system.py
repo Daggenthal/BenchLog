@@ -541,3 +541,139 @@ def test_ifixit_price_list_never_overwrites_what_was_typed(client):
     assert changed > 100
     assert typed["ifixit_price"] == 31.0 and typed["ifixit_source"] == "manual"
     assert cleared["ifixit_price"] is None and cleared["ifixit_source"] == "manual"
+
+
+# ----------------------------------------------------------- live iFixit prices
+
+import ifixit  # noqa: E402
+
+PRODUCT_PAGE = '''<html><head>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Steam Deck OLED Left Thumbstick",
+"offers":{"@type":"Offer","priceCurrency":"USD","price":%s,"availability":"https://schema.org/%s"}}</script>
+</head><body>page</body></html>'''
+
+
+def test_ifixit_page_parser_and_address_check():
+    assert ifixit.parse(PRODUCT_PAGE % ("34.99", "InStock")) == {
+        "price": 34.99, "currency": "USD", "in_stock": True, "name": "Steam Deck OLED Left Thumbstick"}
+    assert ifixit.parse(PRODUCT_PAGE % ('"12.50"', "OutOfStock"))["in_stock"] is False
+    with pytest.raises(ifixit.IfixitError):
+        ifixit.parse("<html>no data here</html>")
+    assert ifixit.is_product_url("https://www.ifixit.com/products/steam-deck-oled-fan?variant=123")
+    for bad in ("http://www.ifixit.com/products/x", "https://www.ifixit.com/Search?query=x",
+                "https://www.ifixit.com/api/2.0/x", "https://evil.example/products/x",
+                "https://www.ifixit.com.evil.example/products/x", "file:///etc/passwd", "", None):
+        assert not ifixit.is_product_url(bad)
+    with pytest.raises(ifixit.IfixitError):  # nothing but a product page is ever requested
+        ifixit.fetch("https://www.ifixit.com/Search?query=x")
+
+
+def test_check_one_ifixit_price(client, monkeypatch):
+    asked = []
+    monkeypatch.setattr(ifixit, "_download", lambda url, timeout=25: asked.append(url) or PRODUCT_PAGE % ("36.49", "InStock"))
+    pid = part_id("Steam Deck OLED", "Thumbstick module (right)")
+    assert "Check iFixit price now" in client.get("/part/%d" % pid).get_data(as_text=True)
+    page = client.post("/part/%d/ifixit-check" % pid, follow_redirects=True).get_data(as_text=True)
+    assert asked == ["https://www.ifixit.com/products/steam-deck-oled-right-thumbstick?variant=40904413249639"]
+    assert "iFixit price changed from $34.99 to $36.49" in page
+    with conn() as c:
+        row = c.execute("SELECT ifixit_price, ifixit_source, ifixit_checked_at FROM parts WHERE id = ?", (pid,)).fetchone()
+    assert row["ifixit_price"] == 36.49 and row["ifixit_source"] == "list"
+    assert row["ifixit_checked_at"] > time.time() - 60
+    with conn() as c:  # a fresh check is newer than the shipped list, so the list leaves it alone
+        dbm.sync_ifixit(c)
+        assert c.execute("SELECT ifixit_price FROM parts WHERE id = ?", (pid,)).fetchone()[0] == 36.49
+
+    def blocked(url, timeout=25):
+        raise ifixit.urllib.error.HTTPError(url, 403, "Forbidden", {}, None)
+    monkeypatch.setattr(ifixit, "_download", blocked)
+    page = client.post("/part/%d/ifixit-check" % pid, follow_redirects=True).get_data(as_text=True)
+    assert "iFixit refused the request" in page
+    # A part with no product page has no button.
+    assert "Check iFixit price now" not in client.get(
+        "/part/%d" % part_id("Steam Deck OLED", "Trackpad (left)")).get_data(as_text=True)
+
+
+def test_check_all_ifixit_prices_reads_each_page_once_and_stops_when_told():
+    pages, saved, lines, naps = [], {}, [], []
+
+    def download(url, timeout=25):
+        pages.append(url)
+        if url.endswith("/gone"):
+            raise ifixit.urllib.error.HTTPError(url, 404, "Not Found", {}, None)
+        if url.endswith("/slow"):
+            raise ifixit.urllib.error.HTTPError(url, 429, "Too Many", {}, None)
+        return PRODUCT_PAGE % ("9.99", "OutOfStock")
+
+    old = ifixit._download
+    ifixit._download = download
+    try:
+        base = "https://www.ifixit.com/products/"
+        rows = [(1, "A", base + "a", 9.99), (2, "B", base + "a", 5.0), (3, "C", base + "gone", 1.0),
+                (4, "D", base + "slow", 1.0), (5, "E", base + "e", 1.0)]
+        summary = ifixit.refresh_all(rows, lambda pid, r: saved.__setitem__(pid, r["price"]),
+                                     log=lines.append, sleep=naps.append)
+    finally:
+        ifixit._download = old
+    assert pages == [base + "a", base + "gone", base + "slow"]  # one request per address, none after the stop
+    assert saved == {1: 9.99, 2: 9.99} and len(naps) == 2
+    assert summary == {"checked": 2, "changed": 1, "failed": 1, "stopped": True}
+    assert any("out of stock" in line for line in lines) and "Stopped early" in lines[-1]
+
+
+def test_check_all_ifixit_prices_button_starts_a_job(client, monkeypatch):
+    monkeypatch.setattr(ifixit, "_download", lambda url, timeout=25: PRODUCT_PAGE % ("1.23", "InStock"))
+    monkeypatch.setattr(ifixit, "PAUSE_SECONDS", 0)
+    assert "Check all iFixit prices" in client.get("/catalog").get_data(as_text=True)
+    response = client.post("/catalog/ifixit-refresh")
+    assert response.status_code == 302 and "/system/job/ifixit-prices-" in response.headers["Location"]
+    job_id = response.headers["Location"].rsplit("/", 1)[-1]
+    for _ in range(100):
+        if system.get_job(job_id)["status"] != "running":
+            break
+        time.sleep(0.1)
+    assert system.get_job(job_id)["status"] == "done", system.job_log(job_id)
+    with conn() as c:
+        prices = {r[0] for r in c.execute("SELECT ifixit_price FROM parts WHERE ifixit_source = 'list'")}
+    assert prices == {1.23}
+
+
+# --------------------------------------------------------------- common repairs
+
+def test_common_repairs_list_is_valid():
+    import json
+    with open(benchlog.COMMON_REPAIRS_FILE, encoding="utf-8") as handle:
+        data = json.load(handle)
+    names = {t["name"]: {p[0] for p in t["parts"]} for t in catalog.CATALOG}
+    seen = set()
+    for item in data["repairs"]:
+        assert item["part"] in names[item["type"]], item
+        assert item["title"] and (item["type"], item["part"]) not in seen
+        seen.add((item["type"], item["part"]))
+        if item["guide_url"]:
+            assert item["guide_url"].startswith("https://www.ifixit.com/Guide/") and item["guide_title"]
+        for text in (item["title"], item["symptom"], item["tip"], item["guide_title"]):
+            assert chr(0x2014) not in text and chr(0x2013) not in text
+    assert {item["type"] for item in data["repairs"]} == set(names)  # every device type has some
+
+
+def test_common_repairs_pages(client):
+    page = client.get("/repairs").get_data(as_text=True)
+    assert "Common repairs" in page and "DualSense (PS5 controller)" in page and ">Repairs</a>" in page
+    with conn() as c:
+        tid = c.execute("SELECT id FROM device_types WHERE name = 'Steam Deck OLED'").fetchone()[0]
+    assert "/repairs/%d" % tid in page
+    page = client.get("/repairs/%d" % tid).get_data(as_text=True)
+    assert "Stick drift (left stick)" in page and "Thumbstick module (left)" in page
+    assert "https://www.ifixit.com/Guide/Steam+Deck+OLED+Left+Thumbstick+Replacement/168652" in page
+    assert "google.com/search" in page and "ebay." in page and "Usual cost" in page
+    assert "https://www.ifixit.com/products/steam-deck-oled-fan" in page  # the iFixit part button
+    assert "No iFixit guide found" in page  # the USB-C port has none
+    assert client.get("/repairs/99999").status_code == 404
+    # A device type the user added has no list, and says so instead of failing.
+    client.post("/catalog", data={"name": "Test handheld", "category": "Console"})
+    with conn() as c:
+        new_id = c.execute("SELECT id FROM device_types WHERE name = 'Test handheld'").fetchone()[0]
+    assert "No common repairs listed" in client.get("/repairs/%d" % new_id).get_data(as_text=True)
+    assert "Test handheld" in client.get("/repairs").get_data(as_text=True)

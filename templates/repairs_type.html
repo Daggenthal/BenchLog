@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ t.name }} common repairs - Bench Log{% endblock %}
+{% block content %}
+<p class="small"><a href="{{ url_for('common_repairs') }}">Common repairs</a></p>
+<h1>{{ t.name }}</h1>
+<p class="muted">Most common first. Prices are per part. <a href="{{ url_for('catalog_type', type_id=t.id) }}">Full parts list and checklist</a> &middot; <a href="{{ parts_page }}" target="_blank" rel="noopener">All iFixit parts for this device</a></p>
+{% for r in repairs %}
+<section class="card repair">
+  <h2>{{ loop.index }}. {{ r.item.title }}{% if r.part.microsolder %} <span class="pill">soldering</span>{% endif %}</h2>
+  {% if r.item.symptom %}<p>{{ r.item.symptom }}</p>{% endif %}
+  {% if r.item.tip %}<p class="muted small">Tip: {{ r.item.tip }}</p>{% endif %}
+  <p>Part: <a href="{{ url_for('part', part_id=r.part.id) }}"><strong>{{ r.part.name }}</strong></a>{% if r.part.part_number %} <span class="mono small">{{ r.part.part_number }}</span>{% endif %}</p>
+  <div class="grid">
+    <div class="stat"><div class="v">{{ r.part.default_cost|money }}</div><div class="k">Usual cost</div></div>
+    <div class="stat"><div class="v">{% if r.part.last_price is not none %}{{ r.part.last_price|money }}{% else %}<span class="muted">n/a</span>{% endif %}</div><div class="k">eBay{% if r.part.last_price_at %}, checked {{ r.part.last_price_at|date }}{% else %}, not checked yet{% endif %}</div></div>
+    <div class="stat"><div class="v">{% if r.part.ifixit_price is not none %}{{ r.part.ifixit_price|money }}{% else %}<span class="muted">n/a</span>{% endif %}</div><div class="k">iFixit{% if r.part.ifixit_price is not none %}{% if r.part.ifixit_kit_price %}, Fix Kit price{% endif %}, checked {{ r.part.ifixit_checked_at|date }}{% if r.part.ifixit_in_stock == 0 %}, out of stock{% endif %}{% else %}, not sold or not matched{% endif %}</div></div>
+    <div class="stat"><div class="v">{% if r.done.bought %}{{ r.done.avg|money }}{% else %}<span class="muted">n/a</span>{% endif %}</div><div class="k">What you paid, {{ r.done.n }} repair(s) logged</div></div>
+  </div>
+  <div class="row" style="margin-top:12px">
+    {% if r.item.guide_url %}<a class="btn primary" href="{{ r.item.guide_url }}" target="_blank" rel="noopener">iFixit guide</a>{% endif %}
+    {% if r.part.buy_url %}<a class="btn" href="{{ r.part.buy_url }}" target="_blank" rel="noopener">Your supplier</a>{% endif %}
+    <a class="btn" href="{{ r.links.google }}" target="_blank" rel="noopener">Google</a>
+    <a class="btn" href="{{ r.links.shopping }}" target="_blank" rel="noopener">Google Shopping</a>
+    <a class="btn" href="{{ r.links.ebay }}" target="_blank" rel="noopener">eBay</a>
+    <a class="btn" href="{{ r.part.ifixit_url or r.links.ifixit }}" target="_blank" rel="noopener">iFixit part</a>
+    <a class="btn" href="{{ url_for('part', part_id=r.part.id) }}">Price and details</a>
+  </div>
+  {% if r.item.guide_url %}<p class="muted small" style="margin-top:8px">Guide: {{ r.item.guide_title }}</p>
+  {% else %}<p class="muted small" style="margin-top:8px">No iFixit guide found for this one.</p>{% endif %}
+  {% if r.donors %}<p class="small" style="margin-top:4px">Good ones on your donors: {% for d in r.donors %}<a class="mono" href="{{ url_for('device', code=d.code) }}">{{ d.code }}</a>{{ ', ' if not loop.last }}{% endfor %}</p>{% endif %}
+</section>
+{% else %}
+<section class="card"><p class="muted">No common repairs listed for this device yet. See its <a href="{{ url_for('catalog_type', type_id=t.id) }}">full parts list</a>.</p></section>
+{% endfor %}
+{% endblock %}
