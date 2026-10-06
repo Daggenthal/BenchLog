@@ -315,13 +315,19 @@ cheap results for small parts are often the wrong item or a bulk lot.
 
 ### iFixit prices
 
-Every part has an iFixit link. Steam Deck parts are marked, because iFixit
-sells Valve's official ones. For those, the link opens the exact product page
-where one is known (thumbsticks, battery, fan), and the Steam Deck parts page
-otherwise. For other devices it searches iFixit's site through Google. iFixit does not allow programs to read its
-prices, so that price is typed in by hand on the part page, along with the
-link to the product. The part page then shows iFixit and eBay side by side and
-says which is cheaper and by how much.
+Bench Log ships with a list of iFixit's prices for the parts it sells, in
+`ifixit_prices.json`. It was read from iFixit's parts pages for each supported
+device, uses the "Part Only" price where iFixit offers one, and carries the date
+it was checked. About 150 parts have a match. Chip-level parts mostly do not,
+because iFixit does not sell them.
+
+The list is a snapshot, not a live feed. It is refreshed with app updates, and
+a newer list replaces older list prices. A price or link you type in on the
+part page is never overwritten, and neither is one you cleared.
+
+The iFixit button on a part opens its product page when one is known, and
+iFixit's parts page for that device otherwise. The part page shows iFixit and
+eBay side by side and says which is cheaper and by how much.
 
 ## Security
 
