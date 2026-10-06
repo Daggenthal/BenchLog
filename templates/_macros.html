@@ -1,0 +1,65 @@
+{% macro badge(status) -%}
+<span class="badge {{ status }}"><span class="letter">{{ STATUSES[status][1] }}</span>{{ STATUSES[status][0] }}</span>
+{%- endmacro %}
+
+{% macro device_table(devices, show_box=true) %}
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ID</th><th>Type</th><th>Status</th>{% if show_box %}<th>Box</th>{% endif %}<th>Lot</th><th>Updated</th></tr></thead>
+  <tbody>
+  {% for d in devices %}
+    <tr>
+      <td class="nowrap"><a class="mono" href="{{ url_for('device', code=d.code) }}"><strong>{{ d.code }}</strong></a></td>
+      <td>{{ d.type_name }}{% if d.serial %}<br><span class="muted small">S/N {{ d.serial }}</span>{% endif %}</td>
+      <td>{{ badge(d.status) }}</td>
+      {% if show_box %}<td class="nowrap">{% if d.box_code %}<a href="{{ url_for('box', code=d.box_code) }}">{{ d.box_code }}</a>{% endif %}</td>{% endif %}
+      <td class="nowrap">{% if d.lot_code %}<a href="{{ url_for('lot', code=d.lot_code) }}">{{ d.lot_code }}</a>{% endif %}</td>
+      <td class="nowrap muted small">{{ d.updated_at|date }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="6" class="muted">Nothing here yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endmacro %}
+
+{% macro type_select(groups, name='device_type_id') %}
+<select name="{{ name }}" id="{{ name }}" required>
+  <option value="">Choose a device type</option>
+  {% for category, types in groups.items() %}
+  <optgroup label="{{ category }}">
+    {% for t in types %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}
+  </optgroup>
+  {% endfor %}
+</select>
+{% endmacro %}
+
+{% macro signed(value) -%}
+<span class="{{ 'pos' if value is not none and value >= 0 else 'neg' }}">{{ value|money }}</span>
+{%- endmacro %}
+
+{% macro part_results(results) %}
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Part</th><th>Device type</th><th>What it fixes</th><th class="num">Usual cost</th><th>On donors</th></tr></thead>
+  <tbody>
+  {% for r in results %}
+    <tr>
+      {% set links = part_links(r.part.name, r.part.part_number, r.part.type_name) %}
+      <td><a href="{{ links.google }}" target="_blank" rel="noopener" title="Search the web for this part"><strong>{{ r.part.name }}</strong></a>{% if r.part.part_number %} <span class="mono small">{{ r.part.part_number }}</span>{% endif %}
+        {% if r.part.microsolder %}<span class="pill">soldering</span>{% endif %}
+        {% if r.part.purpose %}<br><span class="muted small">{{ r.part.purpose }}</span>{% endif %}
+        <div class="small part-links"><a href="{{ links.shopping }}" target="_blank" rel="noopener">Shopping</a><a href="{{ links.ebay }}" target="_blank" rel="noopener">eBay</a><a href="{{ url_for('part', part_id=r.part.id) }}">Price and details</a></div></td>
+      <td><a href="{{ url_for('catalog_type', type_id=r.part.device_type_id) }}">{{ r.part.type_name }}</a></td>
+      <td class="small">{{ r.fixes|join(', ') }}</td>
+      <td class="num">{{ r.part.default_cost|money }}</td>
+      <td>{% for d in r.donors %}<a class="mono" href="{{ url_for('device', code=d.code) }}">{{ d.code }}</a>{% if d.state == 'unknown' %}<span class="muted small">?</span>{% endif %}{{ ', ' if not loop.last }}{% else %}<span class="muted small">none</span>{% endfor %}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5" class="muted">No matching parts.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endmacro %}

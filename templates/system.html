@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block title %}System - Bench Log{% endblock %}
+{% macro sudo_field() %}
+{% if not sudo_free %}
+<div class="field"><label>Password of the account the app runs under (used once, not stored)</label>
+  <input type="password" name="sudo_password" autocomplete="off" required></div>
+{% endif %}
+{% endmacro %}
+{% block content %}
+<div class="head">
+  <h1>System</h1>
+  <span class="muted small">Bench Log {{ VERSION }}{% if version.commit %} &middot; {{ version.commit }} ({{ version.date }}){% endif %}</span>
+</div>
+
+{% if job %}
+<div class="flash ok">A system task is running: <a href="{{ url_for('system_job', job_id=job.id) }}">{{ job.title }}</a></div>
+{% endif %}
+
+<section class="card" id="health">
+  <div class="head">
+    <h2>Device health</h2>
+    <span class="muted small">Refreshes every 10 seconds</span>
+  </div>
+  <div id="health-body" data-refresh="{{ url_for('system_health') }}">{% include "_health.html" %}</div>
+</section>
+
+<section class="card" id="admin">
+  <h2>Admin lock</h2>
+  {% if not admin_set %}
+  <p>Rebooting, updating, and restoring backups are locked until you set an admin password. This is separate from the Pi's own password and exists so nobody else on your network can press these buttons.</p>
+  <form method="post" action="{{ url_for('system_admin') }}">
+    <input type="hidden" name="action" value="set">
+    <div class="fields">
+      <div><label for="admin_password">New admin password (8 or more characters)</label><input type="password" name="admin_password" id="admin_password" autocomplete="new-password" required minlength="8"></div>
+      <div><label for="confirm_password">Type it again</label><input type="password" name="confirm_password" id="confirm_password" autocomplete="new-password" required></div>
+    </div>
+    <button class="primary" type="submit">Set admin password</button>
+  </form>
+  {% elif unlocked %}
+  <p class="state-good">Unlocked. It locks again after 15 minutes without a system action.</p>
+  <div class="row">
+    <form method="post" action="{{ url_for('system_admin') }}"><input type="hidden" name="action" value="lock"><button type="submit">Lock now</button></form>
+  </div>
+  <details style="margin-top:8px">
+    <summary>Change the admin password</summary>
+    <form method="post" action="{{ url_for('system_admin') }}">
+      <input type="hidden" name="action" value="set">
+      <div class="fields">
+        <div><label>Current password</label><input type="password" name="current_password" autocomplete="current-password" required></div>
+        <div><label>New password</label><input type="password" name="admin_password" autocomplete="new-password" required minlength="8"></div>
+        <div><label>Type it again</label><input type="password" name="confirm_password" autocomplete="new-password" required></div>
+      </div>
+      <button type="submit">Change password</button>
+    </form>
+  </details>
+  {% else %}
+  <form method="post" action="{{ url_for('system_admin') }}" class="row">
+    <input type="hidden" name="action" value="unlock">
+    <input type="password" name="admin_password" placeholder="Admin password" autocomplete="current-password" required style="flex:1 1 200px; max-width:320px" aria-label="Admin password">
+    <button class="primary" type="submit">Unlock system actions</button>
+  </form>
+  {% endif %}
+</section>
+
+{% if unlocked %}
+<div class="grid-2">
+<section class="card" id="app">
+  <h2>Bench Log updates</h2>
+  {% if not version.is_git %}
+  <p class="muted">This copy was not installed from the git repository, so it cannot check for updates. See the README for installing with git.</p>
+  {% else %}
+  <p class="small muted">Installed: {{ version.commit }} on {{ version.branch }}, {{ version.date }}{% if version.remote %} &middot; {{ version.remote }}{% endif %}</p>
+  {% if version.dirty %}<p class="neg small">Files in the app folder were edited by hand. Updating is blocked until those edits are undone.</p>{% endif %}
+  {% if app_update.checked_at %}
+    {% if app_update.error %}
+    <p class="neg">{{ app_update.error }}</p>
+    {% elif app_update.behind %}
+    <p><strong>{{ app_update.behind }} update(s) available.</strong> Checked {{ app_update.checked_at|dt }}.</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Date</th><th>Change</th><th>ID</th></tr></thead>
+      <tbody>{% for c in app_update.commits %}<tr><td class="nowrap">{{ c.date }}</td><td>{{ c.subject }}</td><td class="mono small">{{ c.hash }}</td></tr>{% endfor %}</tbody>
+    </table>
+    </div>
+    {% if app_update.files %}<details><summary>Files that will change</summary><pre class="log">{{ app_update.files }}</pre></details>{% endif %}
+    {% else %}
+    <p class="state-good">Up to date. Checked {{ app_update.checked_at|dt }}.</p>
+    {% endif %}
+  {% endif %}
+  <div class="row" style="margin-top:10px">
+    <form method="post" action="{{ url_for('system_app', action='check') }}"><button type="submit">Check for updates</button></form>
+    {% if app_update.behind and not app_update.error and not version.dirty %}
+    <form method="post" action="{{ url_for('system_app', action='apply') }}"><button class="primary" type="submit">Back up and update</button></form>
+    {% endif %}
+    {% if update_state.previous %}
+    <form method="post" action="{{ url_for('system_app', action='rollback') }}"><button type="submit">Go back to the previous version</button></form>
+    {% endif %}
+  </div>
+  <p class="muted small" style="margin-top:10px">Updating never touches your data folder. The database is backed up first, and if the update fails part-way the code is put back as it was.</p>
+  {% endif %}
+</section>
+
+<section class="card" id="os">
+  <h2>Operating system updates</h2>
+  {% if not has_apt %}
+  <p class="muted">This system does not use apt, so its updates have to be done by hand.</p>
+  {% else %}
+  {% if os_updates.checked_at %}
+    {% if os_updates.packages %}
+    <p><strong>{{ os_updates.packages|length }} package(s) can be updated.</strong> Checked {{ os_updates.checked_at|dt }}.</p>
+    <details {{ 'open' if os_updates.packages|length <= 12 }}>
+      <summary>What will change</summary>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Package</th><th>Installed</th><th>New</th></tr></thead>
+        <tbody>{% for p in os_updates.packages %}<tr><td>{{ p.name }}</td><td class="mono small">{{ p.old }}</td><td class="mono small">{{ p.new }}</td></tr>{% endfor %}</tbody>
+      </table>
+      </div>
+    </details>
+    {% else %}
+    <p class="state-good">Up to date. Checked {{ os_updates.checked_at|dt }}.</p>
+    {% endif %}
+  {% else %}
+  <p class="muted">Not checked yet.</p>
+  {% endif %}
+  <form method="post" action="{{ url_for('system_os', action='check') }}" style="margin-top:10px">
+    {{ sudo_field() }}
+    <button type="submit">Check for updates</button>
+  </form>
+  {% if os_updates.packages %}
+  <form method="post" action="{{ url_for('system_os', action='apply') }}" style="margin-top:10px">
+    {{ sudo_field() }}
+    <button class="primary" type="submit">Install these {{ os_updates.packages|length }} update(s)</button>
+  </form>
+  {% endif %}
+  <p class="muted small" style="margin-top:10px">Nothing is installed until you press Install. System updates cannot be undone with one button, so the versions from before are written to the log in case one package has to be put back by hand.</p>
+  {% endif %}
+</section>
+</div>
+
+<section class="card" id="backups">
+  <div class="head">
+    <h2>Backups</h2>
+    <div class="row">
+      <form method="post" action="{{ url_for('system_backups') }}"><input type="hidden" name="action" value="create"><button type="submit">Back up now</button></form>
+      <a class="btn" href="{{ url_for('system_full_backup') }}">Download all data</a>
+    </div>
+  </div>
+  <p class="muted small">One backup is made automatically each day and the last 14 are kept. A backup is also made before every update, restore, and reboot. These live on the same disk as the app, so download one now and then. "Download all data" is a zip of the database and every photo.</p>
+  <ul class="checklist">
+    {% for b in backups %}
+    <li style="display:block">
+      <div class="row" style="justify-content:space-between">
+        <span><span class="pill">{{ b.kind }}</span> <a class="mono small" href="{{ url_for('system_backup_download', name=b.name) }}">{{ b.name }}</a></span>
+        <span class="muted small">{{ b.mtime|dt }} &middot; {{ b.size|bytes }}</span>
+      </div>
+      <details>
+        <summary class="small">Restore or delete</summary>
+        <form method="post" action="{{ url_for('system_backups') }}" class="row">
+          <input type="hidden" name="name" value="{{ b.name }}">
+          <input type="text" name="confirm" placeholder="Type RESTORE" autocomplete="off" style="width:150px" aria-label="Type RESTORE to confirm">
+          <button class="small" type="submit" name="action" value="restore">Restore</button>
+          <button class="small danger" type="submit" name="action" value="delete">Delete</button>
+        </form>
+      </details>
+    </li>
+    {% else %}
+    <li class="muted">No backups yet. The first automatic one is made within an hour of starting.</li>
+    {% endfor %}
+  </ul>
+  <h3>Remote backup</h3>
+  <p class="muted small">Not set up yet. Planned: a nightly copy of the database and photos to your own server. Until then, use the download buttons above.</p>
+</section>
+
+<section class="card" id="power">
+  <h2>Restart</h2>
+  <div class="grid-2">
+    <form method="post" action="{{ url_for('system_restart') }}">
+      <p class="small">Restart only Bench Log. Takes a few seconds.</p>
+      <button type="submit">Restart the app</button>
+    </form>
+    <form method="post" action="{{ url_for('system_reboot') }}">
+      <p class="small">Reboot the whole machine. Running timers are paused and a backup is made first.</p>
+      {{ sudo_field() }}
+      <button class="danger" type="submit">Reboot the device</button>
+    </form>
+  </div>
+</section>
+{% else %}
+<section class="card">
+  <p class="muted">Updates, backups, and restart controls appear here once system actions are unlocked.</p>
+</section>
+{% endif %}
+{% endblock %}

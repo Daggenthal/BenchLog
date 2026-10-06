@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from "_macros.html" import device_table %}
+{% block title %}Devices - Bench Log{% endblock %}
+{% block content %}
+<div class="head">
+  <h1>Devices</h1>
+  <a class="btn primary" href="{{ url_for('device_new') }}">New device</a>
+</div>
+<form class="card" method="get">
+  <div class="fields">
+    <div><label for="status">Status</label>
+      <select name="status" id="status">
+        <option value="">In stock (not sold)</option>
+        {% for key, info in STATUSES.items() %}<option value="{{ key }}" {{ 'selected' if status == key }}>{{ info[0] }}</option>{% endfor %}
+        <option value="all" {{ 'selected' if status == 'all' }}>Everything</option>
+      </select></div>
+    <div><label for="type">Type</label>
+      <select name="type" id="type">
+        <option value="">All types</option>
+        {% for t in types %}<option value="{{ t.id }}" {{ 'selected' if type_id == t.id|string }}>{{ t.name }}</option>{% endfor %}
+      </select></div>
+    <div style="align-self:end"><button type="submit">Filter</button></div>
+  </div>
+</form>
+<section class="card">
+  <p class="muted small">{{ devices|length }} device(s). <a href="{{ url_for('export', name='devices') }}">Export all as CSV</a></p>
+  {{ device_table(devices) }}
+</section>
+{% endblock %}

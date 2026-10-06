@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "_macros.html" import type_select %}
+{% block title %}New device - Bench Log{% endblock %}
+{% block content %}
+<h1>New device</h1>
+<p class="muted">Each device gets its own ID and label. To add several from one purchase, create a lot first so the cost is split across them.</p>
+<form class="card" method="post">
+  <div class="fields">
+    <div><label for="device_type_id">Device type</label>{{ type_select(groups) }}</div>
+    <div><label for="quantity">How many</label><input type="number" id="quantity" name="quantity" value="1" min="1" max="100" inputmode="numeric"></div>
+  </div>
+  <div class="fields">
+    <div><label for="lot_id">Lot (optional)</label>
+      <select name="lot_id" id="lot_id">
+        <option value="">Not part of a lot</option>
+        {% for l in lots %}<option value="{{ l.id }}" {{ 'selected' if preset_lot == l.code }}>{{ l.code }} {{ l.name }}</option>{% endfor %}
+      </select></div>
+    <div><label for="manual_cost">What it cost, if not in a lot</label><input type="number" step="0.01" min="0" id="manual_cost" name="manual_cost" inputmode="decimal" placeholder="0.00"></div>
+    <div><label for="box_id">Box (optional)</label>
+      <select name="box_id" id="box_id">
+        <option value="">No box yet</option>
+        {% for b in boxes %}<option value="{{ b.id }}" {{ 'selected' if preset_box == b.code }}>{{ b.code }} {{ b.name }}</option>{% endfor %}
+      </select></div>
+  </div>
+  <div class="fields">
+    <div><label for="serial">Serial number (single device only)</label><input type="text" id="serial" name="serial" autocomplete="off"></div>
+    <div><label for="notes">Notes</label><input type="text" id="notes" name="notes" autocomplete="off"></div>
+  </div>
+  <button class="primary big" type="submit">Create</button>
+</form>
+{% endblock %}

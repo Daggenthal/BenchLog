@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, signed %}
+{% block title %}{{ d.code }} {{ d.type_name }} - Bench Log{% endblock %}
+{% block content %}
+
+<section class="card">
+  <div class="dev-head">
+    <div class="letter-box" title="{{ STATUSES[d.status][0] }}">{{ STATUSES[d.status][1] }}</div>
+    <div style="flex:1 1 200px; min-width:0">
+      <div class="dev-code mono">{{ d.code }}</div>
+      <div>{{ d.type_name }} {{ badge(d.status) }}</div>
+      <div class="muted small">
+        {% if d.box_code %}In <a href="{{ url_for('box', code=d.box_code) }}">{{ d.box_code }} {{ d.box_name }}</a>{% else %}Not in a box{% endif %}
+        {% if d.lot_code %}&middot; Lot <a href="{{ url_for('lot', code=d.lot_code) }}">{{ d.lot_code }}</a>{% endif %}
+        &middot; Received {{ d.created_at|date }}
+      </div>
+    </div>
+    {% if last_box and last_box.id != d.box_id and d.status != 'sold' %}
+    <form method="post" action="{{ url_for('device_move', code=d.code) }}">
+      <input type="hidden" name="box_id" value="{{ last_box.id }}">
+      <button type="submit">Put in {{ last_box.code }}</button>
+    </form>
+    {% endif %}
+  </div>
+</section>
+
+<nav class="jump no-print">
+  <a href="#time">Timer</a><a href="#checklist">Checklist</a><a href="#repair">Repair</a>
+  {% if d.status == 'parts' %}<a href="#donor">Donor parts</a>{% endif %}
+  <a href="#money">Money</a><a href="#details">Details</a><a href="#photos">Photos</a><a href="#label">Label</a>
+</nav>
+
+<div class="grid-2">
+<div>
+
+<section class="card" id="time">
+  <div class="head">
+    <h2>Bench time</h2>
+    <span class="muted small">{{ sessions|length }} session(s)</span>
+  </div>
+  <div class="row" style="justify-content:space-between">
+    <div class="clock" data-clock data-base="{{ fin.seconds - ((now_ts - active.started_at) if active else 0) }}" {% if active %}data-since="{{ active.started_at }}"{% endif %}>{{ fin.seconds|dur }}</div>
+    <form method="post" action="{{ url_for('device_timer', code=d.code) }}">
+      {% if active %}
+        <input type="hidden" name="action" value="pause">
+        <button class="big" type="submit">Pause</button>
+      {% else %}
+        <input type="hidden" name="action" value="start">
+        <button class="primary big" type="submit">{{ 'Resume work' if sessions else 'Start work' }}</button>
+      {% endif %}
+    </form>
+  </div>
+  <details>
+    <summary>Sessions and corrections</summary>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Started</th><th>Minutes</th><th></th></tr></thead>
+      <tbody>
+      {% for s in sessions %}
+        {% set length = (s.ended_at or now_ts) - s.started_at %}
+        <tr>
+          <td class="nowrap">{{ s.started_at|dt }}{% if length > long_seconds %}<br><span class="pill bad">Long session. Did the timer get left on?</span>{% endif %}</td>
+          <td>
+            {% if s.ended_at %}
+            <form method="post" action="{{ url_for('session_edit', session_id=s.id) }}" class="row">
+              <input type="number" name="minutes" value="{{ '%.0f'|format(length / 60) }}" min="0" step="1" inputmode="numeric" style="width:90px" aria-label="Minutes">
+              <button class="small" type="submit">Save</button>
+              <button class="small danger" type="submit" name="delete" value="1">Delete</button>
+            </form>
+            {% else %}<span class="muted">Running</span>{% endif %}
+          </td>
+          <td></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="3" class="muted">No time logged yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    <form method="post" action="{{ url_for('device_timer', code=d.code) }}" class="row" style="margin-top:10px">
+      <input type="hidden" name="action" value="add">
+      <input type="number" name="minutes" min="1" step="1" inputmode="numeric" placeholder="Minutes" style="width:120px" aria-label="Minutes to add">
+      <button type="submit">Add time by hand</button>
+    </form>
+  </details>
+</section>
+
+<section class="card" id="checklist">
+  <div class="head">
+    <h2>Checklist</h2>
+    <span class="muted small" id="checklist-status">
+      {% if d.intake_done %}Intake recorded. Changes now show the current state.{% else %}Intake in progress.{% endif %}
+    </span>
+  </div>
+  <form method="post" action="{{ url_for('device_tests', code=d.code) }}" id="checklist-form">
+    <ul class="checklist">
+      {% for t in tests %}
+      <li>
+        <span class="name">{{ t.name }}
+          {% if d.intake_done and t.intake != t.current %}<span class="was">At intake: {{ t.intake }}</span>{% endif %}
+        </span>
+        <span class="seg">
+          <input type="radio" name="f_{{ t.id }}" id="f{{ t.id }}w" value="working" {{ 'checked' if t.current == 'working' }}><label for="f{{ t.id }}w">OK</label>
+          <input type="radio" name="f_{{ t.id }}" id="f{{ t.id }}f" value="failed" {{ 'checked' if t.current == 'failed' }}><label for="f{{ t.id }}f">Fail</label>
+          <input type="radio" name="f_{{ t.id }}" id="f{{ t.id }}u" value="untested" {{ 'checked' if t.current == 'untested' }}><label for="f{{ t.id }}u">?</label>
+        </span>
+      </li>
+      {% endfor %}
+    </ul>
+    <noscript><button type="submit">Save checklist</button></noscript>
+  </form>
+  <div class="row" style="margin-top:12px">
+    <form method="post" action="{{ url_for('device_tests_all', code=d.code) }}">
+      <button type="submit">Mark the rest as OK</button>
+    </form>
+    {% if not d.intake_done %}
+    <form method="post" action="{{ url_for('device_intake_done', code=d.code) }}">
+      <button class="primary" type="submit">Finish intake</button>
+    </form>
+    {% else %}
+    <form method="post" action="{{ url_for('device_intake_reopen', code=d.code) }}">
+      <button class="small" type="submit">Reopen intake</button>
+    </form>
+    {% endif %}
+  </div>
+  <p class="muted small" style="margin-top:10px">Each tap saves by itself. "Finish intake" freezes the as-received record, so later changes show what you fixed.</p>
+</section>
+
+</div>
+<div>
+
+<section class="card" id="status">
+  <h2>Status</h2>
+  <div class="row">
+    {% for key, info in STATUSES.items() if key != 'sold' %}
+    <form method="post" action="{{ url_for('device_status', code=d.code) }}">
+      <input type="hidden" name="status" value="{{ key }}">
+      <button type="submit" class="{{ 'primary' if d.status == key }}" {{ 'disabled' if d.status == key }}>{{ info[1] }} &middot; {{ info[0] }}</button>
+    </form>
+    {% endfor %}
+  </div>
+  {% if failed_count and d.status in ('untested', 'needs_repair') %}
+  <p class="muted small" style="margin-top:10px">{{ failed_count }} checklist item(s) currently failing.</p>
+  {% endif %}
+</section>
+
+<section class="card" id="repair">
+  <h2>Repair log</h2>
+  {% if repairs %}
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>What</th><th>Source</th><th class="num">Cost</th><th></th></tr></thead>
+    <tbody>
+    {% for r in repairs %}
+      <tr>
+        <td>{% if r.part_name %}<a href="{{ part_links(r.part_name, r.part_number, d.type_name).google }}" target="_blank" rel="noopener" title="Search the web for this part">{{ r.part_name }}</a>{% else %}{{ r.description or 'Unnamed step' }}{% endif %}{% if r.part_number %} <span class="mono small">{{ r.part_number }}</span>{% endif %}
+          {% if r.part_name and r.description %}<br><span class="muted small">{{ r.description }}</span>{% endif %}</td>
+        <td>{% if r.source == 'donor' and r.donor_code %}Donor <a class="mono" href="{{ url_for('device', code=r.donor_code) }}">{{ r.donor_code }}</a>{% else %}{{ SOURCES[r.source] }}{% endif %}</td>
+        <td class="num">{{ r.cost|money }}</td>
+        <td class="right"><form method="post" action="{{ url_for('repair_delete', item_id=r.id) }}"><button class="small danger" type="submit">Remove</button></form></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p class="muted">Nothing logged yet.</p>
+  {% endif %}
+
+  <h3>Log a repair step</h3>
+  <form method="post" action="{{ url_for('repair_add', code=d.code) }}" id="repair-form">
+    <div class="field">
+      <label for="part_id">Part</label>
+      <select name="part_id" id="part_id">
+        <option value="">No part (describe below)</option>
+        {% if suggested %}
+        <optgroup label="Likely, based on what is failing">
+          {% for p in parts if p.id in suggested %}<option value="{{ p.id }}" data-cost="{{ '%.2f'|format(p.default_cost) }}" data-name="{{ p.name }}">{{ p.name }}{% if p.part_number %} ({{ p.part_number }}){% endif %}</option>{% endfor %}
+        </optgroup>
+        {% endif %}
+        <optgroup label="All parts for this device">
+          {% for p in parts if p.id not in suggested %}<option value="{{ p.id }}" data-cost="{{ '%.2f'|format(p.default_cost) }}" data-name="{{ p.name }}">{{ p.name }}{% if p.part_number %} ({{ p.part_number }}){% endif %}</option>{% endfor %}
+        </optgroup>
+      </select>
+    </div>
+    <div class="fields">
+      <div><label for="source">Where it came from</label>
+        <select name="source" id="source">
+          {% for key, text in SOURCES.items() %}<option value="{{ key }}">{{ text }}</option>{% endfor %}
+        </select></div>
+      <div id="donor-field"><label for="donor_code">Donor ID</label><input type="text" name="donor_code" id="donor_code" placeholder="D-0007" autocomplete="off" autocapitalize="characters"></div>
+      <div><label for="cost">Cost</label><input type="number" step="0.01" min="0" name="cost" id="cost" inputmode="decimal" placeholder="0.00"></div>
+    </div>
+    <div class="field"><label for="description">Note (optional)</label><input type="text" name="description" id="description" autocomplete="off" placeholder="Reflowed, cleaned corrosion, etc."></div>
+    <button class="primary" type="submit">Log it</button>
+    <a class="btn" href="{{ url_for('catalog_type', type_id=d.device_type_id) }}">Look up or buy parts</a>
+  </form>
+
+  {% if donor_map %}
+  <h3>Donors with usable parts for this device</h3>
+  <ul class="checklist">
+    {% for key, rows in donor_map.items() %}
+    <li style="display:block">
+      <a class="mono" href="{{ url_for('device', code=key[0]) }}"><strong>{{ key[0] }}</strong></a>
+      <span class="muted small">{{ key[1] }}</span>
+      {% set likely = rows|selectattr('part_name', 'in', suggested_names)|list %}
+      {% set others = rows|rejectattr('part_name', 'in', suggested_names)|list %}
+      {% if likely %}
+      <div class="pill-list" style="margin-top:6px">
+        {% for row in likely %}<a href="#repair" class="pill {{ 'good' if row.state == 'good' }}" data-fill-donor="{{ key[0] }}" data-part="{{ row.part_name }}">{{ row.part_name }}{{ ' ?' if row.state == 'unknown' }}</a>{% endfor %}
+      </div>
+      {% endif %}
+      {% if others %}
+      <details>
+        <summary class="small">{{ others|length }} other usable part(s)</summary>
+        <div class="pill-list">
+          {% for row in others %}<a href="#repair" class="pill {{ 'good' if row.state == 'good' }}" data-fill-donor="{{ key[0] }}" data-part="{{ row.part_name }}">{{ row.part_name }}{{ ' ?' if row.state == 'unknown' }}</a>{% endfor %}
+        </div>
+      </details>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="muted small">Parts that match what is failing are shown first. Tap one to fill in the form above. A question mark means that part was never tested on the donor.</p>
+  {% endif %}
+</section>
+
+</div>
+</div>
+
+{% if d.status == 'parts' %}
+<section class="card" id="donor">
+  <div class="head">
+    <h2>Donor parts</h2>
+    <form method="post" action="{{ url_for('donor_parts_update', code=d.code) }}">
+      <button class="small" type="submit" name="rebuild" value="1">Rebuild from checklist</button>
+    </form>
+  </div>
+  <p class="muted small">What is still on this device. "Suspect" means something that part is responsible for failed its test.</p>
+  <form method="post" action="{{ url_for('donor_parts_update', code=d.code) }}" id="donor-states"></form>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Part</th><th>State</th><th>Take it for</th></tr></thead>
+    <tbody>
+    {% for p in donor_parts %}
+      <tr>
+        <td><a class="state-{{ p.state }}" href="{{ url_for('part', part_id=p.part_id) }}">{{ p.name }}</a>{% if p.part_number %} <span class="mono small">{{ p.part_number }}</span>{% endif %}</td>
+        <td>
+          {% if p.state == 'harvested' %}
+            <span class="muted">Taken{% if p.used_on_code %}, used on <a class="mono" href="{{ url_for('device', code=p.used_on_code) }}">{{ p.used_on_code }}</a>{% endif %}</span>
+          {% else %}
+            <select name="state_{{ p.part_id }}" form="donor-states" aria-label="State of {{ p.name }}" style="min-width:120px">
+              {% for s in PART_STATES if s != 'harvested' %}<option value="{{ s }}" {{ 'selected' if p.state == s }}>{{ s|capitalize }}</option>{% endfor %}
+            </select>
+          {% endif %}
+        </td>
+        <td>
+          {% if p.state != 'harvested' %}
+          <form method="post" action="{{ url_for('donor_harvest', code=d.code) }}" class="row" style="flex-wrap:nowrap">
+            <input type="hidden" name="part_id" value="{{ p.part_id }}">
+            <input type="text" name="target_code" placeholder="D-0042" required autocomplete="off" autocapitalize="characters" style="width:110px" aria-label="Device this part goes to">
+            <button class="small" type="submit">Take</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="3" class="muted">No parts listed for this device type yet. Add some in Parts.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <button type="submit" form="donor-states" style="margin-top:12px">Save states</button>
+</section>
+{% endif %}
+
+<div class="grid-2">
+<section class="card" id="money">
+  <h2>Money</h2>
+  <div class="grid">
+    <div class="stat"><div class="v">{{ fin.basis|money }}</div><div class="k">Paid for it{% if d.lot_code %} (share of {{ d.lot_code }}){% endif %}</div></div>
+    <div class="stat"><div class="v">{{ fin.parts|money }}</div><div class="k">Parts</div></div>
+    <div class="stat"><div class="v">{{ fin.seconds|dur }}</div><div class="k">Bench time</div></div>
+    {% if fin.profit is not none %}
+    <div class="stat"><div class="v">{{ signed(fin.profit) }}</div><div class="k">Profit{{ ' (expected)' if fin.estimate }}</div></div>
+    <div class="stat"><div class="v">{% if fin.hourly is not none %}{{ signed(fin.hourly) }}/h{% else %}<span class="muted">n/a</span>{% endif %}</div><div class="k">Earned per hour{{ ' (expected)' if fin.estimate }}</div></div>
+    <div class="stat"><div class="v">{{ signed(fin.after_labour) }}</div><div class="k">After paying yourself {{ fin.target|money }}/h</div></div>
+    {% endif %}
+  </div>
+  {% if fin.profit is none %}
+  <p class="muted small" style="margin-top:10px">Enter an expected sale price to see profit and your hourly rate before it sells.</p>
+  {% endif %}
+
+  {% if d.status == 'sold' %}
+  <h3>Sold {{ d.sold_at|date }}</h3>
+  <p>{{ d.sale_price|money }} sale, {{ (d.sale_fees or 0)|money }} fees, {{ (d.sale_shipping or 0)|money }} shipping. You kept {{ fin.net|money }}.</p>
+  <form method="post" action="{{ url_for('device_sell', code=d.code) }}">
+    <button class="small" type="submit" name="undo" value="1">Undo sale</button>
+  </form>
+  {% else %}
+  <h3>Before it sells</h3>
+  <form method="post" action="{{ url_for('device_money', code=d.code) }}" class="row">
+    <div style="flex:1 1 180px"><label for="expected_price">Expected to keep after fees and shipping</label>
+      <input type="number" step="0.01" min="0" name="expected_price" id="expected_price" inputmode="decimal" value="{{ '%.2f'|format(d.expected_price) if d.expected_price is not none }}"></div>
+    <button type="submit" style="align-self:end">Save</button>
+  </form>
+  <h3>When it sells</h3>
+  <form method="post" action="{{ url_for('device_sell', code=d.code) }}">
+    <div class="fields">
+      <div><label for="sale_price">Sale price</label><input type="number" step="0.01" min="0" name="sale_price" id="sale_price" inputmode="decimal"></div>
+      <div><label for="sale_fees">Platform fees</label><input type="number" step="0.01" min="0" name="sale_fees" id="sale_fees" inputmode="decimal"></div>
+      <div><label for="sale_shipping">Shipping you paid</label><input type="number" step="0.01" min="0" name="sale_shipping" id="sale_shipping" inputmode="decimal"></div>
+    </div>
+    <button class="good" type="submit">Mark as sold</button>
+  </form>
+  {% endif %}
+</section>
+
+<section class="card" id="details">
+  <h2>Details</h2>
+  <form method="post" action="{{ url_for('device_update', code=d.code) }}">
+    <div class="fields">
+      <div><label for="serial">Serial number</label><input type="text" name="serial" id="serial" value="{{ d.serial }}" autocomplete="off"></div>
+      <div><label for="box_id">Box</label>
+        <select name="box_id" id="box_id">
+          <option value="">No box</option>
+          {% for b in boxes %}<option value="{{ b.id }}" {{ 'selected' if d.box_id == b.id }}>{{ b.code }} {{ b.name }}</option>{% endfor %}
+        </select></div>
+    </div>
+    <div class="fields">
+      <div><label for="lot_id">Lot</label>
+        <select name="lot_id" id="lot_id">
+          <option value="">Not part of a lot</option>
+          {% for l in lots %}<option value="{{ l.id }}" {{ 'selected' if d.lot_id == l.id }}>{{ l.code }} {{ l.name }}</option>{% endfor %}
+        </select></div>
+      <div><label for="manual_cost">Cost override (blank uses the lot share)</label><input type="number" step="0.01" min="0" name="manual_cost" id="manual_cost" inputmode="decimal" value="{{ '%.2f'|format(d.manual_cost) if d.manual_cost is not none }}"></div>
+    </div>
+    <div class="field"><label for="notes">Notes</label><textarea name="notes" id="notes">{{ d.notes }}</textarea></div>
+    <button type="submit">Save details</button>
+  </form>
+</section>
+</div>
+
+<div class="grid-2">
+<section class="card" id="photos">
+  <h2>Photos</h2>
+  <p class="muted small">Photograph the device and its serial number at intake and again before shipping.</p>
+  {% if photos %}
+  <div class="photos">
+    {% for p in photos %}
+    <figure>
+      <a href="{{ url_for('photo', photo_id=p.id) }}"><img src="{{ url_for('photo', photo_id=p.id) }}" alt="Photo of {{ d.code }} taken {{ p.created_at|dt }}" loading="lazy"></a>
+      <form method="post" action="{{ url_for('photo_delete', photo_id=p.id) }}"><button class="small" type="submit">Remove</button></form>
+    </figure>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <form method="post" action="{{ url_for('photo_add', code=d.code) }}" enctype="multipart/form-data" class="row">
+    <input type="file" name="photos" accept="image/*" multiple required style="flex:1 1 200px" aria-label="Choose photos">
+    <button type="submit">Upload</button>
+  </form>
+</section>
+
+<section class="card" id="label">
+  <h2>Label</h2>
+  <img class="label-img" src="{{ url_for('label_device', code=d.code) }}?s={{ d.status }}" alt="Label for {{ d.code }}: QR code, ID, device type, and the letter {{ STATUSES[d.status][1] }}">
+  <div class="row" style="margin-top:10px">
+    <a class="btn" href="{{ url_for('label_device', code=d.code) }}" download>Download image</a>
+    <button type="button" disabled title="Printer support comes once the label printer arrives">Print (no printer yet)</button>
+  </div>
+  <p class="muted small" style="margin-top:10px">The QR code only holds a link to this page, so the label never goes out of date. Only the letter changes with status. To test scanning now, point your phone camera at the code on this screen.</p>
+</section>
+</div>
+
+<section class="card no-print" id="danger">
+  <details>
+    <summary>Delete this device</summary>
+    <p class="small">Removes the device with its checklist, time, repairs, and photos. Parts it took from donors go back to them. The ID {{ d.code }} is never reused.</p>
+    <form method="post" action="{{ url_for('device_delete', code=d.code) }}" class="row">
+      <input type="text" name="confirm" placeholder="Type {{ d.code }} to confirm" autocomplete="off" autocapitalize="characters" style="max-width:260px" aria-label="Type the device ID to confirm">
+      <button class="danger" type="submit">Delete</button>
+    </form>
+  </details>
+</section>
+{% endblock %}

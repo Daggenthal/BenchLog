@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Boxes - Bench Log{% endblock %}
+{% block content %}
+<h1>Boxes</h1>
+<p class="muted">A box label is printed once. Scanning it always shows the live count, however many devices go in or out.</p>
+<section class="card">
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Box</th><th>Name</th><th class="num">Total</th>{% for key, info in STATUSES.items() if key != 'sold' %}<th class="num" title="{{ info[0] }}">{{ info[1] }}</th>{% endfor %}</tr></thead>
+    <tbody>
+    {% for b, counts in boxes %}
+      <tr>
+        <td class="nowrap"><a class="mono" href="{{ url_for('box', code=b.code) }}"><strong>{{ b.code }}</strong></a></td>
+        <td>{{ b.name }}</td>
+        <td class="num"><strong>{{ counts.values()|sum }}</strong></td>
+        {% for key in STATUSES if key != 'sold' %}<td class="num">{{ counts[key] or '' }}</td>{% endfor %}
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="muted">No boxes yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="muted small" style="margin-top:8px">U untested, N needs repair, R repaired, P parts.</p>
+</section>
+<form class="card" method="post">
+  <h2>New box</h2>
+  <div class="fields">
+    <div><label for="name">Name</label><input type="text" name="name" id="name" placeholder="DualSense controllers" required autocomplete="off"></div>
+    <div><label for="notes">Notes</label><input type="text" name="notes" id="notes" autocomplete="off"></div>
+  </div>
+  <button class="primary" type="submit">Create box</button>
+</form>
+{% endblock %}

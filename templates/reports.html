@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% from "_macros.html" import signed %}
+{% block title %}Reports - Bench Log{% endblock %}
+{% block content %}
+<h1>Reports</h1>
+<section class="card">
+  <h2>Overall</h2>
+  <div class="grid">
+    <div class="stat"><div class="v">{{ overall.seconds|dur }}</div><div class="k">Total bench time</div></div>
+    <div class="stat"><div class="v">{{ signed(overall.profit) }}</div><div class="k">Profit so far</div></div>
+    <div class="stat"><div class="v">{% if overall.hourly is not none %}{{ signed(overall.hourly) }}/h{% else %}<span class="muted">n/a</span>{% endif %}</div><div class="k">Earned per hour</div></div>
+    <div class="stat"><div class="v">{{ signed(overall.after_labour) }}</div><div class="k">After paying yourself {{ target|money }}/h</div></div>
+  </div>
+  <p class="muted small" style="margin-top:10px">Profit so far counts every purchase and part against real sales only. Unsold stock shows as a cost until it sells. Change your target hourly rate in <a href="{{ url_for('settings') }}">Settings</a>.</p>
+</section>
+
+<section class="card">
+  <h2>By lot</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Lot</th><th class="num">Paid</th><th class="num">Parts</th><th class="num">Units</th><th class="num">Sold</th><th class="num">Ended as parts</th><th class="num">Time</th><th class="num">Profit so far</th><th class="num">Per hour</th><th class="num">Projected</th></tr></thead>
+    <tbody>
+    {% for l, s in lot_rows %}
+      <tr>
+        <td><a class="mono" href="{{ url_for('lot', code=l.code) }}"><strong>{{ l.code }}</strong></a> {{ l.name }}</td>
+        <td class="num">{{ s.cost|money }}</td>
+        <td class="num">{{ s.parts|money }}</td>
+        <td class="num">{{ s.count }}</td>
+        <td class="num">{{ s.sold }}</td>
+        <td class="num">{{ s.status.parts }}</td>
+        <td class="num">{{ s.seconds|dur }}</td>
+        <td class="num">{{ signed(s.profit) }}</td>
+        <td class="num">{% if s.hourly is not none %}{{ signed(s.hourly) }}{% endif %}</td>
+        <td class="num">{{ signed(s.projected) }}</td>
+      </tr>
+    {% endfor %}
+    {% if loose.count %}
+      <tr>
+        <td>Bought singly (no lot)</td>
+        <td class="num">{{ loose.cost|money }}</td>
+        <td class="num">{{ loose.parts|money }}</td>
+        <td class="num">{{ loose.count }}</td>
+        <td class="num">{{ loose.sold }}</td>
+        <td class="num"></td>
+        <td class="num">{{ loose.seconds|dur }}</td>
+        <td class="num">{{ signed(loose.profit) }}</td>
+        <td class="num">{% if loose.hourly is not none %}{{ signed(loose.hourly) }}{% endif %}</td>
+        <td class="num"></td>
+      </tr>
+    {% endif %}
+    {% if not lot_rows and not loose.count %}<tr><td colspan="10" class="muted">Nothing to report yet.</td></tr>{% endif %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Average time by repair</h2>
+  <p class="muted small">Devices that came out working, grouped by what was replaced. Use the labour column to price customer repairs.</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Device type</th><th>Repair</th><th class="num">Count</th><th class="num">Avg time</th><th class="num">Avg parts</th><th class="num">Labour at {{ target|money }}/h</th></tr></thead>
+    <tbody>
+    {% for r in repair_types %}
+      <tr>
+        <td>{{ r.type }}</td><td>{{ r.repair }}</td><td class="num">{{ r.n }}</td>
+        <td class="num">{{ r.avg_seconds|dur }}</td><td class="num">{{ r.avg_parts|money }}</td><td class="num">{{ r.labour|money }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="muted">Appears once you have finished repairs with time logged.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Time spent on devices that became donors</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Device type</th><th class="num">Count</th><th class="num">Total time</th><th class="num">Avg time</th></tr></thead>
+    <tbody>
+    {% for name, v in failure_summary.items() %}
+      <tr><td>{{ name }}</td><td class="num">{{ v.n }}</td><td class="num">{{ v.seconds|dur }}</td><td class="num">{{ (v.seconds / v.n)|dur }}</td></tr>
+    {% else %}
+      <tr><td colspan="4" class="muted">No donors yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Export</h2>
+  <div class="row">
+    <a class="btn" href="{{ url_for('export', name='devices') }}">Devices CSV</a>
+    <a class="btn" href="{{ url_for('export', name='repairs') }}">Repairs CSV</a>
+    <a class="btn" href="{{ url_for('export', name='sessions') }}">Time sessions CSV</a>
+    <a class="btn" href="{{ url_for('system_page') }}#backups">Backups</a>
+  </div>
+</section>
+{% endblock %}

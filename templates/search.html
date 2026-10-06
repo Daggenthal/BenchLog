@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% from "_macros.html" import device_table, part_results %}
+{% block title %}Search - Bench Log{% endblock %}
+{% block content %}
+<h1>Results for "{{ q }}"</h1>
+<section class="card">
+  <h2>Devices</h2>
+  {{ device_table(devices) }}
+</section>
+<section class="card">
+  <h2>Parts</h2>
+  <p class="muted small">Matches part names, part numbers, and the symptoms each part fixes. "On donors" lists donor devices that still have a usable one.</p>
+  {{ part_results(parts) }}
+</section>
+{% endblock %}

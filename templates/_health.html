@@ -1,0 +1,87 @@
+{% macro meter(percent) -%}
+<div class="meter" role="img" aria-label="{{ percent }} percent used"><span class="{{ 'hot' if percent >= 90 else ('warm' if percent >= 75 else '') }}" style="width:{{ [percent, 100]|min }}%"></span></div>
+{%- endmacro %}
+{% if h.warnings %}
+<ul class="warnings">
+  {% for w in h.warnings %}<li>{{ w }}</li>{% endfor %}
+</ul>
+{% else %}
+<p class="state-good">No problems found.</p>
+{% endif %}
+<div class="grid health-grid">
+  {% for d in h.disks %}
+  <div class="stat">
+    <div class="k">{{ d.label }} storage</div>
+    <div class="v">{{ d.free|bytes }} free</div>
+    {{ meter(d.percent) }}
+    <div class="k">{{ d.used|bytes }} of {{ d.total|bytes }} used ({{ d.percent }}%), {{ d.free_percent }}% left</div>
+  </div>
+  {% endfor %}
+  <div class="stat">
+    <div class="k">Memory</div>
+    <div class="v">{{ h.mem.percent }}%</div>
+    {{ meter(h.mem.percent) }}
+    <div class="k">{{ h.mem.used|bytes }} of {{ h.mem.total|bytes }}</div>
+  </div>
+  <div class="stat">
+    <div class="k">Swap</div>
+    {% if h.swap.total %}
+    <div class="v">{{ h.swap.percent }}%</div>
+    {{ meter(h.swap.percent) }}
+    <div class="k">{{ h.swap.used|bytes }} of {{ h.swap.total|bytes }}</div>
+    {% else %}
+    <div class="v">Off</div><div class="k">No swap configured</div>
+    {% endif %}
+  </div>
+  <div class="stat">
+    <div class="k">CPU</div>
+    <div class="v">{% if h.cpu_percent is not none %}{{ h.cpu_percent }}%{% else %}n/a{% endif %}</div>
+    {% if h.cpu_percent is not none %}{{ meter(h.cpu_percent) }}{% endif %}
+    <div class="k">{{ h.cpu_count }} cores{% if h.load %}, load {{ h.load|join(' ') }}{% endif %}</div>
+  </div>
+  <div class="stat">
+    <div class="k">Temperature</div>
+    <div class="v">{% if h.cpu_temp is not none %}{{ h.cpu_temp }} &deg;C{% else %}n/a{% endif %}</div>
+    <div class="k">{% if h.cpu_temp is not none %}{{ '%.0f'|format(h.cpu_temp * 9 / 5 + 32) }} &deg;F. Throttles near 80 &deg;C{% else %}No sensor found{% endif %}</div>
+  </div>
+  <div class="stat">
+    <div class="k">GPU</div>
+    {% if h.gpus %}
+      {% for gpu in h.gpus %}
+      <div class="v">{% if gpu.busy is not none %}{{ gpu.busy }}%{% else %}n/a{% endif %}</div>
+      {% if gpu.busy is not none %}{{ meter(gpu.busy) }}{% endif %}
+      <div class="k">{{ gpu.name }}{% if gpu.vram %}, memory {{ gpu.vram[0]|bytes }} of {{ gpu.vram[1]|bytes }}{% endif %}</div>
+      {% endfor %}
+    {% elif h.gpu_temp is not none %}
+      <div class="v">{{ h.gpu_temp }} &deg;C</div><div class="k">Load is not reported on this hardware</div>
+    {% else %}
+      <div class="v">n/a</div><div class="k">Load is not reported on this hardware</div>
+    {% endif %}
+  </div>
+  <div class="stat">
+    <div class="k">Power</div>
+    {% if h.throttled is none %}
+    <div class="v">n/a</div><div class="k">Only reported on a Raspberry Pi</div>
+    {% elif h.throttled %}
+    <div class="v neg">Check</div><div class="k">{{ h.throttled|length }} power or heat warning(s)</div>
+    {% else %}
+    <div class="v pos">Good</div><div class="k">No under-voltage or throttling</div>
+    {% endif %}
+  </div>
+  <div class="stat">
+    <div class="k">Uptime</div>
+    <div class="v">{{ h.uptime }}</div>
+    <div class="k">Booted {{ h.booted_at|dt }}. App running {{ h.app_uptime }}</div>
+  </div>
+  <div class="stat">
+    <div class="k">Your data</div>
+    <div class="v">{{ (h.db_size + h.photos_size)|bytes }}</div>
+    <div class="k">Database {{ h.db_size|bytes }}, {{ h.photos_count }} photo(s) {{ h.photos_size|bytes }}</div>
+  </div>
+  <div class="stat">
+    <div class="k">Local backups</div>
+    <div class="v">{{ h.backups_count }}</div>
+    <div class="k">{% if h.last_backup %}Latest {{ h.last_backup|dt }}, {{ h.backups_size|bytes }} total{% else %}None yet{% endif %}</div>
+  </div>
+</div>
+<p class="muted small" style="margin-top:10px">{{ h.model }} &middot; {{ h.os }} &middot; kernel {{ h.kernel }} &middot; {{ h.hostname }}{% if h.ips %} ({{ h.ips|join(', ') }}){% endif %}{% if h.root_device %} &middot; system on {{ h.root_device }}{% endif %}</p>

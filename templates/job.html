@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }} - Bench Log{% endblock %}
+{% block content %}
+<p class="small"><a href="{{ url_for('system_page') }}">System</a></p>
+<h1>{{ job.title }}</h1>
+<section class="card">
+  <p id="job-status" data-url="{{ url_for('system_job_json', job_id=job.id) }}" data-status="{{ job.status }}" data-back="{{ url_for('system_page') }}" data-started="{{ started }}">
+    {% if job.status == 'running' %}Running. Keep this page open if you want to watch.
+    {% elif job.status == 'done' %}Finished.
+    {% elif job.status == 'failed' %}Failed. The log below shows where it stopped.
+    {% else %}The app restarted while this was running.{% endif %}
+  </p>
+  <pre class="log" id="job-log">{{ log }}</pre>
+  <a class="btn" href="{{ url_for('system_page') }}">Back to System</a>
+</section>
+{% endblock %}

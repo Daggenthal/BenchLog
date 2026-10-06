@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% from "_macros.html" import part_results %}
+{% block title %}Parts - Bench Log{% endblock %}
+{% block content %}
+<h1>Parts catalog</h1>
+<p class="muted">Each device type has a test checklist and a list of parts that commonly fail. Search by part, part number, or symptom.</p>
+<form class="card" method="get">
+  <div class="row">
+    <input type="search" name="q" value="{{ q }}" placeholder="drift, M92T36, no charge, HDMI" style="flex:1 1 220px" aria-label="Search parts">
+    <button class="primary" type="submit">Search parts</button>
+  </div>
+</form>
+{% if q %}
+<section class="card">
+  <h2>Parts matching "{{ q }}"</h2>
+  {{ part_results(results) }}
+</section>
+{% endif %}
+<section class="card">
+  <h2>Device types</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Type</th><th>Category</th><th class="num">Checklist items</th><th class="num">Parts</th><th class="num">Devices logged</th></tr></thead>
+    <tbody>
+    {% for t in types %}
+      <tr>
+        <td><a href="{{ url_for('catalog_type', type_id=t.id) }}"><strong>{{ t.name }}</strong></a></td>
+        <td>{{ t.category }}</td>
+        <td class="num">{{ t.function_count }}</td>
+        <td class="num">{{ t.part_count }}</td>
+        <td class="num">{{ t.device_count }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+<form class="card" method="post">
+  <h2>Add a device type</h2>
+  <div class="fields">
+    <div><label for="name">Name</label><input type="text" name="name" id="name" placeholder="Xbox Elite Series 2" required autocomplete="off"></div>
+    <div><label for="category">Category</label><input type="text" name="category" id="category" placeholder="Controller" autocomplete="off"></div>
+    <div><label for="copy_from">Start from a copy of</label>
+      <select name="copy_from" id="copy_from">
+        <option value="">Empty</option>
+        {% for t in types %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}
+      </select></div>
+  </div>
+  <button type="submit">Add type</button>
+</form>
+{% endblock %}

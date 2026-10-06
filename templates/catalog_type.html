@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{{ t.name }} - Bench Log{% endblock %}
+{% block content %}
+<p class="small"><a href="{{ url_for('catalog_index') }}">Parts catalog</a></p>
+<h1>{{ t.name }}</h1>
+<p class="muted">{{ t.category }}</p>
+
+<section class="card">
+  <h2>Parts</h2>
+  <p class="muted small">Click a part name to search the web for it. Usual costs are placeholders: set them to what you really pay, and the repair form will prefill them.</p>
+  <form method="post">
+    <input type="hidden" name="action" value="save_costs">
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Part</th><th>What it fixes</th><th class="num">Usual cost</th></tr></thead>
+      <tbody>
+      {% for p, fixes in parts %}
+        <tr>
+          {% set links = part_links(p.name, p.part_number, t.name) %}
+          <td><a href="{{ links.google }}" target="_blank" rel="noopener" title="Search the web for this part"><strong>{{ p.name }}</strong></a>{% if p.part_number %} <span class="mono small">{{ p.part_number }}</span>{% endif %}
+            {% if p.microsolder %}<span class="pill">soldering</span>{% endif %}
+            {% if p.purpose %}<br><span class="muted small">{{ p.purpose }}</span>{% endif %}
+            <div class="small part-links">{% if p.buy_url %}<a href="{{ p.buy_url }}" target="_blank" rel="noopener">Supplier</a>{% endif %}<a href="{{ links.shopping }}" target="_blank" rel="noopener">Shopping</a><a href="{{ links.ebay }}" target="_blank" rel="noopener">eBay</a><a href="{{ url_for('part', part_id=p.id) }}">Price and details</a></div></td>
+          <td class="small">{{ fixes|join(', ') }}</td>
+          <td class="num"><input type="number" step="0.01" min="0" name="cost_{{ p.id }}" value="{{ '%.2f'|format(p.default_cost) }}" inputmode="decimal" style="width:100px" aria-label="Usual cost of {{ p.name }}"></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="3" class="muted">No parts yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% if parts %}<button type="submit" style="margin-top:12px">Save costs</button>{% endif %}
+  </form>
+</section>
+
+<div class="grid-2">
+<form class="card" method="post">
+  <h2>Add a part</h2>
+  <input type="hidden" name="action" value="add_part">
+  <div class="fields">
+    <div><label for="pname">Name</label><input type="text" name="name" id="pname" required autocomplete="off"></div>
+    <div><label for="part_number">Part number</label><input type="text" name="part_number" id="part_number" autocomplete="off"></div>
+    <div><label for="default_cost">Usual cost</label><input type="number" step="0.01" min="0" name="default_cost" id="default_cost" inputmode="decimal"></div>
+  </div>
+  <div class="field"><label for="purpose">What it is for</label><input type="text" name="purpose" id="purpose" autocomplete="off"></div>
+  <div class="field">
+    <label for="fixes">Checklist items it fixes (hold Ctrl or Cmd for several)</label>
+    <select name="fixes" id="fixes" multiple size="6">
+      {% for f in functions %}<option value="{{ f.id }}">{{ f.name }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="field"><label class="check"><input type="checkbox" name="microsolder" value="1"> Needs soldering</label></div>
+  <button type="submit">Add part</button>
+</form>
+
+<section class="card">
+  <h2>Test checklist</h2>
+  <ol style="margin:0 0 12px; padding-left:22px">
+    {% for f in functions %}<li>{{ f.name }}</li>{% endfor %}
+  </ol>
+  <form method="post" class="row">
+    <input type="hidden" name="action" value="add_function">
+    <input type="text" name="name" placeholder="New checklist item" required autocomplete="off" style="flex:1 1 200px" aria-label="New checklist item">
+    <button type="submit">Add item</button>
+  </form>
+</section>
+</div>
+{% endblock %}

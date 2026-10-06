@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "_macros.html" import signed %}
+{% block title %}Lots - Bench Log{% endblock %}
+{% block content %}
+<h1>Lots</h1>
+<p class="muted">A lot is one purchase of several devices. Its cost is split evenly across them, so every unit has a true cost.</p>
+<section class="card">
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Lot</th><th>Name</th><th class="num">Paid</th><th class="num">Units</th><th class="num">Sold</th><th class="num">Time</th><th class="num">Profit so far</th><th class="num">Per hour</th></tr></thead>
+    <tbody>
+    {% for l, s in lots %}
+      <tr>
+        <td class="nowrap"><a class="mono" href="{{ url_for('lot', code=l.code) }}"><strong>{{ l.code }}</strong></a></td>
+        <td>{{ l.name }}<br><span class="muted small">{{ l.source }} {{ l.purchased_at|date }}</span></td>
+        <td class="num">{{ l.total_cost|money }}</td>
+        <td class="num">{{ s.count }}{% if l.unit_count and l.unit_count != s.count %} of {{ l.unit_count }}{% endif %}</td>
+        <td class="num">{{ s.sold }}</td>
+        <td class="num">{{ s.seconds|dur }}</td>
+        <td class="num">{{ signed(s.profit) }}</td>
+        <td class="num">{% if s.hourly is not none %}{{ signed(s.hourly) }}{% endif %}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="8" class="muted">No lots yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+<form class="card" method="post">
+  <h2>New lot</h2>
+  <div class="fields">
+    <div><label for="name">Name</label><input type="text" name="name" id="name" placeholder="eBay 10x DualSense" required autocomplete="off"></div>
+    <div><label for="source">Bought from</label><input type="text" name="source" id="source" placeholder="eBay, local, etc." autocomplete="off"></div>
+    <div><label for="purchased_at">Date</label><input type="date" name="purchased_at" id="purchased_at" value="{{ today }}"></div>
+  </div>
+  <div class="fields">
+    <div><label for="total_cost">Total paid, including shipping and tax</label><input type="number" step="0.01" min="0" name="total_cost" id="total_cost" inputmode="decimal" required></div>
+    <div><label for="unit_count">Number of units</label><input type="number" min="1" step="1" name="unit_count" id="unit_count" inputmode="numeric" required></div>
+    <div><label for="notes">Notes</label><input type="text" name="notes" id="notes" autocomplete="off"></div>
+  </div>
+  <button class="primary" type="submit">Create lot</button>
+</form>
+{% endblock %}

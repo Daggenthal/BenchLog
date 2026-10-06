@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge %}
+{% block title %}{{ b.code }} {{ b.name }} - Bench Log{% endblock %}
+{% block content %}
+<section class="card">
+  <div class="dev-head">
+    <div style="flex:1 1 200px">
+      <div class="muted small">Box</div>
+      <div class="dev-code mono">{{ b.code }}</div>
+      <div>{{ b.name }}</div>
+      {% if b.notes %}<div class="muted small">{{ b.notes }}</div>{% endif %}
+    </div>
+    <div class="right">
+      <div class="clock">{{ devices|length }}</div>
+      <div class="muted small">in this box</div>
+    </div>
+  </div>
+  <div class="tiles" style="margin:14px 0 0">
+    {% for key, info in STATUSES.items() if key != 'sold' %}
+    <div class="tile"><div class="n">{{ counts[key] }}</div><div class="l">{{ info[1] }} &middot; {{ info[0] }}</div></div>
+    {% endfor %}
+  </div>
+</section>
+
+<form class="card" method="post" action="{{ url_for('box_add', code=b.code) }}">
+  <h2>Add devices</h2>
+  <div class="row">
+    <input type="text" name="codes" placeholder="D-0042, or just 42. Several at once is fine" required autocomplete="off" autocapitalize="characters" style="flex:1 1 220px" aria-label="Device IDs to add">
+    <button class="primary" type="submit">Add</button>
+    <a class="btn" href="{{ url_for('device_new', box=b.code) }}">New device here</a>
+  </div>
+  <p class="muted small" style="margin-top:8px">Tip: after scanning this box, scan a device and tap "Put in {{ b.code }}" on its page.</p>
+</form>
+
+<section class="card">
+  <h2>Contents</h2>
+  <ul class="checklist">
+    {% for d in devices %}
+    <li style="align-items:flex-start">
+      <div class="name">
+        <a class="mono" href="{{ url_for('device', code=d.code) }}"><strong>{{ d.code }}</strong></a>
+        {{ badge(d.status) }} <span class="muted small">{{ d.type_name }}</span>
+        {% set info = donor_info.get(d.id) %}
+        {% if info %}
+        <div class="small" style="margin-top:4px">
+          {% if info.broken %}<div><span class="muted">Broken:</span> {{ info.broken|join(', ') }}</div>{% endif %}
+          {% if info.taken %}<div><span class="muted">Taken:</span> {% for name, used in info.taken %}{{ name }}{% if used %} (for <a class="mono" href="{{ url_for('device', code=used) }}">{{ used }}</a>){% endif %}{{ ', ' if not loop.last }}{% endfor %}</div>{% endif %}
+          <div><span class="muted">Known good:</span> {{ info.good|length }} part(s)</div>
+        </div>
+        {% elif d.notes %}<div class="small muted" style="margin-top:4px">{{ d.notes }}</div>{% endif %}
+      </div>
+      <form method="post" action="{{ url_for('box_update', code=b.code) }}">
+        <button class="small" type="submit" name="remove_device" value="{{ d.code }}">Take out</button>
+      </form>
+    </li>
+    {% else %}
+    <li class="muted">This box is empty.</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<div class="grid-2">
+<section class="card">
+  <h2>Box label</h2>
+  <img class="label-img" src="{{ url_for('label_box', code=b.code) }}" alt="Box label for {{ b.code }} {{ b.name }}">
+  <div class="row" style="margin-top:10px"><a class="btn" href="{{ url_for('label_box', code=b.code) }}" download>Download image</a></div>
+</section>
+<section class="card">
+  <h2>Edit box</h2>
+  <form method="post" action="{{ url_for('box_update', code=b.code) }}">
+    <div class="field"><label for="name">Name</label><input type="text" name="name" id="name" value="{{ b.name }}" required></div>
+    <div class="field"><label for="notes">Notes</label><input type="text" name="notes" id="notes" value="{{ b.notes }}"></div>
+    <div class="row">
+      <button type="submit">Save</button>
+      <button class="danger small" type="submit" name="delete" value="1">Delete box (keeps its devices)</button>
+    </div>
+  </form>
+</section>
+</div>
+{% endblock %}

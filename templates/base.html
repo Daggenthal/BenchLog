@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Bench Log{% endblock %}</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body data-now="{{ now_ts }}">
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="{{ url_for('index') }}">Bench Log</a>
+    <nav class="nav">
+      {% set ep = request.endpoint or '' %}
+      <a href="{{ url_for('devices') }}" class="{{ 'active' if ep.startswith('device') }}">Devices</a>
+      <a href="{{ url_for('boxes') }}" class="{{ 'active' if ep.startswith('box') }}">Boxes</a>
+      <a href="{{ url_for('lots') }}" class="{{ 'active' if ep.startswith('lot') }}">Lots</a>
+      <a href="{{ url_for('catalog_index') }}" class="{{ 'active' if ep.startswith('catalog') or ep.startswith('part') }}">Parts</a>
+      <a href="{{ url_for('reports') }}" class="{{ 'active' if ep == 'reports' }}">Reports</a>
+      <a href="{{ url_for('settings') }}" class="{{ 'active' if ep == 'settings' }}">Settings</a>
+      <a href="{{ url_for('system_page') }}" class="{{ 'active' if ep.startswith('system') }}">System</a>
+    </nav>
+    <form class="search" action="{{ url_for('search') }}" method="get">
+      <input type="search" name="q" placeholder="ID, serial, part, symptom" aria-label="Search" value="{{ q if q is defined else '' }}">
+      <button type="submit">Find</button>
+    </form>
+  </div>
+</header>
+{% if running %}
+<div class="timerbar">
+  <div class="timerbar-inner">
+    <span>Timer running on <a href="{{ url_for('device', code=running.device_code) }}">{{ running.device_code }}</a>
+      &middot; <span data-clock data-base="0" data-since="{{ running.started_at }}"></span></span>
+    <form method="post" action="{{ url_for('device_timer', code=running.device_code) }}" class="inline">
+      <input type="hidden" name="action" value="pause">
+      <input type="hidden" name="next" value="{{ request.path }}">
+      <button class="small" type="submit">Pause</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

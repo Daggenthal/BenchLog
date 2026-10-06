@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, device_table %}
+{% block content %}
+<div class="head">
+  <h1>Bench</h1>
+  <div class="row">
+    <a class="btn primary" href="{{ url_for('device_new') }}">New device</a>
+    <a class="btn" href="{{ url_for('lots') }}">New lot</a>
+    <a class="btn" href="{{ url_for('boxes') }}">New box</a>
+  </div>
+</div>
+<div class="tiles">
+  {% for key, info in STATUSES.items() %}
+  <a class="tile" href="{{ url_for('devices', status=key) }}">
+    <div class="n">{{ counts[key] }}</div>
+    <div class="l">{{ info[0] }}</div>
+  </a>
+  {% endfor %}
+</div>
+<div class="grid-2">
+  <section class="card">
+    <h2>Repair queue</h2>
+    <p class="muted small">Tested devices waiting for a repair, oldest first.</p>
+    {{ device_table(queue) }}
+  </section>
+  <section class="card">
+    <h2>Recently touched</h2>
+    {{ device_table(recent) }}
+  </section>
+</div>
+{% endblock %}

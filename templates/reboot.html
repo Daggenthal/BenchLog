@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Restarting - Bench Log{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>{{ 'Restarting the app' if app_only else 'Rebooting the device' }}</h1>
+  <p id="reboot-status" data-ping="{{ url_for('system_ping') }}" data-started="{{ started }}" data-back="{{ url_for('system_page') }}">
+    {{ 'This takes a few seconds.' if app_only else 'This usually takes about a minute.' }} The page returns to System by itself when it is back.
+  </p>
+  <a class="btn" href="{{ url_for('system_page') }}">Try System now</a>
+</section>
+{% endblock %}
