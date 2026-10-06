@@ -15,7 +15,7 @@
     <a class="btn" href="{{ search_links.ebay }}" target="_blank" rel="noopener">eBay, buy it now</a>
     <a class="btn {{ 'good' if search_links.ifixit_official }}" href="{{ p.ifixit_url or search_links.ifixit }}" target="_blank" rel="noopener">iFixit{{ ' (official parts)' if search_links.ifixit_official }}</a>
   </div>
-  {% if search_links.ifixit_name and not p.ifixit_url %}<p class="muted small" style="margin-top:8px">iFixit sells this as "{{ search_links.ifixit_name }}".</p>{% endif %}
+  {% if p.ifixit_name %}<p class="muted small" style="margin-top:8px">iFixit sells this as "{{ p.ifixit_name }}".{% if p.ifixit_note %} {{ p.ifixit_note }}{% endif %} <a href="{{ search_links.ifixit }}" target="_blank" rel="noopener">All iFixit parts for this device</a></p>{% endif %}
   <div class="grid" style="margin-top:14px">
     <div class="stat"><div class="v">{{ p.default_cost|money }}</div><div class="k">Usual cost, prefilled on repairs</div></div>
     <div class="stat"><div class="v">{% if p.last_price is not none %}{{ p.last_price|money }}{% else %}<span class="muted">n/a</span>{% endif %}</div><div class="k">{% if p.last_price_at %}eBay median, checked {{ p.last_price_at|date }}{% else %}No price check yet{% endif %}</div></div>
@@ -34,7 +34,7 @@
         <td class="right">{% if p.last_price is not none %}<form method="post" action="{{ url_for('part', part_id=p.id) }}"><button class="small" type="submit" name="use_price" value="{{ '%.2f'|format(p.last_price) }}">Use</button></form>{% endif %}</td>
       </tr>
       <tr>
-        <td><a href="{{ p.ifixit_url or search_links.ifixit }}" target="_blank" rel="noopener">iFixit</a> <span class="muted small">entered by you</span></td>
+        <td><a href="{{ p.ifixit_url or search_links.ifixit }}" target="_blank" rel="noopener">iFixit</a> <span class="muted small">{% if p.ifixit_source == 'list' %}{{ 'Fix Kit price, the bare part may cost less' if p.ifixit_kit_price else 'part only, from iFixit\'s parts list' }}{% elif p.ifixit_price is not none %}entered by you{% endif %}</span></td>
         <td class="num">{% if p.ifixit_price is not none %}{{ p.ifixit_price|money }}{% else %}<span class="muted">n/a</span>{% endif %}</td>
         <td class="muted small">{{ p.ifixit_checked_at|date }}</td>
         <td class="right">{% if p.ifixit_price is not none %}<form method="post" action="{{ url_for('part', part_id=p.id) }}"><button class="small" type="submit" name="use_price" value="{{ '%.2f'|format(p.ifixit_price) }}">Use</button></form>{% endif %}</td>
@@ -58,7 +58,7 @@
     </div>
     <button type="submit">Save iFixit price</button>
   </form>
-  <p class="muted small" style="margin-top:8px">iFixit does not allow programs to read its prices, so open the iFixit link, then type the price here. Leave the price blank and save to clear it.</p>
+  <p class="muted small" style="margin-top:8px">Where iFixit sells a part, its price is filled in from a list that ships with Bench Log and is refreshed with app updates. It is not live, so check the date. Type a price here to replace it. Leave the price blank and save to clear it.</p>
 
   <h3>Check the current eBay price</h3>
   {% if ebay_ready %}

@@ -25,7 +25,7 @@ import printing
 import remote
 import system
 
-VERSION = "1.3.2"
+VERSION = "1.4.0"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.environ.get("BENCHLOG_DATA", os.path.join(BASE_DIR, "data"))
@@ -1562,12 +1562,14 @@ def part(part_id):
     p = part_or_404(part_id)
     if request.method == "POST":
         if request.form.get("action") == "ifixit":
-            # iFixit does not allow automated price lookups, so this one is entered by hand.
+            # A price typed in by hand replaces the one from the shipped list.
             price = fnum("ifixit_price")
             url = (request.form.get("ifixit_url") or "").strip()
             if url and not url.lower().startswith(("http://", "https://")):
                 url = "https://" + url
-            conn.execute("UPDATE parts SET ifixit_price = ?, ifixit_url = ?, ifixit_checked_at = ? WHERE id = ?",
+            # Marked as typed in, so the price list shipped with updates never overwrites it.
+            conn.execute("UPDATE parts SET ifixit_price = ?, ifixit_url = ?, ifixit_checked_at = ?, ifixit_name = '',"
+                         " ifixit_note = '', ifixit_kit_price = 0, ifixit_source = 'manual' WHERE id = ?",
                          (price, url, now() if price is not None else None, part_id))
             flash("iFixit price saved." if price is not None else "iFixit price cleared.", "ok")
         elif "use_price" in request.form:

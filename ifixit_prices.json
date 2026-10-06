@@ -1,0 +1,1328 @@
+{
+ "checked": "2026-10-06",
+ "items": [
+  {
+   "type": "DualSense (PS5 controller)",
+   "part": "Analog stick module (left)",
+   "name": "PlayStation DualSense Controller Joystick",
+   "url": "https://www.ifixit.com/products/playstation-dualsense-controller-joystick",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Single joystick module, same part for left or right; requires soldering; cap not included. Listed for DualSense V1/V2 (BDM-010/020)."
+  },
+  {
+   "type": "DualSense (PS5 controller)",
+   "part": "Analog stick module (right)",
+   "name": "PlayStation DualSense Controller Joystick",
+   "url": "https://www.ifixit.com/products/playstation-dualsense-controller-joystick",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Single joystick module, same part for left or right; requires soldering; cap not included. Listed for DualSense V1/V2 (BDM-010/020)."
+  },
+  {
+   "type": "DualSense (PS5 controller)",
+   "part": "Battery",
+   "name": "PlayStation DualSense Controller Battery",
+   "url": "https://www.ifixit.com/products/playstation-dualsense-controller-battery",
+   "price": 23.99,
+   "kit_price": false,
+   "note": "No ?variant= id exposed in fetched page content; plain product URL used. Only option shown is Part Only. LIP1708, 1700 mAh. V1/V2."
+  },
+  {
+   "type": "DualSense (PS5 controller)",
+   "part": "GuliKit TMR stick, left (drift-proof upgrade)",
+   "name": "PS5 DualSense Controller - Gulikit TMR Joystick",
+   "url": "https://www.ifixit.com/products/ps5-dualsense-controller-gulikit-tmr-joystick",
+   "price": 29.99,
+   "kit_price": false,
+   "note": "Price is for a pack of TWO TMR joysticks plus two caps (covers left and right together). Fits BDM-010 to BDM-050."
+  },
+  {
+   "type": "DualSense (PS5 controller)",
+   "part": "GuliKit TMR stick, right (drift-proof upgrade)",
+   "name": "PS5 DualSense Controller - Gulikit TMR Joystick",
+   "url": "https://www.ifixit.com/products/ps5-dualsense-controller-gulikit-tmr-joystick",
+   "price": 29.99,
+   "kit_price": false,
+   "note": "Price is for a pack of TWO TMR joysticks plus two caps (covers left and right together). Fits BDM-010 to BDM-050."
+  },
+  {
+   "type": "DualSense (PS5 controller)",
+   "part": "Speaker",
+   "name": "PlayStation DualSense Controller Speaker",
+   "url": "https://www.ifixit.com/products/playstation-dualsense-controller-speaker",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Single option. V1/V2."
+  },
+  {
+   "type": "DualSense (PS5 controller)",
+   "part": "Thumbstick caps",
+   "name": "PlayStation DualSense Controller Joystick Cover",
+   "url": "https://www.ifixit.com/products/playstation-dualsense-controller-joystick-cover",
+   "price": 7.99,
+   "kit_price": false,
+   "note": "No ?variant= id exposed in fetched page content; plain product URL used. Appears to be a single cap (quantity not stated); our part is plural. V1/V2."
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "Analog stick module (left)",
+   "name": "DualShock 4 and Xbox One Controller Joystick",
+   "url": "https://www.ifixit.com/products/dualshock-4-xbox-one-controller-joystick",
+   "price": 9.99,
+   "kit_price": false,
+   "note": "No ?variant= id exposed in fetched page content; plain product URL used. Single joystick module, fits left or right; cap not included. CUH-ZCT1 and CUH-ZCT2."
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "Analog stick module (right)",
+   "name": "DualShock 4 and Xbox One Controller Joystick",
+   "url": "https://www.ifixit.com/products/dualshock-4-xbox-one-controller-joystick",
+   "price": 9.99,
+   "kit_price": false,
+   "note": "No ?variant= id exposed in fetched page content; plain product URL used. Single joystick module, fits left or right; cap not included. CUH-ZCT1 and CUH-ZCT2."
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "Battery",
+   "name": "DualShock 4 (JDM-030 and Earlier) Controller Battery",
+   "url": "https://www.ifixit.com/products/dualshock-4-jdm-030-and-earlier-controller-battery",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "No ?variant= id exposed in fetched page content; plain product URL used. Only option is Part Only. CUH-ZCT1 (JDM-001 to JDM-030) only, not CUH-ZCT2. Product page shows $14.99 (checked twice); listing page summary showed $16.99."
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "GuliKit TMR stick, left (drift-proof upgrade)",
+   "name": "PS4 DualShock 4 Controller - Gulikit TMR Joystick",
+   "url": "https://www.ifixit.com/products/ps4-dualshock-4-controller-gulikit-tmr-joystick",
+   "price": 29.99,
+   "kit_price": false,
+   "note": "Price is for a pack of TWO TMR joysticks plus two caps (covers left and right together). CUH-ZCT1 and CUH-ZCT2."
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "GuliKit TMR stick, right (drift-proof upgrade)",
+   "name": "PS4 DualShock 4 Controller - Gulikit TMR Joystick",
+   "url": "https://www.ifixit.com/products/ps4-dualshock-4-controller-gulikit-tmr-joystick",
+   "price": 29.99,
+   "kit_price": false,
+   "note": "Price is for a pack of TWO TMR joysticks plus two caps (covers left and right together). CUH-ZCT1 and CUH-ZCT2."
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "Main board",
+   "name": "DualShock 4 Controller Motherboard (JDM-011)",
+   "url": "https://www.ifixit.com/products/dualshock-4-controller-motherboard-jdm-011",
+   "price": 34.99,
+   "kit_price": false,
+   "note": "DOUBTFUL on revision: board is JDM-011 only (used OEM, in stock). Boards are revision-specific; other listings: Motherboard (JDM-030) $39.99, and motherboard+midframe assemblies JDM-001 $17.99 / JDM-011 $27.99 / JDM-020 $27.99 / JDM-030 $29.99 (assemblies incl..."
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "Micro-USB charging port board",
+   "name": "DualShock 4 Controller Charging Assembly (JDS-001)",
+   "url": "https://www.ifixit.com/products/dualshock-4-controller-charging-assembly-jds-001",
+   "price": 5.99,
+   "kit_price": false,
+   "note": "Revision-specific: JDS-001 is for first-gen CUH-ZCT1 (JDM-001) only; used OEM, out of stock when checked. Whether the flex cable is included is not stated. Other revisions (listing prices, not checked on product pages): JDS-011 $8.99, JDS-030 $14.99."
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "Shell (front or back)",
+   "name": "DualShock 4 Controller Front Panel (CUH-ZCT1)",
+   "url": "https://www.ifixit.com/products/dualshock-4-controller-front-panel-cuh-zct1",
+   "price": 7.99,
+   "kit_price": false,
+   "note": "Front only, used OEM (Black A-stock / White B-stock), CUH-ZCT1. Out of stock when checked. Rear Panel (CUH-ZCT1) is separate at $10.99 (https://www.ifixit.com/products/dualshock-4-controller-rear-panel-cuh-zct1)."
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "Thumbstick caps",
+   "name": "DualShock 4 Controller Joystick Cover",
+   "url": "https://www.ifixit.com/products/dualshock-4-controller-joystick-cover",
+   "price": 4.49,
+   "kit_price": false,
+   "note": "No ?variant= id exposed in fetched page content; plain product URL used. Single used OEM cap, fits left or right; our part is plural. Out of stock when checked."
+  },
+  {
+   "type": "DualShock 4 (PS4 controller)",
+   "part": "Touchpad assembly",
+   "name": "DualShock 4 Controller Touch Pad (CUH-ZCT1)",
+   "url": "https://www.ifixit.com/products/dualshock-4-controller-touch-pad-cuh-zct1",
+   "price": 4.99,
+   "kit_price": false,
+   "note": "Used OEM, CUH-ZCT1 (JDM-001/011/020). Out of stock when checked. CUH-ZCT2 version is a separate product, also $4.99 on the listing."
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "Analog stick module (left)",
+   "name": "Xbox Series X/S Controller Joystick",
+   "url": "https://www.ifixit.com/products/xbox-series-x-s-controller-joystick",
+   "price": 7.99,
+   "kit_price": false,
+   "note": "No Fix Kit option exists; sold as bare part (New). Listing page showed $9.99 on one fetch and $7.99 on another; product page says $7.99. Side not specified (same module either side). Fits Model 1914. Requires soldering."
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "Analog stick module (right)",
+   "name": "Xbox Series X/S Controller Joystick",
+   "url": "https://www.ifixit.com/products/xbox-series-x-s-controller-joystick",
+   "price": 7.99,
+   "kit_price": false,
+   "note": "No Fix Kit option exists; sold as bare part (New). Listing page showed $9.99 on one fetch and $7.99 on another; product page says $7.99. Side not specified (same module either side). Fits Model 1914. Requires soldering."
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "Battery door",
+   "name": "Microsoft Xbox Controller (Model 1914) Battery Cover",
+   "url": "https://www.ifixit.com/products/xbox-series-x-s-controller-battery-cover?variant=39607800365159",
+   "price": 9.99,
+   "kit_price": false,
+   "note": "New; Black or White, same price; variant id from listing, colour of that variant not confirmed. No kit option."
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "GuliKit TMR stick, left (drift-proof upgrade)",
+   "name": "Xbox Series X/S Controller - Gulikit TMR Joystick",
+   "url": "https://www.ifixit.com/products/xbox-series-x-s-controller-gulikit-tmr-joystick",
+   "price": 29.99,
+   "kit_price": false,
+   "note": "Exact GuliKit TMR product. One pack = TWO TMR joysticks + two caps, so one purchase covers left and right. Fits Model 1914 (and Elite Series 2). No kit option."
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "GuliKit TMR stick, right (drift-proof upgrade)",
+   "name": "Xbox Series X/S Controller - Gulikit TMR Joystick",
+   "url": "https://www.ifixit.com/products/xbox-series-x-s-controller-gulikit-tmr-joystick",
+   "price": 29.99,
+   "kit_price": false,
+   "note": "Exact GuliKit TMR product. One pack = TWO TMR joysticks + two caps, so one purchase covers left and right. Fits Model 1914 (and Elite Series 2). No kit option."
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "Headphone jack",
+   "name": "Microsoft Xbox Controller (Model 1914) Headphone Jack Assembly",
+   "url": "https://www.ifixit.com/products/xbox-series-x-s-controller-headphone-jack-assembly",
+   "price": 9.99,
+   "kit_price": false,
+   "note": "Used part. No kit option."
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "LB / RB bumper assembly",
+   "name": "Microsoft Xbox Controller (Model 1914) Bumper Assembly",
+   "url": "https://www.ifixit.com/products/xbox-series-x-s-controller-bumper-assembly?variant=39607790501991",
+   "price": 9.99,
+   "kit_price": false,
+   "note": "Used part; Black or White, same price; variant id in URL came from the listing, colour of that variant not confirmed. Page says it is only the bumper cover, interior mechanical parts not included. No kit option."
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "Main board set (top and bottom)",
+   "name": "Microsoft Xbox Controller (Model 1914) Motherboard Assembly with Rumble Motors - Genuine",
+   "url": "https://www.ifixit.com/products/microsoft-xbox-controller-model-1914-motherboard-assembly-with-rumble-motors-genuine",
+   "price": 34.99,
+   "kit_price": false,
+   "note": "DOUBTFUL: ONE board only ('1 PCBA with rumble motors and internal joysticks assembled'), not a top+bottom set; the other board is sold separately as 'I/O Board - Genuine' $33.99 (also out of stock). Part Only is the only option shown; variant id not visible."
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "Shell (faceplate or back)",
+   "name": "Microsoft Xbox Controller (Model 1914) Top Case - Genuine",
+   "url": "https://www.ifixit.com/products/microsoft-xbox-controller-model-1914-top-case-genuine",
+   "price": 19.99,
+   "kit_price": false,
+   "note": "Faceplate. New, Part Only is the only option; Black/White; variant id not visible. OUT OF STOCK."
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "Thumbstick caps",
+   "name": "Microsoft Xbox Controller (Model 1914) Joystick Covers",
+   "url": "https://www.ifixit.com/products/xbox-series-x-controller-joystick-cover",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Set of two covers, New. No kit option."
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "Trigger (LT / RT) and spring",
+   "name": "Microsoft Xbox Controller (Model 1914) Left and Right Trigger Button Covers",
+   "url": "https://www.ifixit.com/products/xbox-series-x-s-controller-left-and-right-trigger-button-covers",
+   "price": 9.99,
+   "kit_price": false,
+   "note": "DOUBTFUL: used plastic trigger covers (pair) only; no springs, 'internal button contacts are not included'. Drop if the spring is required."
+  },
+  {
+   "type": "Xbox Series controller",
+   "part": "USB-C port",
+   "name": "Microsoft Xbox Controller (Model 1914) USB-Port",
+   "url": "https://www.ifixit.com/products/xbox-series-x-s-controller-usb-port",
+   "price": 9.99,
+   "kit_price": false,
+   "note": "New, solder-on port. No kit option."
+  },
+  {
+   "type": "Xbox One controller",
+   "part": "Battery door",
+   "name": "Xbox One Controller Battery Enclosure",
+   "url": "https://www.ifixit.com/products/xbox-one-controller-battery-enclosure",
+   "price": 4.99,
+   "kit_price": false,
+   "note": "DOUBTFUL: fits 1537/1697/1708 (all), but page only says 'plastic battery enclosure' ('broken or missing'); not confirmed it is the removable door. Used. OUT OF STOCK."
+  },
+  {
+   "type": "Xbox One controller",
+   "part": "Face button conductive pad",
+   "name": "Xbox One Controller Action Button Gasket",
+   "url": "https://www.ifixit.com/products/xbox-one-controller-action-button-gasket",
+   "price": 7.99,
+   "kit_price": false,
+   "note": "Fits 1537, 1697 and 1708 (all). Used OEM rubber gasket between ABXY covers and board contacts. OUT OF STOCK."
+  },
+  {
+   "type": "Xbox One controller",
+   "part": "Headphone jack",
+   "name": "Xbox One/One S Controller (1697 and 1708) Headphone Jack Assembly",
+   "url": "https://www.ifixit.com/products/xbox-one-one-s-controller-1697-and-1708-headphone-jack-assembly",
+   "price": 4.99,
+   "kit_price": false,
+   "note": "Fits 1697 and 1708. Used OEM. OUT OF STOCK."
+  },
+  {
+   "type": "Xbox One controller",
+   "part": "LB / RB bumper assembly",
+   "name": "Xbox One S Controller (1708) Bumper Assembly",
+   "url": "https://www.ifixit.com/products/xbox-one-s-controller-1708-bumper-assembly",
+   "price": 9.99,
+   "kit_price": false,
+   "note": "Fits model 1708 specifically. Used OEM. Only 8 left in stock."
+  },
+  {
+   "type": "Xbox One controller",
+   "part": "Main board set (top and bottom)",
+   "name": "Xbox One S Controller (1708) Motherboard",
+   "url": "https://www.ifixit.com/products/xbox-one-s-controller-1708-motherboard",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "DOUBTFUL: fits 1708 specifically, but appears to be a single (bottom) board, not a top+bottom set. Used. Only 8 left."
+  },
+  {
+   "type": "Xbox One controller",
+   "part": "Shell (faceplate or back)",
+   "name": "Xbox One S Controller (1708) Front Panel",
+   "url": "https://www.ifixit.com/products/xbox-one-s-controller-1708-front-panel",
+   "price": 4.99,
+   "kit_price": false,
+   "note": "Fits 1708 specifically. Used (A-Stock/B-Stock options, $4.99 shown). OUT OF STOCK. Back shell: 'Xbox One S Controller (1708) Rear Panel' $4.99, /products/xbox-one-s-controller-1708-rear-panel, also out of stock."
+  },
+  {
+   "type": "Xbox One controller",
+   "part": "Thumbstick caps",
+   "name": "Xbox One Controller Joystick Cover",
+   "url": "https://www.ifixit.com/products/xbox-one-controller-joystick-cover",
+   "price": 9.99,
+   "kit_price": false,
+   "note": "Fits 1537, 1697 and 1708 (all). New. Quantity per order not stated on page (may be a single cap). No kit option."
+  },
+  {
+   "type": "Joy-Con (L)",
+   "part": "Analog stick module",
+   "name": "Nintendo Switch Joy-Con/Switch Lite Joystick",
+   "url": "https://www.ifixit.com/products/nintendo-switch-joy-con-joystick?variant=39372012421223",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Same module fits left or right. Fix Kit is $19.99. Variant shown is colour Black."
+  },
+  {
+   "type": "Joy-Con (L)",
+   "part": "Battery",
+   "name": "Nintendo Switch Joy-Con Controller Battery",
+   "url": "https://www.ifixit.com/products/nintendo-switch-joy-con-controller-replacement-battery?variant=39372012322919",
+   "price": 11.99,
+   "kit_price": false,
+   "note": "Part Only price $11.99 and variant id come from the listing page only; the variant product page was rate-limited (HTTP 429) and could not be re-checked. Plain product page confirmed title, left-or-right fit (HAC-006) and Fix Kit $16.99."
+  },
+  {
+   "type": "Joy-Con (L)",
+   "part": "GuliKit TMR stick (drift-proof upgrade)",
+   "name": "Nintendo Switch Joy-Con/Switch Lite - Gulikit TMR Joystick",
+   "url": "https://www.ifixit.com/products/nintendo-switch-joy-con-switch-lite-tmr-effect-joystick?variant=41564755755111",
+   "price": 17.99,
+   "kit_price": false,
+   "note": "One joystick, fits left or right. Fix Kit is $22.99."
+  },
+  {
+   "type": "Joy-Con (L)",
+   "part": "Lock latch (metal buckle)",
+   "name": "Nintendo Switch Joy-Con Replacement Metal Buckle Locks",
+   "url": "https://www.ifixit.com/products/nintendo-switch-joy-con-replacement-metal-buckle-locks",
+   "price": 6.99,
+   "kit_price": false,
+   "note": "Sold as a set of two latches for a pair of Joy-Cons; price is for the pair."
+  },
+  {
+   "type": "Joy-Con (L)",
+   "part": "SL / SR and LED flex cable",
+   "name": "Nintendo Switch Joy-Con Controller SL/SR Button Boards",
+   "url": "https://www.ifixit.com/products/nintendo-switch-joy-con-controller-sl-sr-button-boards",
+   "price": 11.99,
+   "kit_price": false,
+   "note": "Sold as a pair (left + right); price is for the pair. Page says switches and flex cables for SL/SR; LEDs not explicitly mentioned."
+  },
+  {
+   "type": "Joy-Con (R)",
+   "part": "Analog stick module",
+   "name": "Nintendo Switch Joy-Con/Switch Lite Joystick",
+   "url": "https://www.ifixit.com/products/nintendo-switch-joy-con-joystick?variant=39372012421223",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Same module fits left or right. Fix Kit is $19.99. Variant shown is colour Black."
+  },
+  {
+   "type": "Joy-Con (R)",
+   "part": "Battery",
+   "name": "Nintendo Switch Joy-Con Controller Battery",
+   "url": "https://www.ifixit.com/products/nintendo-switch-joy-con-controller-replacement-battery?variant=39372012322919",
+   "price": 11.99,
+   "kit_price": false,
+   "note": "Part Only price $11.99 and variant id come from the listing page only; the variant product page was rate-limited (HTTP 429) and could not be re-checked. Plain product page confirmed title, left-or-right fit (HAC-006) and Fix Kit $16.99."
+  },
+  {
+   "type": "Joy-Con (R)",
+   "part": "GuliKit TMR stick (drift-proof upgrade)",
+   "name": "Nintendo Switch Joy-Con/Switch Lite - Gulikit TMR Joystick",
+   "url": "https://www.ifixit.com/products/nintendo-switch-joy-con-switch-lite-tmr-effect-joystick?variant=41564755755111",
+   "price": 17.99,
+   "kit_price": false,
+   "note": "One joystick, fits left or right. Fix Kit is $22.99."
+  },
+  {
+   "type": "Joy-Con (R)",
+   "part": "Lock latch (metal buckle)",
+   "name": "Nintendo Switch Joy-Con Replacement Metal Buckle Locks",
+   "url": "https://www.ifixit.com/products/nintendo-switch-joy-con-replacement-metal-buckle-locks",
+   "price": 6.99,
+   "kit_price": false,
+   "note": "Sold as a set of two latches for a pair of Joy-Cons; price is for the pair."
+  },
+  {
+   "type": "Joy-Con (R)",
+   "part": "SL / SR and LED flex cable",
+   "name": "Nintendo Switch Joy-Con Controller SL/SR Button Boards",
+   "url": "https://www.ifixit.com/products/nintendo-switch-joy-con-controller-sl-sr-button-boards",
+   "price": 11.99,
+   "kit_price": false,
+   "note": "Sold as a pair (left + right); price is for the pair. Page says switches and flex cables for SL/SR; LEDs not explicitly mentioned."
+  },
+  {
+   "type": "Switch Pro Controller",
+   "part": "Analog stick module (left)",
+   "name": "Nintendo Switch Pro Controller Joystick",
+   "url": "https://www.ifixit.com/products/nintendo-switch-pro-controller-joystick",
+   "price": 12.99,
+   "kit_price": false,
+   "note": "Single joystick; page says both joysticks are the same component. Requires soldering."
+  },
+  {
+   "type": "Switch Pro Controller",
+   "part": "Analog stick module (right)",
+   "name": "Nintendo Switch Pro Controller Joystick",
+   "url": "https://www.ifixit.com/products/nintendo-switch-pro-controller-joystick",
+   "price": 12.99,
+   "kit_price": false,
+   "note": "Single joystick; page says both joysticks are the same component. Requires soldering."
+  },
+  {
+   "type": "Switch Pro Controller",
+   "part": "Battery",
+   "name": "Nintendo CTR-003 Battery",
+   "url": "https://www.ifixit.com/products/nintendo-ctr-003-battery",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Part Only is the only option shown; no variant id. Shared 3DS/2DS battery, lists Pro Controller HAC-013."
+  },
+  {
+   "type": "Switch Pro Controller",
+   "part": "GuliKit TMR stick, left (drift-proof upgrade)",
+   "name": "Nintendo Switch Pro Controller - Gulikit TMR Joystick",
+   "url": "https://www.ifixit.com/products/nintendo-switch-pro-gulikit-tmr-joystick",
+   "price": 29.99,
+   "kit_price": false,
+   "note": "Sold as a set of 2 joysticks with 2 caps; $29.99 is for the pair, not per side."
+  },
+  {
+   "type": "Switch Pro Controller",
+   "part": "GuliKit TMR stick, right (drift-proof upgrade)",
+   "name": "Nintendo Switch Pro Controller - Gulikit TMR Joystick",
+   "url": "https://www.ifixit.com/products/nintendo-switch-pro-gulikit-tmr-joystick",
+   "price": 29.99,
+   "kit_price": false,
+   "note": "Sold as a set of 2 joysticks with 2 caps; $29.99 is for the pair, not per side."
+  },
+  {
+   "type": "Joy-Con 2 (L)",
+   "part": "Analog stick module",
+   "name": "Nintendo Switch 2 Joy-Con Joystick",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-joy-con-joystick",
+   "price": 24.99,
+   "kit_price": false,
+   "note": "Fits BEE-012 Left and BEE-014 Right. Page shows Part Only and Fix Kit both at $24.99, with colour (Neon Red/Neon Blue) and New/Used options; no variant id obtainable."
+  },
+  {
+   "type": "Joy-Con 2 (L)",
+   "part": "Conductive button pad",
+   "name": "Nintendo Switch 2 Left Joy-Con 2 D-Pad Buttons and Membrane",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-left-joy-con-2-d-pad-buttons-and-membrane",
+   "price": 12.99,
+   "kit_price": false,
+   "note": "Includes button faces plus the membrane."
+  },
+  {
+   "type": "Joy-Con 2 (L)",
+   "part": "Magnetic connector assembly",
+   "name": "Nintendo Switch 2 Left Joy-Con 2 Socket Cable",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-left-joy-con-2-socket-cable",
+   "price": 9.99,
+   "kit_price": false,
+   "note": "Doubtful: page describes 'exterior connector socket ... includes the cable connecting to the circuit board'; not explicitly called the magnetic connector. The separate Rail product ($14.99) is the rail assembly."
+  },
+  {
+   "type": "Joy-Con 2 (L)",
+   "part": "Main board",
+   "name": "Nintendo Switch 2 Left Joy-Con 2 Motherboard",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-left-joy-con-2-motherboard",
+   "price": 34.99,
+   "kit_price": false,
+   "note": "Out of stock when checked. Listing summary showed $39.99; product page shows $34.99."
+  },
+  {
+   "type": "Joy-Con 2 (L)",
+   "part": "Release button mechanism",
+   "name": "Nintendo Switch 2 Left Joy-Con 2 Release Button Bracket",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-left-joy-con-2-release-button-bracket",
+   "price": 12.99,
+   "kit_price": false,
+   "note": "Internal bracket of the release mechanism only; the button face is a separate product (Release Button, $12.99). Out of stock when checked."
+  },
+  {
+   "type": "Joy-Con 2 (L)",
+   "part": "Rumble motor",
+   "name": "Nintendo Switch 2 Left Joy-Con 2 Rumble Motor",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-left-joy-con-2-rumble-motor",
+   "price": 19.99,
+   "kit_price": false,
+   "note": "Listing page summary showed $14.99; product page shows $19.99 (used here)."
+  },
+  {
+   "type": "Joy-Con 2 (L)",
+   "part": "Shell and midframe",
+   "name": "Nintendo Switch 2 Left Joy-Con 2 Front Case",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-left-joy-con-2-front-case",
+   "price": 19.99,
+   "kit_price": false,
+   "note": "Partial match: iFixit sells shell pieces separately. This is the front case only; Midframe ($12.99, https://www.ifixit.com/products/nintendo-switch-2-left-joy-con-2-midframe) and Rear Case (not verified) are separate products. Out of stock when checked."
+  },
+  {
+   "type": "Joy-Con 2 (L)",
+   "part": "Shoulder and trigger flex cable",
+   "name": "Nintendo Switch 2 Left Joy-Con 2 Trigger Button Board",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-left-joy-con-2-trigger-button-board",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Internal trigger switch and cable, no button face. Page does not say whether it covers both bumper and trigger. Out of stock when checked. Listing summary showed $19.99."
+  },
+  {
+   "type": "Joy-Con 2 (R)",
+   "part": "Analog stick module",
+   "name": "Nintendo Switch 2 Joy-Con Joystick",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-joy-con-joystick",
+   "price": 24.99,
+   "kit_price": false,
+   "note": "Fits BEE-012 Left and BEE-014 Right. Page shows Part Only and Fix Kit both at $24.99, with colour (Neon Red/Neon Blue) and New/Used options; no variant id obtainable."
+  },
+  {
+   "type": "Joy-Con 2 (R)",
+   "part": "Conductive button pad",
+   "name": "Nintendo Switch 2 Right Joy-Con 2 ABXY Buttons and Membrane",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-right-joy-con-2-abxy-buttons-and-membrane",
+   "price": 12.99,
+   "kit_price": false,
+   "note": "Includes button faces plus the membrane. Out of stock when checked."
+  },
+  {
+   "type": "Joy-Con 2 (R)",
+   "part": "Magnetic connector assembly",
+   "name": "Nintendo Switch 2 Right Joy-Con 2 Socket Cable",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-right-joy-con-2-socket-cable",
+   "price": 9.99,
+   "kit_price": false,
+   "note": "Doubtful: page describes 'exterior connector socket ... includes the cable connecting to the circuit board'; not explicitly called the magnetic connector. The separate Rail product ($14.99) is the rail assembly."
+  },
+  {
+   "type": "Joy-Con 2 (R)",
+   "part": "Main board",
+   "name": "Nintendo Switch 2 Right Joy-Con 2 Motherboard",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-right-joy-con-2-motherboard",
+   "price": 34.99,
+   "kit_price": false,
+   "note": "Out of stock when checked. Listing summary showed $39.99; product page shows $34.99."
+  },
+  {
+   "type": "Joy-Con 2 (R)",
+   "part": "Release button mechanism",
+   "name": "Nintendo Switch 2 Right Joy-Con 2 Release Button Bracket",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-right-joy-con-2-release-button-bracket",
+   "price": 12.99,
+   "kit_price": false,
+   "note": "Internal bracket of the release mechanism only; the button face is a separate product (Release Button, $12.99)."
+  },
+  {
+   "type": "Joy-Con 2 (R)",
+   "part": "Rumble motor",
+   "name": "Nintendo Switch 2 Right Joy-Con 2 Rumble Motor",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-right-joy-con-2-rumble-motor",
+   "price": 19.99,
+   "kit_price": false,
+   "note": "Listing page summary showed $14.99; product page shows $19.99 (used here)."
+  },
+  {
+   "type": "Joy-Con 2 (R)",
+   "part": "Shell and midframe",
+   "name": "Nintendo Switch 2 Right Joy-Con 2 Front Case",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-right-joy-con-2-front-case",
+   "price": 19.99,
+   "kit_price": false,
+   "note": "Partial match: iFixit sells shell pieces separately. This is the front case only; Midframe ($12.99, https://www.ifixit.com/products/nintendo-switch-2-right-joy-con-2-midframe) and Rear Case (not verified) are separate products. Out of stock when checked."
+  },
+  {
+   "type": "Joy-Con 2 (R)",
+   "part": "Shoulder and trigger flex cable",
+   "name": "Nintendo Switch 2 Right Joy-Con 2 Trigger Button Board",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-right-joy-con-2-trigger-button-board",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Internal trigger switch and cable, no button face. Page does not say whether it covers both bumper and trigger. Out of stock when checked. Listing summary showed $19.99."
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "Battery",
+   "name": "Nintendo Switch Console Battery",
+   "url": "https://www.ifixit.com/products/nintendo-switch-console-replacement-battery?variant=39372012224615",
+   "price": 34.99,
+   "kit_price": false,
+   "note": "Part Only variant (Fix Kit is 39.99). HAC-003; fits 2017, 2019 and OLED."
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "Fan",
+   "name": "Nintendo Switch (2017 HAC-001) Fan",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2017-hac-001-fan?variant=39372011339879",
+   "price": 24.99,
+   "kit_price": false,
+   "note": "Part Only variant (Fix Kit 29.99). 2017 HAC-001 only. The 2019 HAC-001(-01) revision uses a different product, also 24.99 Part Only: https://www.ifixit.com/products/nintendo-switch-2019-hac-001-01-fan?variant=42226474549351"
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "Game card reader board (with headphone jack)",
+   "name": "Nintendo Switch (2017 and 2019) Game Card Reader",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2017-2019-game-card-reader?variant=41538930671719",
+   "price": 19.99,
+   "kit_price": false,
+   "note": "Part Only variant (Fix Kit 24.99). Page says it includes the headphone jack."
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "Kickstand",
+   "name": "Nintendo Switch Kick Stand",
+   "url": "https://www.ifixit.com/products/nintendo-switch-kick-stand",
+   "price": 9.99,
+   "kit_price": false,
+   "note": "Used part."
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "LCD panel",
+   "name": "Nintendo Switch LCD",
+   "url": "https://www.ifixit.com/products/nintendo-switch-lcd",
+   "price": 49.99,
+   "kit_price": false,
+   "note": "LCD panel only, used. A combined LCD+digitizer 'Nintendo Switch (2017 HAC-001) Screen' is 79.99."
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "Left Joy-Con rail (with flex)",
+   "name": "Nintendo Switch Left Joy-Con Sensor Rail",
+   "url": "https://www.ifixit.com/products/nintendo-switch-left-joy-con-sensor-rail",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Console-side rail with ribbon cable."
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "Main board",
+   "name": "Nintendo Switch (2017 HAC-001) Motherboard",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2017-hac-001-motherboard",
+   "price": 126.99,
+   "kit_price": false,
+   "note": "Used, out of stock when checked. 2017 HAC-001 only; the 2019 HAC-001(-01) board is a separate product listed at 159.99 (https://www.ifixit.com/products/nintendo-switch-2017-hac-001-01-motherboard, listing price only, not re-checked)."
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "Power and volume button flex",
+   "name": "Nintendo Switch Power Button Board",
+   "url": "https://www.ifixit.com/products/nintendo-switch-power-button-board",
+   "price": 8.99,
+   "kit_price": false,
+   "note": "Doubtful: iFixit calls it a power button board; could not confirm from the page that the volume switches are on it. Used part."
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "Right Joy-Con rail (with flex)",
+   "name": "Nintendo Switch Right Joy-Con Sensor Rail",
+   "url": "https://www.ifixit.com/products/nintendo-switch-right-joy-con-sensor-rail",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Console-side rail with ribbon cable."
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "Shell (back plate, midframe)",
+   "name": "Nintendo Switch Rear Panel",
+   "url": "https://www.ifixit.com/products/nintendo-switch-rear-panel",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Back plate only (used, A-stock, black), out of stock when checked. A separate 'Nintendo Switch Front Frame' is listed at 9.99 (not re-checked)."
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "Speakers",
+   "name": "Nintendo Switch Speaker",
+   "url": "https://www.ifixit.com/products/nintendo-switch-speaker",
+   "price": 9.99,
+   "kit_price": false,
+   "note": "Price is for ONE speaker (console has two identical ones). Used part."
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "Touch digitizer",
+   "name": "Nintendo Switch (2017 HAC-001) Digitizer Front Panel",
+   "url": "https://www.ifixit.com/products/nintendo-switch-digitizer-front-panel",
+   "price": 24.99,
+   "kit_price": false,
+   "note": "Page says 2017 HAC-001 only, not compatible with 2019 HAC-001(-01). Adhesive not included."
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "USB-C charging port",
+   "name": "Nintendo Switch Console USB-C Port",
+   "url": "https://www.ifixit.com/products/nintendo-switch-console-usb-c-port",
+   "price": 12.99,
+   "kit_price": false,
+   "note": "Solder-on port; fits 2017 HAC-001 and 2019 HAC-001(-01)."
+  },
+  {
+   "type": "Nintendo Switch (original)",
+   "part": "microSD reader board",
+   "name": "Nintendo Switch Micro SD Card Reader",
+   "url": "https://www.ifixit.com/products/nintendo-switch-micro-sd-card-reader?variant=39372011536487",
+   "price": 19.99,
+   "kit_price": false,
+   "note": "Part Only variant (Fix Kit 24.99)."
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "Analog stick module (left)",
+   "name": "Nintendo Switch Joy-Con/Switch Lite Joystick",
+   "url": "https://www.ifixit.com/products/nintendo-switch-joy-con-joystick?variant=39372012421223",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Part Only variant (Fix Kit 19.99). Same module for left and right; price is per stick."
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "Analog stick module (right)",
+   "name": "Nintendo Switch Joy-Con/Switch Lite Joystick",
+   "url": "https://www.ifixit.com/products/nintendo-switch-joy-con-joystick?variant=39372012421223",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Part Only variant (Fix Kit 19.99). Same module for left and right; price is per stick."
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "Battery",
+   "name": "Nintendo Switch Lite Battery",
+   "url": "https://www.ifixit.com/products/nintendo-switch-lite-battery",
+   "price": 29.99,
+   "kit_price": false,
+   "note": "Sold as Part Only only; no variant id needed. HDH-003."
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "Fan",
+   "name": "Nintendo Switch Lite Fan",
+   "url": "https://www.ifixit.com/products/nintendo-switch-lite-fan",
+   "price": 19.99,
+   "kit_price": false,
+   "note": "Used part."
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "Game card reader",
+   "name": "Nintendo Switch Lite Game Card Reader",
+   "url": "https://www.ifixit.com/products/nintendo-switch-lite-game-card-reader",
+   "price": 19.99,
+   "kit_price": false,
+   "note": "Does not include the headphone jack."
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "GuliKit TMR stick (drift-proof upgrade)",
+   "name": "Nintendo Switch Joy-Con/Switch Lite - Gulikit TMR Joystick",
+   "url": "https://www.ifixit.com/products/nintendo-switch-joy-con-switch-lite-tmr-effect-joystick?variant=41564755755111",
+   "price": 17.99,
+   "kit_price": false,
+   "note": "Part Only variant (Fix Kit 22.99). Gulikit-branded, Switch Lite listed as compatible; price is per stick."
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "LCD panel",
+   "name": "Nintendo Switch Lite LCD",
+   "url": "https://www.ifixit.com/products/nintendo-switch-lite-lcd",
+   "price": 65.99,
+   "kit_price": false,
+   "note": "LCD only. New/Used condition options; 65.99 is the price shown (New). Combined LCD+digitizer 'Nintendo Switch Lite Screen' is 69.99."
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "Main board",
+   "name": "Nintendo Switch Lite Motherboard",
+   "url": "https://www.ifixit.com/products/nintendo-switch-lite-motherboard",
+   "price": 154.99,
+   "kit_price": false,
+   "note": "Used, out of stock when checked."
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "Touch digitizer",
+   "name": "Nintendo Switch Lite Touch Screen Digitizer",
+   "url": "https://www.ifixit.com/products/nintendo-switch-lite-touch-screen-digitizer",
+   "price": 19.99,
+   "kit_price": false,
+   "note": "Front glass + digitizer, 5 colour variants all 19.99; plain URL used (variant ids are colours). Adhesive not included."
+  },
+  {
+   "type": "Nintendo Switch Lite",
+   "part": "USB-C charging port",
+   "name": "Nintendo Switch Lite Console USB-C Port",
+   "url": "https://www.ifixit.com/products/nintendo-switch-lite-console-usb-c-port",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Solder-on port."
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "Battery",
+   "name": "Nintendo Switch Console Battery",
+   "url": "https://www.ifixit.com/products/nintendo-switch-console-replacement-battery?variant=39372012224615",
+   "price": 34.99,
+   "kit_price": false,
+   "note": "Part Only variant (Fix Kit 39.99). Product page lists Switch OLED (HEG-001) as compatible."
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "Fan",
+   "name": "Nintendo Switch OLED Fan",
+   "url": "https://www.ifixit.com/products/nintendo-switch-oled-fan",
+   "price": 39.99,
+   "kit_price": false,
+   "note": "Used part."
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "Game card reader board (with headphone jack)",
+   "name": "Nintendo Switch OLED Game Card Reader Daughterboard",
+   "url": "https://www.ifixit.com/products/nintendo-switch-oled-game-card-reader-daughterboard",
+   "price": 69.99,
+   "kit_price": false,
+   "note": "Used part. Could not confirm from the page whether the headphone jack is on this board."
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "Kickstand",
+   "name": "Nintendo Switch OLED Kickstand",
+   "url": "https://www.ifixit.com/products/nintendo-switch-oled-kickstand",
+   "price": 39.99,
+   "kit_price": false,
+   "note": "New/Used condition options; 39.99 is the price shown. Hinges are a separate product (19.99 on listing)."
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "Left Joy-Con rail (with flex)",
+   "name": "Nintendo Switch OLED Left Joy-Con Sensor Rail",
+   "url": "https://www.ifixit.com/products/nintendo-switch-oled-left-joy-con-sensor-rail",
+   "price": 24.99,
+   "kit_price": false,
+   "note": "New condition price; a Used option exists."
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "Main board",
+   "name": "Nintendo Switch OLED Console Motherboard",
+   "url": "https://www.ifixit.com/products/nintendo-switch-oled-console-motherboard",
+   "price": 199.99,
+   "kit_price": false,
+   "note": "Used, out of stock when checked."
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "OLED panel (with touch)",
+   "name": "Nintendo Switch OLED Screen",
+   "url": "https://www.ifixit.com/products/nintendo-switch-oled-screen",
+   "price": 169.99,
+   "kit_price": false,
+   "note": "Front glass digitizer + fused OLED. Only 1 in stock when checked. A used 'Nintendo Switch OLED Screen Assembly' is 159.99 (https://www.ifixit.com/products/nintendo-switch-oled-screen-assembly)."
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "Power and volume button flex",
+   "name": "Nintendo Switch OLED Power Button Board",
+   "url": "https://www.ifixit.com/products/nintendo-switch-oled-power-button-board",
+   "price": 19.99,
+   "kit_price": false,
+   "note": "Doubtful: named power button board; volume switches not confirmed. Used part."
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "Right Joy-Con rail (with flex)",
+   "name": "Nintendo Switch OLED Right Joy-Con Sensor Rail",
+   "url": "https://www.ifixit.com/products/nintendo-switch-oled-right-joy-con-sensor-rail",
+   "price": 24.99,
+   "kit_price": false,
+   "note": "New condition price; a Used option exists."
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "Shell (back plate, midframe)",
+   "name": "Nintendo Switch OLED Console Rear Case",
+   "url": "https://www.ifixit.com/products/nintendo-switch-oled-console-rear-case",
+   "price": 39.99,
+   "kit_price": false,
+   "note": "Rear case only. New/Used condition options; 39.99 is the price shown, other condition may differ."
+  },
+  {
+   "type": "Nintendo Switch OLED",
+   "part": "USB-C charging port",
+   "name": "Nintendo Switch OLED Console USB-C Port",
+   "url": "https://www.ifixit.com/products/nintendo-switch-oled-console-usb-c-port",
+   "price": 9.99,
+   "kit_price": false,
+   "note": "Solder-on port; sold as-is, no returns."
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "Headphone jack",
+   "name": "Nintendo Switch 2 Console Headphone Jack",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-console-headphone-jack",
+   "price": 17.99,
+   "kit_price": false,
+   "note": "New price; Used option exists."
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "Kickstand",
+   "name": "Nintendo Switch 2 Console Kickstand and Hinges",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-console-kickstand-and-hinges",
+   "price": 19.99,
+   "kit_price": false,
+   "note": "Includes hinges. Out of stock when checked."
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "LCD panel",
+   "name": "Nintendo Switch 2 Console Screen",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-console-screen",
+   "price": 299.99,
+   "kit_price": false,
+   "note": "Front glass digitizer + fused LCD assembly, so it also covers our 'Touch digitizer'; mapped to LCD panel only as the closest. New price; Used option exists."
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "Main board",
+   "name": "Nintendo Switch 2 Console Motherboard",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-console-motherboard",
+   "price": 289.99,
+   "kit_price": false,
+   "note": "Out of stock when checked. New/Used condition options."
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "Microphone",
+   "name": "Nintendo Switch 2 Console Microphone",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-console-microphone",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Only 1 (Used) in stock when checked."
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "Power and volume button flex",
+   "name": "Nintendo Switch 2 Console Power and Volume Button Board",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-console-power-and-volume-button-board",
+   "price": 17.99,
+   "kit_price": false,
+   "note": "New/Used condition options; 17.99 is the price shown."
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "Shell (back plate, midframe)",
+   "name": "Nintendo Switch 2 Console Midframe",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-console-midframe",
+   "price": 34.99,
+   "kit_price": false,
+   "note": "Midframe only (New price; Used option exists). Back plate is a separate product: 'Nintendo Switch 2 Console Rear Case' 24.99, out of stock (https://www.ifixit.com/products/nintendo-switch-2-console-rear-case)."
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "Speakers",
+   "name": "Nintendo Switch 2 Console Left Speaker",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-console-left-speaker",
+   "price": 39.99,
+   "kit_price": false,
+   "note": "Price is for the LEFT speaker only, New condition (product page). Listing page showed 29.99, probably the Used condition. Right speaker is a separate product at the same price: https://www.ifixit.com/products/nintendo-switch-2-console-right-speaker"
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "Top USB-C port",
+   "name": "Nintendo Switch 2 Console USB-C Top Port",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-console-usb-c-top-port",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Solder-on top port."
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "USB-C charging port",
+   "name": "Nintendo Switch 2 Console USB-C Bottom Port",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-console-usb-c-bottom-port",
+   "price": 14.99,
+   "kit_price": false,
+   "note": "Solder-on bottom port."
+  },
+  {
+   "type": "Nintendo Switch 2",
+   "part": "microSD reader",
+   "name": "Nintendo Switch 2 Console MicroSD Express Reader",
+   "url": "https://www.ifixit.com/products/nintendo-switch-2-console-microsd-express-reader",
+   "price": 49.99,
+   "kit_price": false,
+   "note": "New condition price; Used option exists. iFixit's blurb mentions game card detection, but the product is named as the microSD Express reader, so matched to microSD reader only."
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "Battery",
+   "name": "Steam Deck LCD Battery",
+   "url": "https://www.ifixit.com/products/steam-deck-lcd-battery",
+   "price": 84.99,
+   "kit_price": true,
+   "note": "Aftermarket battery (IF260-089-2), in stock. Fix Kit $84.99 confirmed; Part Only option exists but price and variant id not read. A second product, the genuine battery (steam-deck-battery), shows $134.99 Fix Kit and is out of stock."
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "Display assembly (LCD)",
+   "name": "Steam Deck LCD (64GB or 256GB) Screen",
+   "url": "https://www.ifixit.com/products/steam-deck-64gb-or-256gb-screen",
+   "price": 149.99,
+   "kit_price": true,
+   "note": "Fix Kit price only; Part Only option exists, price and variant id not read. Out of stock when checked. The 512GB anti-glare screen is separate: steam-deck-512gb-screen, $199.99 (Fix Kit), also out of stock."
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "Fan",
+   "name": "Steam Deck LCD (Refreshed Model) Fan",
+   "url": "https://www.ifixit.com/products/steam-deck-refreshed-model-fan",
+   "price": 29.99,
+   "kit_price": true,
+   "note": "Fits REFRESHED LCD models only, not the original. Fix Kit price only; Part Only exists, price not read. Out of stock when checked."
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "L1 / R1 bumper button",
+   "name": "Steam Deck LCD Right Bumper Button Assembly",
+   "url": "https://www.ifixit.com/products/steam-deck-right-bumper-button-assembly",
+   "price": 6.99,
+   "kit_price": false,
+   "note": "Right (R1) only. Listing page showed $14.99 but the product page showed $6.99 (used product page; recheck). Left (L1) is separate: steam-deck-left-bumper-button-assembly, $19.99, out of stock."
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "SSD (M.2 2230)",
+   "name": "Micron 2500 NVMe PCIe Gen4 2230 SSD",
+   "url": "https://www.ifixit.com/products/micron-2500-nvme-pcie-gen4-2230-ssd",
+   "price": 156.99,
+   "kit_price": false,
+   "note": "Bare M.2 2230 drive, 512 GB price shown (1 TB / 2 TB options exist, prices not read). Out of stock when checked. Listing pages showed conflicting prices ($65.99 and $156.99); product page said $156.99."
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "Shell (front, back, or buttons)",
+   "name": "Steam Deck LCD Back Plate",
+   "url": "https://www.ifixit.com/products/steam-deck-back-plate",
+   "price": 34.99,
+   "kit_price": false,
+   "note": "Back plate. Front plate is separate: steam-deck-front-plate, $19.99. Individual buttons also sold separately."
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "Speakers",
+   "name": "Steam Deck LCD (Refreshed Model) Speakers",
+   "url": "https://www.ifixit.com/products/steam-deck-refreshed-model-speakers",
+   "price": 24.99,
+   "kit_price": false,
+   "note": "Fits REFRESHED LCD models only, not the original. Part only (IF260-049-1), in stock."
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "Thumbstick module (left)",
+   "name": "Steam Deck LCD Left Thumbstick",
+   "url": "https://www.ifixit.com/products/steam-deck-left-thumbstick",
+   "price": 39.99,
+   "kit_price": true,
+   "note": "Only the Fix Kit price ($39.99) could be confirmed; a Part Only option exists, price and variant id not read. Comes in Type A and Type B (must match the unit), so there are four variants."
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "Thumbstick module (right)",
+   "name": "Steam Deck LCD Right Thumbstick",
+   "url": "https://www.ifixit.com/products/steam-deck-right-thumbstick",
+   "price": 39.99,
+   "kit_price": true,
+   "note": "Only the Fix Kit price ($39.99, Type A) could be confirmed; a Part Only option exists, price and variant id not read. Comes in Type A and Type B (must match the unit)."
+  },
+  {
+   "type": "Steam Deck LCD",
+   "part": "Trigger assembly (L2 / R2)",
+   "name": "Steam Deck LCD Right Trigger Button Assembly",
+   "url": "https://www.ifixit.com/products/steam-deck-right-trigger-button-assembly",
+   "price": 19.99,
+   "kit_price": false,
+   "note": "Right (R2) only. Listing page showed $14.99, product page $19.99 (used product page). Left (L2) is separate: steam-deck-left-trigger-button-assembly, $29.99, out of stock."
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "Battery",
+   "name": "Steam Deck OLED Battery",
+   "url": "https://www.ifixit.com/products/steam-deck-oled-battery?variant=40440102453351",
+   "price": 79.99,
+   "kit_price": false,
+   "note": "Part Only confirmed on variant URL (IF260-080-3). Fix Kit is $84.99."
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "Display assembly (OLED)",
+   "name": "Steam Deck OLED (512GB) Screen",
+   "url": "https://www.ifixit.com/products/steam-deck-oled-512gb-screen?variant=40440105697383",
+   "price": 94.99,
+   "kit_price": false,
+   "note": "Part Only confirmed. This is the 512GB (glossy) screen. The 1TB anti-glare etched screen is a separate product: steam-deck-oled-1tb-screen?variant=40440103764071, Part Only $119.99 (confirmed)."
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "Fan",
+   "name": "Steam Deck OLED Fan",
+   "url": "https://www.ifixit.com/products/steam-deck-oled-fan",
+   "price": 39.99,
+   "kit_price": true,
+   "note": "A Part Only option exists but its price and variant id could not be read (page only exposes the selected Fix Kit price $39.99, IF260-053-2)."
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "Headphone jack board",
+   "name": "Steam Deck OLED Audio Board",
+   "url": "https://www.ifixit.com/products/steam-deck-oled-audio-board",
+   "price": 24.99,
+   "kit_price": false,
+   "note": "DOUBTFUL: product page does not mention the headphone jack; description says 'audio board compatible with a 512GB Valve Steam Deck OLED'. Listing page showed $19.99, product page $24.99 (used product page)."
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "L1 / R1 bumper button",
+   "name": "Steam Deck OLED Left Bumper Button Assembly",
+   "url": "https://www.ifixit.com/products/steam-deck-oled-left-bumper-button-assembly",
+   "price": 12.99,
+   "kit_price": false,
+   "note": "Left (L1) only, external button face. Right (R1) is a separate product at the same $12.99: steam-deck-oled-right-bumper-button-assembly. Single option, no kit."
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "SSD (M.2 2230)",
+   "name": "Micron 2500 NVMe PCIe Gen4 2230 SSD",
+   "url": "https://www.ifixit.com/products/micron-2500-nvme-pcie-gen4-2230-ssd",
+   "price": 156.99,
+   "kit_price": false,
+   "note": "Bare M.2 2230 drive, 512 GB price shown (1 TB / 2 TB options exist, prices not read). Out of stock when checked. Listing pages showed conflicting prices ($65.99 and $156.99); product page said $156.99."
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "Shell (front, back, or buttons)",
+   "name": "Steam Deck OLED Back Plate",
+   "url": "https://www.ifixit.com/products/steam-deck-oled-back-plate",
+   "price": 29.99,
+   "kit_price": false,
+   "note": "Back plate (includes L4/L5/R4/R5 button faces). Front plate is separate: steam-deck-oled-front-plate, $34.99. Individual face buttons also sold at $4.99 each."
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "Thumbstick module (left)",
+   "name": "Steam Deck OLED Left Thumbstick",
+   "url": "https://www.ifixit.com/products/steam-deck-oled-left-thumbstick?variant=40904412135527",
+   "price": 34.99,
+   "kit_price": false,
+   "note": "Part Only confirmed on variant URL (IF260-082-1). Fix Kit is $39.99."
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "Thumbstick module (right)",
+   "name": "Steam Deck OLED Right Thumbstick",
+   "url": "https://www.ifixit.com/products/steam-deck-oled-right-thumbstick?variant=40904413249639",
+   "price": 34.99,
+   "kit_price": false,
+   "note": "Part Only confirmed on variant URL (IF260-083-1). Fix Kit is $44.99."
+  },
+  {
+   "type": "Steam Deck OLED",
+   "part": "Trigger assembly (L2 / R2)",
+   "name": "Steam Deck OLED Left Trigger Button Assembly",
+   "url": "https://www.ifixit.com/products/steam-deck-oled-left-trigger-button-assembly",
+   "price": 19.99,
+   "kit_price": false,
+   "note": "Left (L2) only, button face and spring. Right (R2) is a separate product at the same $19.99: steam-deck-oled-right-trigger-button-assembly (not on the listing pages, but the product page exists)."
+  },
+  {
+   "type": "PlayStation 5 console",
+   "part": "Fan",
+   "name": "PlayStation 5 Fan",
+   "url": "https://www.ifixit.com/products/playstation-5-fan",
+   "price": 34.99,
+   "kit_price": true,
+   "note": "Has Part Only and Fix Kit options plus 3 styles (23 Blades 2.15A / 23 Blades 2.4A / 17 Blades 1.9A). Only the Fix Kit price ($34.99, 23 Blades 2.15A) was visible; Part Only price and variant id could NOT be confirmed."
+  },
+  {
+   "type": "PlayStation 5 console",
+   "part": "HDMI port",
+   "name": "PlayStation 5 HDMI Port",
+   "url": "https://www.ifixit.com/products/playstation-5-hdmi-port",
+   "price": 9.99,
+   "kit_price": false,
+   "note": "No ?variant= id exposed in fetched page content; plain product URL used. Only option is Part Only. Fits CFI-10xx/11xx/12xx. Out of stock when checked."
+  },
+  {
+   "type": "PlayStation 5 console",
+   "part": "Main board",
+   "name": "PlayStation 5 Motherboard & Paired Optical Drive",
+   "url": "https://www.ifixit.com/products/playstation-5-motherboard-and-paired-optical-drive",
+   "price": 299.99,
+   "kit_price": false,
+   "note": "DOUBTFUL: product is motherboard bundled with its paired optical drive, not a bare board. Used OEM, CFI-10xxA/B only. Out of stock when checked."
+  },
+  {
+   "type": "PlayStation 5 console",
+   "part": "Power and eject button board",
+   "name": "PlayStation 5 Power & Eject Button Board",
+   "url": "https://www.ifixit.com/products/playstation-5-power-and-eject-button-board",
+   "price": 24.99,
+   "kit_price": false,
+   "note": "Used OEM, single option. Fits CFI-10xxA/B only. Button covers not included. Out of stock when checked."
+  },
+  {
+   "type": "PlayStation 5 console",
+   "part": "Power supply unit",
+   "name": "PlayStation 5 Power Supply",
+   "url": "https://www.ifixit.com/products/playstation-5-power-supply",
+   "price": 79.99,
+   "kit_price": false,
+   "note": "Used OEM, single option. Fits CFI-10xxA/B (2020 launch models) only. Listing page titled it 'PlayStation 5 ADP-400DR Power Supply'; product page H1 is 'PlayStation 5 Power Supply'."
+  },
+  {
+   "type": "PlayStation 5 console",
+   "part": "Shell (side plates, stand)",
+   "name": "PlayStation 5 Front Panel",
+   "url": "https://www.ifixit.com/products/playstation-5-front-panel",
+   "price": 29.99,
+   "kit_price": false,
+   "note": "One white outer panel only (used OEM, CFI-10xxA/B). The other side is a separate product: 'PlayStation 5 Rear Panel' $29.99 (https://www.ifixit.com/products/playstation-5-rear-panel, includes optical slot). No stand sold. Out of stock when checked."
+  },
+  {
+   "type": "PlayStation 4 console",
+   "part": "Disc drive laser",
+   "name": "PlayStation 4 Optical Drive Laser",
+   "url": "https://www.ifixit.com/products/playstation-4-optical-drive-laser",
+   "price": 19.99,
+   "kit_price": false,
+   "note": "Used OEM. Original PS4 CUH-10XXA, BDP-010 drive only. Out of stock when checked."
+  },
+  {
+   "type": "PlayStation 4 console",
+   "part": "Disc drive rollers and motor",
+   "name": "PlayStation 4 Optical Drive Eject Motor",
+   "url": "https://www.ifixit.com/products/playstation-4-optical-drive-eject-motor",
+   "price": 7.99,
+   "kit_price": false,
+   "note": "DOUBTFUL/partial: eject motor only, rollers not confirmed included. Used OEM, original PS4 CUH-10XXA (BDP-010 drive). Out of stock when checked."
+  },
+  {
+   "type": "PlayStation 4 console",
+   "part": "Fan",
+   "name": "PlayStation 4 (CUH-10XXA and CUH-11XXA) Fan",
+   "url": "https://www.ifixit.com/products/playstation-4-cuh-10xxa-and-cuh-11xxa-fan",
+   "price": 39.99,
+   "kit_price": false,
+   "note": "New, single option. Original PS4 CUH-10XXA and CUH-11XXA; not CUH-12XXA (separate fan $29.99), not Slim/Pro."
+  },
+  {
+   "type": "PlayStation 4 console",
+   "part": "Hard drive (2.5 inch SATA)",
+   "name": "PlayStation 4 SAA-001/SAB-001 Hard Drive and Bracket",
+   "url": "https://www.ifixit.com/products/playstation-4-saa-001-sab-001-hard-drive-and-bracket",
+   "price": 29.99,
+   "kit_price": false,
+   "note": "Drive plus caddy bracket, 500 GB or 1 TB option both shown at $29.99. Original PS4 CUH-10XXA/CUH-11XXA. Out of stock when checked. (The generic '500 GB 5400 RPM 2.5\" Hard Drive' $103.99 on the listing does not name PS4 in its compatibility list, so not used.)"
+  },
+  {
+   "type": "PlayStation 4 console",
+   "part": "Main board",
+   "name": "PlayStation 4 SAA-001 Motherboard & Optical Drive Board",
+   "url": "https://www.ifixit.com/products/playstation-4-saa-001-motherboard-and-optical-drive-board",
+   "price": 129.99,
+   "kit_price": false,
+   "note": "Original PS4 CUH-10XXA only. Sold paired with the optical drive daughterboard (options BDP-010/015 or BDP-020/025), so not a bare board. Out of stock when checked. SAB-001 (CUH-11XXA) equivalent also $129.99."
+  },
+  {
+   "type": "PlayStation 4 console",
+   "part": "Power supply unit",
+   "name": "PlayStation 4 ADP-240AR Power Supply",
+   "url": "https://www.ifixit.com/products/playstation-4-adp-240ar-power-supply",
+   "price": 59.99,
+   "kit_price": false,
+   "note": "Original PS4 CUH-10XXA only (used OEM). Product page shows $59.99; listing page summary showed $64.99 - recheck. Other models: ADP-240CR for CUH-11XXA $59.99, ADP-200ER for CUH-12XXA $49.99. Not Slim/Pro."
+  },
+  {
+   "type": "PlayStation 4 console",
+   "part": "Shell (top cover, HDD cover)",
+   "name": "PlayStation 4 (CUH-11XXA) Left Case",
+   "url": "https://www.ifixit.com/products/playstation-4-cuh-11xxa-left-case",
+   "price": 24.99,
+   "kit_price": false,
+   "note": "DOUBTFUL: left half of outer casing, listed for CUH-11XXA only (original-style PS4, not explicitly CUH-10XXA, not Slim/Pro). Used A/B-stock, Black/Gray/White."
+  },
+  {
+   "type": "PlayStation 4 console",
+   "part": "Thermal paste and pads",
+   "name": "iFixit Thermal Paste",
+   "url": "https://www.ifixit.com/products/ifixit-thermal-paste",
+   "price": 24.95,
+   "kit_price": false,
+   "note": "DOUBTFUL: generic consumable listed on the PS4 parts page; paste only, no thermal pads. Page showed both 'Part Only' and 'Fix Kit' at $24.95; variant id not available. Fits all models."
+  }
+ ]
+}

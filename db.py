@@ -1,6 +1,10 @@
 """SQLite schema, connection helper, and catalog seeding."""
 
+import calendar
+import json
+import os
 import sqlite3
+import time
 
 import catalog
 
@@ -202,6 +206,10 @@ MIGRATIONS = [
     ("parts", "ifixit_price", "REAL"),
     ("parts", "ifixit_url", "TEXT NOT NULL DEFAULT ''"),
     ("parts", "ifixit_checked_at", "INTEGER"),
+    ("parts", "ifixit_name", "TEXT NOT NULL DEFAULT ''"),
+    ("parts", "ifixit_note", "TEXT NOT NULL DEFAULT ''"),
+    ("parts", "ifixit_kit_price", "INTEGER NOT NULL DEFAULT 0"),
+    ("parts", "ifixit_source", "TEXT NOT NULL DEFAULT ''"),  # '' none, 'list' shipped list, 'manual' typed in
     ("devices", "customer_id", "INTEGER REFERENCES customers(id)"),
 ]
 
@@ -285,6 +293,42 @@ def sync_catalog(conn):
     return added
 
 
+IFIXIT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ifixit_prices.json")
+
+
+def sync_ifixit(conn, path=None):
+    """Fill in iFixit prices from the list shipped with the app.
+
+    The list is a dated snapshot of iFixit's parts pages. A price or link the user
+    typed in is never overwritten, and neither is one the user cleared.
+    """
+    try:
+        with open(path or IFIXIT_FILE, encoding="utf-8") as handle:
+            data = json.load(handle)
+        checked = int(calendar.timegm(time.strptime(data["checked"], "%Y-%m-%d"))) + 12 * 3600
+    except (OSError, ValueError, KeyError):
+        return 0
+    changed = 0
+    for item in data.get("items") or []:
+        row = conn.execute(
+            "SELECT p.id, p.ifixit_price, p.ifixit_url, p.ifixit_source, p.ifixit_checked_at FROM parts p"
+            " JOIN device_types t ON t.id = p.device_type_id WHERE t.name = ? AND p.name = ?",
+            (item["type"], item["part"])).fetchone()
+        if row is None:
+            continue
+        untouched = row[3] == "" and row[1] is None and not row[2]
+        older_list = row[3] == "list" and (row[4] or 0) < checked
+        if not (untouched or older_list):
+            continue
+        conn.execute(
+            "UPDATE parts SET ifixit_price = ?, ifixit_url = ?, ifixit_checked_at = ?, ifixit_name = ?,"
+            " ifixit_note = ?, ifixit_kit_price = ?, ifixit_source = 'list' WHERE id = ?",
+            (item["price"], item["url"], checked, item.get("name", ""), item.get("note", ""),
+             1 if item.get("kit_price") else 0, row[0]))
+        changed += 1
+    return changed
+
+
 def init(conn):
     conn.executescript(SCHEMA)
     for table, column, declaration in MIGRATIONS:
@@ -294,4 +338,5 @@ def init(conn):
     for key, value in DEFAULT_SETTINGS.items():
         conn.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (key, value))
     sync_catalog(conn)
+    sync_ifixit(conn)
     conn.commit()

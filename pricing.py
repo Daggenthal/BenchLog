@@ -30,35 +30,36 @@ MARKETPLACES = {
 # Device types iFixit sells manufacturer-backed parts for, so its listing is worth checking first.
 IFIXIT_OFFICIAL = {"Steam Deck LCD", "Steam Deck OLED"}
 
-# iFixit's parts page for a device type. Used when there is no exact product page below.
+# iFixit's parts page for each device type. Used when a part has no product page saved.
 IFIXIT_PARTS_PAGES = {
-    "Steam Deck LCD": "https://www.ifixit.com/Parts/Steam_Deck",
-    "Steam Deck OLED": "https://www.ifixit.com/Parts/Steam_Deck_OLED",
-}
-
-# Exact iFixit product pages, keyed by (device type, catalog part name).
-# The value is iFixit's own product name and the last piece of its address.
-IFIXIT_PRODUCTS = {
-    ("Steam Deck OLED", "Thumbstick module (left)"): ("Steam Deck OLED Left Thumbstick", "steam-deck-oled-left-thumbstick"),
-    ("Steam Deck OLED", "Thumbstick module (right)"): ("Steam Deck OLED Right Thumbstick", "steam-deck-oled-right-thumbstick"),
-    ("Steam Deck OLED", "Battery"): ("Steam Deck OLED Battery", "steam-deck-oled-battery"),
-    ("Steam Deck OLED", "Fan"): ("Steam Deck OLED Fan", "steam-deck-oled-fan"),
-    ("Steam Deck LCD", "Thumbstick module (left)"): ("Steam Deck LCD Left Thumbstick", "steam-deck-left-thumbstick"),
-    ("Steam Deck LCD", "Thumbstick module (right)"): ("Steam Deck LCD Right Thumbstick", "steam-deck-right-thumbstick"),
-    ("Steam Deck LCD", "Battery"): ("Steam Deck LCD Battery", "steam-deck-lcd-battery"),
+    "DualSense (PS5 controller)": "DualSense",
+    "DualShock 4 (PS4 controller)": "DualShock_4",
+    "Xbox Series controller": "Xbox_Series_X_Wireless_Controller",
+    "Xbox One controller": "Xbox_One_Controller",
+    "Joy-Con (L)": "Joy-Con",
+    "Joy-Con (R)": "Joy-Con",
+    "Joy-Con 2 (L)": "Nintendo_Switch_2_Joy-Con",
+    "Joy-Con 2 (R)": "Nintendo_Switch_2_Joy-Con",
+    "Switch Pro Controller": "Switch_Pro_Controller",
+    "Nintendo Switch (original)": "Nintendo_Switch",
+    "Nintendo Switch Lite": "Nintendo_Switch_Lite",
+    "Nintendo Switch OLED": "Nintendo_Switch_OLED_Model",
+    "Nintendo Switch 2": "Nintendo_Switch_2",
+    "Steam Deck LCD": "Steam_Deck",
+    "Steam Deck OLED": "Steam_Deck_OLED",
+    "PlayStation 5 console": "PlayStation_5",
+    "PlayStation 4 console": "PlayStation_4",
 }
 
 
 def ifixit_link(part_name, type_name):
-    """Best iFixit address for a part, and the product name when it is an exact page."""
-    exact = IFIXIT_PRODUCTS.get((type_name, part_name))
-    if exact:
-        return "https://www.ifixit.com/products/" + exact[1], exact[0]
+    """iFixit's parts page for the device type, or a search of its site for unknown types."""
     if type_name in IFIXIT_PARTS_PAGES:
-        return IFIXIT_PARTS_PAGES[type_name], ""
+        return "https://www.ifixit.com/Parts/" + IFIXIT_PARTS_PAGES[type_name]
     # iFixit's own search address is not dependable, so search its site through Google.
     plain = re.sub(r"\s+", " ", re.sub(r"[()/]", " ", "%s %s" % (type_name or "", part_name or ""))).strip()
-    return "https://www.google.com/search?q=" + urllib.parse.quote_plus("site:ifixit.com " + plain), ""
+    return "https://www.google.com/search?q=" + urllib.parse.quote_plus("site:ifixit.com " + plain)
+
 
 _token = {"value": "", "expires": 0, "client_id": ""}
 
@@ -80,13 +81,11 @@ def links(part_name, part_number, type_name, marketplace="EBAY_US", query=None):
     """Search links for a part: general web, shopping results, and eBay buy-it-now."""
     q = urllib.parse.quote_plus(query or part_query(part_name, part_number, type_name))
     domain = MARKETPLACES.get(marketplace, MARKETPLACES["EBAY_US"])[1]
-    ifixit, ifixit_name = ifixit_link(part_name, type_name)
     return {
         "google": "https://www.google.com/search?q=" + q,
         "shopping": "https://www.google.com/search?tbm=shop&q=" + q,
         "ebay": "https://www.%s/sch/i.html?_nkw=%s&LH_BIN=1" % (domain, q),
-        "ifixit": ifixit,
-        "ifixit_name": ifixit_name,
+        "ifixit": ifixit_link(part_name, type_name),
         "ifixit_official": type_name in IFIXIT_OFFICIAL,
     }
 

@@ -13,6 +13,7 @@ import pytest  # noqa: E402
 
 import app as benchlog  # noqa: E402
 import db as dbm  # noqa: E402
+import catalog  # noqa: E402
 import pricing  # noqa: E402
 import system  # noqa: E402
 
@@ -461,15 +462,11 @@ def test_turning_on_start_at_boot(client, monkeypatch, tmp_path):
 
 def test_ifixit_links_and_comparison_helper():
     links = pricing.links("Fan", "", "Steam Deck LCD")
-    assert links["ifixit"] == "https://www.ifixit.com/Parts/Steam_Deck" and links["ifixit_name"] == ""
-    exact = pricing.links("Thumbstick module (left)", "", "Steam Deck OLED")
-    assert exact["ifixit"] == "https://www.ifixit.com/products/steam-deck-oled-left-thumbstick"
-    assert exact["ifixit_name"] == "Steam Deck OLED Left Thumbstick"
-    other = pricing.links("Battery", "LIP1708", DS)["ifixit"]
+    assert links["ifixit"] == "https://www.ifixit.com/Parts/Steam_Deck"
+    assert pricing.links("Battery", "LIP1708", DS)["ifixit"] == "https://www.ifixit.com/Parts/DualSense"
+    other = pricing.links("Battery", "", "Some future handheld")["ifixit"]
     assert other.startswith("https://www.google.com/search?q=site%3Aifixit.com+")
-    assert "ifixit.com/Search" not in other
-    for (type_name, part_name) in pricing.IFIXIT_PRODUCTS:  # every exact page points at a real catalog part
-        assert part_id(type_name, part_name)
+    assert set(pricing.IFIXIT_PARTS_PAGES) == {t["name"] for t in catalog.CATALOG}
     assert links["ifixit_official"] is True
     assert pricing.links("Battery", "LIP1708", DS)["ifixit_official"] is False
     assert pricing.compare(None, 20.0) is None and pricing.compare(20.0, None) is None
@@ -507,3 +504,40 @@ def test_ifixit_price_is_entered_by_hand_and_compared(client, fake_ebay):
     with conn() as c:
         row = c.execute("SELECT ifixit_price, default_cost FROM parts WHERE id = ?", (pid,)).fetchone()
     assert row["ifixit_price"] is None and row["default_cost"] == 24.99
+
+
+def test_ifixit_price_list_is_valid_and_fills_parts(client):
+    import json
+    with open(dbm.IFIXIT_FILE, encoding="utf-8") as handle:
+        data = json.load(handle)
+    names = {t["name"]: {p[0] for p in t["parts"]} for t in catalog.CATALOG}
+    seen = set()
+    for item in data["items"]:
+        assert item["part"] in names[item["type"]], item
+        assert item["url"].startswith("https://www.ifixit.com/products/") and item["price"] > 0
+        assert (item["type"], item["part"]) not in seen
+        seen.add((item["type"], item["part"]))
+
+    pid = part_id("Steam Deck OLED", "Thumbstick module (left)")
+    with conn() as c:
+        row = c.execute("SELECT * FROM parts WHERE id = ?", (pid,)).fetchone()
+    assert row["ifixit_price"] == 34.99 and row["ifixit_source"] == "list"
+    assert row["ifixit_url"] == "https://www.ifixit.com/products/steam-deck-oled-left-thumbstick?variant=40904412135527"
+    page = client.get("/part/%d" % pid).get_data(as_text=True)
+    assert "Steam Deck OLED Left Thumbstick" in page and "part only, from iFixit" in page
+
+
+def test_ifixit_price_list_never_overwrites_what_was_typed(client):
+    pid = part_id("Steam Deck OLED", "Thumbstick module (left)")
+    other = part_id("Steam Deck OLED", "Battery")
+    client.post("/part/%d" % pid, data={"action": "ifixit", "ifixit_price": "31.00", "ifixit_url": ""})
+    client.post("/part/%d" % other, data={"action": "ifixit", "ifixit_price": "", "ifixit_url": ""})
+    with conn() as c:
+        c.execute("UPDATE parts SET ifixit_checked_at = 1 WHERE ifixit_source = 'list'")  # pretend the list is old
+        changed = dbm.sync_ifixit(c)
+        typed = c.execute("SELECT ifixit_price, ifixit_source FROM parts WHERE id = ?", (pid,)).fetchone()
+        cleared = c.execute("SELECT ifixit_price, ifixit_source FROM parts WHERE id = ?", (other,)).fetchone()
+        assert dbm.sync_ifixit(c) == 0  # nothing left to refresh
+    assert changed > 100
+    assert typed["ifixit_price"] == 31.0 and typed["ifixit_source"] == "manual"
+    assert cleared["ifixit_price"] is None and cleared["ifixit_source"] == "manual"
