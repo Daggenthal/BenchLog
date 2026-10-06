@@ -224,6 +224,17 @@
       <div><label for="r_keep">Copies to keep</label><input type="number" name="keep" id="r_keep" value="{{ remote_cfg.keep }}" min="2" max="1000" inputmode="numeric"></div>
     </div>
     <div class="field"><label class="check"><input type="checkbox" name="enabled" value="1" {{ 'checked' if remote_cfg.enabled }}> Back up automatically on this schedule</label></div>
+    <h3>Encryption <span class="pill">experimental</span></h3>
+    <p class="small muted">Scrambles each database copy with a passphrase before it leaves this device, so the server only ever holds unreadable files. Photos are not encrypted yet.</p>
+    <div class="field"><label class="check"><input type="checkbox" name="encrypt" value="1" {{ 'checked' if remote_cfg.encrypt }}> Encrypt database copies</label></div>
+    <div class="field"><label for="r_pass">{{ 'Change the passphrase (leave blank to keep it)' if remote_passphrase else 'Passphrase (12 or more characters)' }}</label><input type="password" name="passphrase" id="r_pass" autocomplete="new-password"></div>
+    {% if remote_passphrase %}
+    <details>
+      <summary class="small">Show the current passphrase</summary>
+      <pre class="log">{{ remote_passphrase }}</pre>
+    </details>
+    {% endif %}
+    <p class="small neg">Write the passphrase down somewhere other than this device. If this device is lost and you do not have the passphrase, the encrypted copies cannot be opened by anyone, including you. Changing it does not re-encrypt older copies, which still need the old one.</p>
     <button type="submit">Save server details</button>
   </form>
 
@@ -245,7 +256,7 @@
   <ul class="checklist">
     {% for snap in rc.snapshots %}
     <li>
-      <span class="name"><span class="mono small">{{ snap.name }}</span> <span class="muted small">{{ snap.when|dt }} &middot; {{ snap.size|bytes }}</span></span>
+      <span class="name"><span class="mono small">{{ snap.name }}</span>{% if snap.encrypted %} <span class="pill">encrypted</span>{% endif %} <span class="muted small">{{ snap.when|dt }} &middot; {{ snap.size|bytes }}</span></span>
       <form method="post" action="{{ url_for('system_remote') }}">
         <input type="hidden" name="name" value="{{ snap.name }}">
         <button class="small" type="submit" name="action" value="fetch">Download and compare</button>
@@ -257,6 +268,54 @@
   <form method="post" action="{{ url_for('system_remote') }}"><button class="small" type="submit" name="action" value="photos">Fetch photos from the server</button></form>
   {% endif %}
 </section>
+
+<div class="grid-2">
+<section class="card" id="alerts">
+  <h2>Phone alerts <span class="pill">experimental</span></h2>
+  <p class="small muted">Sends a push to your phone when something on this page needs attention: a failed or overdue backup, a full disk, overheating, or a power warning. It uses ntfy: install the ntfy app, subscribe to a topic with a long name nobody could guess, and paste its address here. Checked every hour.</p>
+  <form method="post" action="{{ url_for('system_alerts') }}">
+    <div class="field"><label for="a_url">ntfy topic address</label><input type="text" name="url" id="a_url" value="{{ alert_cfg.url }}" placeholder="https://ntfy.sh/benchlog-a-long-random-name" autocomplete="off" autocapitalize="off" inputmode="url"></div>
+    <div class="field"><label class="check"><input type="checkbox" name="enabled" value="1" {{ 'checked' if alert_cfg.enabled }}> Send alerts</label></div>
+    <div class="row">
+      <button type="submit" name="action" value="save">Save</button>
+      <button type="submit" name="action" value="test">Save and send a test</button>
+    </div>
+  </form>
+  {% if alert_state.error %}<p class="neg small" style="margin-top:8px">Last attempt failed: {{ alert_state.error }}</p>{% endif %}
+  {% if alert_state.checked_at %}<p class="muted small" style="margin-top:8px">Last checked {{ alert_state.checked_at|dt }}.</p>{% endif %}
+  <p class="muted small">Anyone who knows the topic name can read these messages, so they only ever contain the warnings shown above, never customer or device details.</p>
+</section>
+
+<section class="card" id="printer">
+  <h2>Label printer <span class="pill">experimental</span></h2>
+  {% if not printer.available %}
+  <p class="small">Printing to a Brother QL needs one extra library. This has not been tried on a real printer yet.</p>
+  <form method="post" action="{{ url_for('system_printer') }}"><button class="primary" type="submit" name="action" value="install">Install printing support</button></form>
+  {% else %}
+  <p class="small muted">Sends labels straight to a Brother QL printer. This has not been tried on a real printer yet, so start with the test label.</p>
+  <form method="post" action="{{ url_for('system_printer') }}">
+    <div class="fields">
+      <div><label for="p_model">Printer model</label><select name="printer_model" id="p_model">{% for m in printer_models %}<option value="{{ m }}" {{ 'selected' if printer.model == m }}>{{ m }}</option>{% endfor %}</select></div>
+      <div><label for="p_tape">Tape loaded</label><select name="printer_tape" id="p_tape">{% for key, info in printer_tapes.items() %}<option value="{{ key }}" {{ 'selected' if printer.tape == key }}>{{ info[0] }}</option>{% endfor %}</select></div>
+    </div>
+    <div class="field"><label for="p_addr">Printer address</label><input type="text" name="printer_address" id="p_addr" value="{{ printer.address }}" autocomplete="off" autocapitalize="off"></div>
+    <div class="row">
+      <button type="submit" name="action" value="save">Save</button>
+      <button class="primary" type="submit" name="action" value="test">Save and print a test label</button>
+    </div>
+  </form>
+  <details>
+    <summary class="small">Connection help</summary>
+    <ul class="small">
+      <li>USB on this device: <span class="mono">file:///dev/usb/lp0</span>. Add your user to the printer group once with <span class="mono">sudo usermod -aG lp $USER</span>, then reboot.</li>
+      <li>Network printer: <span class="mono">tcp://192.168.1.50</span>, using the printer's own address.</li>
+      <li>On a QL-800, QL-810W, or QL-820NWB the Editor Lite light must be off. Hold its button until the light goes out.</li>
+      <li>The roll that ships with those models is black and red (DK-22251). Pick that tape here or the printer refuses the job.</li>
+    </ul>
+  </details>
+  {% endif %}
+</section>
+</div>
 
 <section class="card" id="power">
   <h2>Start at boot</h2>

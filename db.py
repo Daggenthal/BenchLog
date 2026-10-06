@@ -127,6 +127,52 @@ CREATE TABLE IF NOT EXISTS photos (
     created_at INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS device_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    device_id INTEGER NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
+    at INTEGER NOT NULL,
+    text TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS customers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT UNIQUE,
+    name TEXT NOT NULL DEFAULT '',
+    email TEXT NOT NULL DEFAULT '',
+    phone TEXT NOT NULL DEFAULT '',
+    address TEXT NOT NULL DEFAULT '',
+    notes TEXT NOT NULL DEFAULT '',
+    created_at INTEGER NOT NULL
+);
+
+/* One customer repair job. The device itself is an ordinary devices row owned by the customer. */
+CREATE TABLE IF NOT EXISTS tickets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT UNIQUE,
+    customer_id INTEGER NOT NULL REFERENCES customers(id),
+    device_id INTEGER REFERENCES devices(id) ON DELETE SET NULL,
+    problem TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'received',
+    priority TEXT NOT NULL DEFAULT 'standard',
+    received_at INTEGER NOT NULL,
+    due_at INTEGER,
+    quote REAL,
+    charged REAL,
+    carrier_in TEXT NOT NULL DEFAULT '',
+    service_in TEXT NOT NULL DEFAULT '',
+    tracking_in TEXT NOT NULL DEFAULT '',
+    carrier_out TEXT NOT NULL DEFAULT '',
+    service_out TEXT NOT NULL DEFAULT '',
+    tracking_out TEXT NOT NULL DEFAULT '',
+    shipping_out_cost REAL,
+    shipped_at INTEGER,
+    notes TEXT NOT NULL DEFAULT '',
+    created_at INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_events_device ON device_events(device_id);
+CREATE INDEX IF NOT EXISTS idx_tickets_status ON tickets(status);
+CREATE INDEX IF NOT EXISTS idx_tickets_customer ON tickets(customer_id);
 CREATE INDEX IF NOT EXISTS idx_devices_status ON devices(status);
 CREATE INDEX IF NOT EXISTS idx_devices_box ON devices(box_id);
 CREATE INDEX IF NOT EXISTS idx_devices_lot ON devices(lot_id);
@@ -140,6 +186,9 @@ DEFAULT_SETTINGS = {
     "base_url": "",
     "long_session_hours": "3",
     "ebay_marketplace": "EBAY_US",
+    "printer_model": "QL-800",
+    "printer_address": "file:///dev/usb/lp0",
+    "printer_tape": "62",
 }
 
 # Columns added after the first release: (table, column, declaration).
@@ -150,6 +199,10 @@ MIGRATIONS = [
     ("parts", "last_price_at", "INTEGER"),
     ("parts", "last_price_query", "TEXT NOT NULL DEFAULT ''"),
     ("parts", "is_upgrade", "INTEGER NOT NULL DEFAULT 0"),
+    ("parts", "ifixit_price", "REAL"),
+    ("parts", "ifixit_url", "TEXT NOT NULL DEFAULT ''"),
+    ("parts", "ifixit_checked_at", "INTEGER"),
+    ("devices", "customer_id", "INTEGER REFERENCES customers(id)"),
 ]
 
 

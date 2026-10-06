@@ -21,7 +21,8 @@
             {% if p.is_upgrade %}<span class="pill good">upgrade</span>{% endif %}
             {% if p.microsolder %}<span class="pill">soldering</span>{% endif %}
             {% if p.purpose %}<br><span class="muted small">{{ p.purpose }}</span>{% endif %}
-            <div class="small part-links">{% if p.buy_url %}<a href="{{ p.buy_url }}" target="_blank" rel="noopener">Supplier</a>{% endif %}<a href="{{ links.shopping }}" target="_blank" rel="noopener">Shopping</a><a href="{{ links.ebay }}" target="_blank" rel="noopener">eBay</a><a href="{{ url_for('part', part_id=p.id) }}">Price and details</a></div></td>
+            <div class="small part-links">{% if p.buy_url %}<a href="{{ p.buy_url }}" target="_blank" rel="noopener">Supplier</a>{% endif %}<a href="{{ links.shopping }}" target="_blank" rel="noopener">Shopping</a><a href="{{ links.ebay }}" target="_blank" rel="noopener">eBay</a><a href="{{ p.ifixit_url or links.ifixit }}" target="_blank" rel="noopener">iFixit</a><a href="{{ url_for('part', part_id=p.id) }}">Price and details</a></div>
+            {% if p.last_price is not none or p.ifixit_price is not none %}<div class="small muted">{% if p.last_price is not none %}eBay {{ p.last_price|money }}{% endif %}{% if p.last_price is not none and p.ifixit_price is not none %} &middot; {% endif %}{% if p.ifixit_price is not none %}iFixit {{ p.ifixit_price|money }}{% endif %}</div>{% endif %}</td>
           <td class="small">{{ fixes|join(', ') }}</td>
           <td class="num"><input type="number" step="0.01" min="0" name="cost_{{ p.id }}" value="{{ '%.2f'|format(p.default_cost) }}" inputmode="decimal" style="width:100px" aria-label="Usual cost of {{ p.name }}"></td>
         </tr>

@@ -14,6 +14,7 @@
     <nav class="nav">
       {% set ep = request.endpoint or '' %}
       <a href="{{ url_for('devices') }}" class="{{ 'active' if ep.startswith('device') }}">Devices</a>
+      <a href="{{ url_for('tickets') }}" class="{{ 'active' if ep.startswith('ticket') or ep.startswith('customer') }}">Tickets</a>
       <a href="{{ url_for('boxes') }}" class="{{ 'active' if ep.startswith('box') }}">Boxes</a>
       <a href="{{ url_for('lots') }}" class="{{ 'active' if ep.startswith('lot') }}">Lots</a>
       <a href="{{ url_for('catalog_index') }}" class="{{ 'active' if ep.startswith('catalog') or ep.startswith('part') }}">Parts</a>

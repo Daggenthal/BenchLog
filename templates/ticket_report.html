@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Repair report {{ t.code }}{% endblock %}
+{% block content %}
+<div class="row no-print" style="margin-bottom:12px">
+  <a class="btn" href="{{ url_for('ticket', code=t.code) }}">Back to the ticket</a>
+  <button type="button" onclick="window.print()">Print</button>
+</div>
+<section class="card">
+  <h1>Repair report</h1>
+  <p>Repair ID <strong class="mono">{{ t.code }}</strong> &middot; {{ t.type_name or 'Device' }}{% if t.device_code %} &middot; our reference <span class="mono">{{ t.device_code }}</span>{% endif %}</p>
+  <p class="muted small">Received {{ t.received_at|date }}{% if t.shipped_at %} &middot; returned {{ t.shipped_at|date }}{% endif %}</p>
+
+  <h3>Reported problem</h3>
+  <p>{{ t.problem or 'Not recorded.' }}</p>
+
+  <h3>What we found on arrival</h3>
+  {% if report.failed_at_intake %}<ul>{% for name in report.failed_at_intake %}<li>{{ name }}: failed</li>{% endfor %}</ul>{% else %}<p>No faults recorded at intake.</p>{% endif %}
+
+  <h3>Work carried out</h3>
+  {% if report.work %}<ul>{% for w in report.work %}<li>{{ w.what or 'Repair step' }}{% if w.source == 'in_place' %} (repaired, no part replaced){% else %} (replaced){% endif %}</li>{% endfor %}</ul>{% else %}<p>No work recorded.</p>{% endif %}
+
+  <h3>Final check</h3>
+  <p>{{ report.working }} function(s) tested and working.{% if report.still_failing %} Not resolved: {{ report.still_failing|join(', ') }}.{% endif %}</p>
+
+  {% if t.carrier_out or t.tracking_out %}
+  <h3>Return shipping</h3>
+  <p>{{ t.carrier_out }} {{ t.service_out }}{% if t.tracking_out %} &middot; tracking {{ t.tracking_out }}{% endif %}</p>
+  {% endif %}
+</section>
+{% endblock %}

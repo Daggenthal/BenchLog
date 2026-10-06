@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Customers - Bench Log{% endblock %}
+{% block content %}
+<div class="head">
+  <h1>Customers <span class="pill">experimental</span></h1>
+  <a class="btn primary" href="{{ url_for('ticket_new') }}">New ticket</a>
+</div>
+<form class="card" method="get">
+  <div class="row">
+    <input type="search" name="q" value="{{ q }}" placeholder="Name, email, phone, or customer ID" style="flex:1 1 220px" aria-label="Search customers">
+    <button type="submit">Search</button>
+  </div>
+</form>
+<section class="card">
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>ID</th><th>Name</th><th>Contact</th><th class="num">Tickets</th><th class="num">Open</th></tr></thead>
+    <tbody>
+    {% for c in customers %}
+      <tr>
+        <td class="nowrap"><a class="mono" href="{{ url_for('customer', code=c.code) }}"><strong>{{ c.code }}</strong></a></td>
+        <td>{{ c.name }}</td>
+        <td class="small">{{ c.email }}{% if c.email and c.phone %}<br>{% endif %}{{ c.phone }}</td>
+        <td class="num">{{ c.ticket_count }}</td>
+        <td class="num">{{ c.open_count or '' }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="muted">No customers found.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endblock %}

@@ -3,19 +3,21 @@
 {% block content %}
 <div class="head no-print">
   <h1>Labels</h1>
-  <span class="muted small">Printer support comes once the label printer arrives. Until then, scan these from the screen to test.</span>
+  <span class="muted small">{% if can_print %}Print each label below, or scan them from the screen.{% else %}Printing is not set up yet. Scan these from the screen to test, or set up the printer on the System page.{% endif %}</span>
 </div>
 <div class="label-grid">
   {% for b in boxes %}
   <figure style="margin:0">
     <img class="label-img" src="{{ url_for('label_box', code=b.code) }}" alt="Box label for {{ b.code }} {{ b.name }}">
-    <figcaption class="small"><a href="{{ url_for('box', code=b.code) }}">{{ b.code }}</a> {{ b.name }}</figcaption>
+    <figcaption class="small"><a href="{{ url_for('box', code=b.code) }}">{{ b.code }}</a> {{ b.name }}
+      {% if can_print %}<form method="post" action="{{ url_for('print_label', kind='b', code=b.code) }}" class="no-print"><input type="hidden" name="next" value="{{ request.full_path }}"><button class="small" type="submit">Print</button></form>{% endif %}</figcaption>
   </figure>
   {% endfor %}
   {% for d in devices %}
   <figure style="margin:0">
     <img class="label-img" src="{{ url_for('label_device', code=d.code) }}?s={{ d.status }}" alt="Label for {{ d.code }} {{ d.type_name }}">
-    <figcaption class="small"><a href="{{ url_for('device', code=d.code) }}">{{ d.code }}</a> {{ d.type_name }}</figcaption>
+    <figcaption class="small"><a href="{{ url_for('device', code=d.code) }}">{{ d.code }}</a> {{ d.type_name }}
+      {% if can_print %}<form method="post" action="{{ url_for('print_label', kind='d', code=d.code) }}" class="no-print"><input type="hidden" name="next" value="{{ request.full_path }}"><button class="small" type="submit">Print</button></form>{% endif %}</figcaption>
   </figure>
   {% endfor %}
 </div>

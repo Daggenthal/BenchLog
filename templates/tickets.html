@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Tickets - Bench Log{% endblock %}
+{% block content %}
+<div class="head">
+  <h1>Customer repairs <span class="pill">experimental</span></h1>
+  <div class="row">
+    <a class="btn primary" href="{{ url_for('ticket_new') }}">New ticket</a>
+    <a class="btn" href="{{ url_for('customers') }}">Customers</a>
+  </div>
+</div>
+<p class="muted">Express jobs come first, then whatever is due soonest, then the oldest.</p>
+<div class="row" style="margin-bottom:12px">
+  <a class="btn small {{ 'primary' if show != 'all' }}" href="{{ url_for('tickets') }}">Open queue</a>
+  <a class="btn small {{ 'primary' if show == 'all' }}" href="{{ url_for('tickets', show='all') }}">All tickets</a>
+</div>
+<section class="card">
+  <ul class="checklist">
+    {% for t in tickets %}
+    <li style="align-items:flex-start">
+      <div class="name">
+        <a class="mono" href="{{ url_for('ticket', code=t.code) }}"><strong>{{ t.code }}</strong></a>
+        {% if t.priority == 'express' %}<span class="pill bad">Express</span>{% endif %}
+        <span class="badge {{ 'ready' if t.status == 'ready' else ('needs_repair' if t.status in ('received', 'in_repair') else '') }}">{{ TICKET_STATUSES[t.status] }}</span>
+        <span class="muted small">{{ t.type_name or 'No device' }}{% if t.device_code %} &middot; <a class="mono" href="{{ url_for('device', code=t.device_code) }}">{{ t.device_code }}</a>{% endif %}</span>
+        <div class="small">{{ t.customer_name }} <span class="muted">{{ t.customer_code }}</span></div>
+        {% if t.problem %}<div class="small muted">{{ t.problem }}</div>{% endif %}
+      </div>
+      <div class="right small muted nowrap">
+        Received {{ t.received_at|date }}
+        {% if t.due_at %}<br><span class="{{ 'neg' if t.due_at < now_ts and t.status not in ('shipped', 'cancelled') }}">Due {{ t.due_at|date }}</span>{% endif %}
+      </div>
+    </li>
+    {% else %}
+    <li class="muted">{{ 'No tickets yet.' if show == 'all' else 'The queue is empty.' }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

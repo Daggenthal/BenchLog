@@ -22,7 +22,8 @@ gets a QR label that links straight to its page.
 - A repair log per device: which part, where it came from, what it cost
 - A parts catalog with common failure parts for each device type
 - Reverse search by part name, part number, or symptom ("drift", "no charge", "M92T36")
-- Part names link to a web search, Google Shopping, and eBay buy-it-now
+- Part names link to a web search, Google Shopping, eBay buy-it-now, and iFixit
+- iFixit and eBay prices side by side for each part, with the difference worked out
 - A saved supplier link per part
 - Upgrades and mods listed beside like-for-like parts, starting with GuliKit drift-proof sticks for the Steam Deck, Joy-Con, Switch Lite, DualSense, DualShock 4, Xbox, and Switch Pro controllers
 - Optional live price check through the eBay Browse API, with the result shown as a suggestion you confirm
@@ -66,6 +67,37 @@ gets a QR label that links straight to its page.
 - Devices, repairs, and time sessions as CSV
 - The database, or the database with all photos as one zip
 
+## Experimental features
+
+These are built and covered by automated tests, but have not yet been used on
+real hardware or with real customers. They are marked "experimental" in the
+app. Expect rough edges and report what breaks.
+
+**Customer repair tickets**
+- A ticket per job with a searchable repair ID, the customer's details, the reported problem, how it arrived, and how it goes back
+- An express priority that puts the job at the top of the queue, then jobs sorted by promised date
+- Quote, amount charged, and return shipping, feeding the same profit and hourly figures as stock repairs
+- Turnaround time from received to shipped, alongside bench time
+- A printable repair report for the customer: what failed, what was done, and the final check, with no prices on it
+- Labels still show only the device ID, never a name
+
+**Change history**
+- Every device keeps a dated list of what happened to it: status changes, intake results, repairs, edits, labels printed, and ticket updates
+
+**Encrypted remote backups**
+- Each database copy can be encrypted with a passphrase before it leaves the device, so the server only holds unreadable files
+- Photos are not encrypted yet
+- Keep the passphrase somewhere other than the device. Without it the copies cannot be opened
+
+**Phone alerts**
+- A push through ntfy when a backup fails or is overdue, the disk is nearly full, the device overheats, or the Pi reports a power problem
+- One message per problem, a reminder after three days, and one more when it clears
+
+**Label printing**
+- Direct printing to Brother QL printers over USB or the network, using the `brother_ql` library
+- Installed separately from the System page, so a problem with it cannot block other updates
+- Not yet tried on a real printer. Print the test label first
+
 ## Supported devices out of the box
 
 The catalog is seeded with checklists and parts for:
@@ -99,17 +131,19 @@ marking on the board before ordering a chip.
 These steps are for Raspberry Pi OS. Any Debian or Ubuntu system works the
 same way.
 
-### 1. Give the Pi read access to this repository
+### 1. Get the code
 
-The repository is private, so the Pi needs its own read-only key.
+    sudo apt install git python3-venv fonts-dejavu-core rsync openssh-client
+    git clone https://github.com/Daggenthal/BenchLog.git ~/benchlog
+
+If the repository is private, the Pi needs its own read-only key first:
 
     ssh-keygen -t ed25519 -f ~/.ssh/benchlog_deploy -N ""
     cat ~/.ssh/benchlog_deploy.pub
 
 On GitHub, open the repository, then Settings, Deploy keys, Add deploy key.
-Paste the line that was printed and leave "Allow write access" off.
-
-Then tell SSH to use that key for this repository:
+Paste the line that was printed and leave "Allow write access" off. Then tell
+SSH to use that key, and clone through it:
 
     cat >> ~/.ssh/config <<'EOT'
     Host github.com-benchlog
@@ -118,11 +152,10 @@ Then tell SSH to use that key for this repository:
       IdentityFile ~/.ssh/benchlog_deploy
       IdentitiesOnly yes
     EOT
+    git clone git@github.com-benchlog:Daggenthal/BenchLog.git ~/benchlog
 
 ### 2. Install and run
 
-    sudo apt install git python3-venv fonts-dejavu-core rsync openssh-client
-    git clone git@github.com-benchlog:Daggenthal/BenchLog.git ~/benchlog
     cd ~/benchlog
     python3 -m venv .venv
     .venv/bin/pip install -r requirements.txt
@@ -215,6 +248,9 @@ Also in the `data` folder once remote backup is set up:
 - `remote_known_hosts`: the backup server's recorded identity
 - `remote.json`: the server address and schedule
 
+The backup encryption passphrase and the alert address are kept in
+`secrets.json`.
+
 ## Remote backup
 
 Bench Log can copy its data to any server you can reach over SSH.
@@ -277,10 +313,22 @@ The result is a list of fixed-price listings with the lowest, median, and
 highest total. Nothing changes until you press "Use". Read the titles first:
 cheap results for small parts are often the wrong item or a bulk lot.
 
+### iFixit prices
+
+Every part has an iFixit link. Steam Deck parts are marked, because iFixit
+sells Valve's official ones. iFixit does not allow programs to read its
+prices, so that price is typed in by hand on the part page, along with the
+link to the product. The part page then shows iFixit and eBay side by side and
+says which is cheaper and by how much.
+
 ## Security
 
 - There is no login for everyday pages. Keep the app on your home network and
   do not forward its port to the internet.
+- Customer names, addresses, and contact details entered on tickets can be
+  read by anyone who can open the app on your network. Keep that in mind
+  before entering real customer data, and turn on encryption for remote
+  backups once you do.
 - Reboot, updates, and backups need the admin password. It is stored as a
   salted hash.
 - If the system asks for a password for administrator commands, the System
@@ -292,10 +340,10 @@ cheap results for small parts are often the wrong item or a bulk lot.
 
 ## Roadmap
 
-- Direct printing to a Brother QL label printer
-- Customer repair tickets with IDs, shipping details, and an express queue
+- Prove the experimental features on real hardware and move them out of experimental
+- A login for everyday pages, now that customer details can be stored
 - Stock counts for purchased parts
-- Encrypting remote backups before they leave the device
+- Encrypting photos in remote backups
 - Customer email notifications
 
 ## Development
@@ -312,6 +360,8 @@ cheap results for small parts are often the wrong item or a bulk lot.
 | `pricing.py` | Part search links and the eBay price check |
 | `system.py` | Health, backups, updates, and background tasks |
 | `remote.py` | Remote backup over SSH |
+| `alerts.py` | Phone alerts through ntfy |
+| `printing.py` | Brother QL printing |
 | `templates/`, `static/` | The pages |
 | `tests/` | Automated tests |
 

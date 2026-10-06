@@ -63,7 +63,10 @@
 <section class="card">
   <h2>Box label</h2>
   <img class="label-img" src="{{ url_for('label_box', code=b.code) }}" alt="Box label for {{ b.code }} {{ b.name }}">
-  <div class="row" style="margin-top:10px"><a class="btn" href="{{ url_for('label_box', code=b.code) }}" download>Download image</a></div>
+  <div class="row" style="margin-top:10px">
+    <a class="btn" href="{{ url_for('label_box', code=b.code) }}" download>Download image</a>
+    {% if can_print %}<form method="post" action="{{ url_for('print_label', kind='b', code=b.code) }}"><button class="primary" type="submit">Print label</button></form>{% endif %}
+  </div>
 </section>
 <section class="card">
   <h2>Edit box</h2>

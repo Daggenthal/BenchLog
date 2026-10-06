@@ -13,6 +13,7 @@
     <a class="btn" href="{{ search_links.google }}" target="_blank" rel="noopener">Google</a>
     <a class="btn" href="{{ search_links.shopping }}" target="_blank" rel="noopener">Google Shopping</a>
     <a class="btn" href="{{ search_links.ebay }}" target="_blank" rel="noopener">eBay, buy it now</a>
+    <a class="btn {{ 'good' if search_links.ifixit_official }}" href="{{ p.ifixit_url or search_links.ifixit }}" target="_blank" rel="noopener">iFixit{{ ' (official parts)' if search_links.ifixit_official }}</a>
   </div>
   <div class="grid" style="margin-top:14px">
     <div class="stat"><div class="v">{{ p.default_cost|money }}</div><div class="k">Usual cost, prefilled on repairs</div></div>
@@ -20,7 +21,45 @@
     <div class="stat"><div class="v">{% if used.n %}{{ used.avg|money }}{% else %}<span class="muted">n/a</span>{% endif %}</div><div class="k">What you actually paid, average of {{ used.n }} repair(s)</div></div>
   </div>
 
-  <h3>Check the current price</h3>
+  <h3>iFixit against eBay</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Where</th><th class="num">Price</th><th>Checked</th><th></th></tr></thead>
+    <tbody>
+      <tr>
+        <td><a href="{{ search_links.ebay }}" target="_blank" rel="noopener">eBay</a> <span class="muted small">median, with shipping</span></td>
+        <td class="num">{% if p.last_price is not none %}{{ p.last_price|money }}{% else %}<span class="muted">n/a</span>{% endif %}</td>
+        <td class="muted small">{{ p.last_price_at|date }}</td>
+        <td class="right">{% if p.last_price is not none %}<form method="post" action="{{ url_for('part', part_id=p.id) }}"><button class="small" type="submit" name="use_price" value="{{ '%.2f'|format(p.last_price) }}">Use</button></form>{% endif %}</td>
+      </tr>
+      <tr>
+        <td><a href="{{ p.ifixit_url or search_links.ifixit }}" target="_blank" rel="noopener">iFixit</a> <span class="muted small">entered by you</span></td>
+        <td class="num">{% if p.ifixit_price is not none %}{{ p.ifixit_price|money }}{% else %}<span class="muted">n/a</span>{% endif %}</td>
+        <td class="muted small">{{ p.ifixit_checked_at|date }}</td>
+        <td class="right">{% if p.ifixit_price is not none %}<form method="post" action="{{ url_for('part', part_id=p.id) }}"><button class="small" type="submit" name="use_price" value="{{ '%.2f'|format(p.ifixit_price) }}">Use</button></form>{% endif %}</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  {% if price_gap %}
+  <p style="margin-top:8px">
+    {% if price_gap.cheaper == 'same' %}Both are the same price.
+    {% elif price_gap.cheaper == 'ebay' %}<strong>eBay is {{ price_gap.gap|money }} cheaper</strong>{% if price_gap.percent %} ({{ price_gap.percent }}% less than iFixit){% endif %}.
+    {% else %}<strong>iFixit is {{ price_gap.gap|money }} cheaper</strong>{% if price_gap.percent %} ({{ price_gap.percent }}% less than eBay){% endif %}.{% endif %}
+    <span class="muted small">iFixit parts are tested and come with a warranty, which eBay listings often do not.</span>
+  </p>
+  {% endif %}
+  <form method="post" action="{{ url_for('part', part_id=p.id) }}" style="margin-top:10px">
+    <input type="hidden" name="action" value="ifixit">
+    <div class="fields">
+      <div><label for="ifixit_price">iFixit price</label><input type="number" step="0.01" min="0" name="ifixit_price" id="ifixit_price" inputmode="decimal" value="{{ '%.2f'|format(p.ifixit_price) if p.ifixit_price is not none }}"></div>
+      <div><label for="ifixit_url">Link to the iFixit product page</label><input type="text" name="ifixit_url" id="ifixit_url" value="{{ p.ifixit_url }}" placeholder="https://www.ifixit.com/products/..." inputmode="url" autocomplete="off"></div>
+    </div>
+    <button type="submit">Save iFixit price</button>
+  </form>
+  <p class="muted small" style="margin-top:8px">iFixit does not allow programs to read its prices, so open the iFixit link, then type the price here. Leave the price blank and save to clear it.</p>
+
+  <h3>Check the current eBay price</h3>
   {% if ebay_ready %}
   <form method="post" action="{{ url_for('part_price', part_id=p.id) }}">
     <div class="field"><label for="query">Search words</label><input type="text" name="query" id="query" value="{{ query }}" autocomplete="off"></div>
@@ -56,6 +95,7 @@
     <div class="stat"><div class="v">{{ summary.low|money }}</div><div class="k">Lowest, with shipping</div></div>
     <div class="stat"><div class="v">{{ summary.median|money }}</div><div class="k">Median of {{ summary.count }} listing(s)</div></div>
     <div class="stat"><div class="v">{{ summary.high|money }}</div><div class="k">Highest</div></div>
+    <div class="stat"><div class="v">{% if p.ifixit_price is not none %}{{ p.ifixit_price|money }}{% else %}<span class="muted">n/a</span>{% endif %}</div><div class="k">iFixit{% if p.ifixit_checked_at %}, entered {{ p.ifixit_checked_at|date }}{% else %}, not entered yet{% endif %}</div></div>
   </div>
   <form method="post" action="{{ url_for('part', part_id=p.id) }}" style="margin:12px 0">
     <button class="primary" type="submit" name="use_price" value="{{ '%.2f'|format(summary.median) }}">Use the median, {{ summary.median|money }}, as the usual cost</button>

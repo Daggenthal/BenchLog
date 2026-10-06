@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% from "_macros.html" import type_select %}
+{% block title %}New ticket - Bench Log{% endblock %}
+{% block content %}
+<h1>New customer repair <span class="pill">experimental</span></h1>
+<p class="muted">This creates a ticket and a device record owned by the customer. Labels only ever show the device ID, never the customer's name.</p>
+<form class="card" method="post">
+  <h2>Customer</h2>
+  <div class="field">
+    <label for="customer_id">Existing customer</label>
+    <select name="customer_id" id="customer_id">
+      <option value="">New customer (fill in below)</option>
+      {% for c in customers %}<option value="{{ c.id }}" {{ 'selected' if preset_customer == c.code }}>{{ c.name }} ({{ c.code }}){% if c.email %} {{ c.email }}{% endif %}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="fields">
+    <div><label for="name">Name</label><input type="text" name="name" id="name" autocomplete="off"></div>
+    <div><label for="email">Email</label><input type="text" name="email" id="email" inputmode="email" autocomplete="off" autocapitalize="off"></div>
+    <div><label for="phone">Phone</label><input type="text" name="phone" id="phone" inputmode="tel" autocomplete="off"></div>
+  </div>
+  <div class="field"><label for="address">Return address</label><textarea name="address" id="address"></textarea></div>
+
+  <h2>Device and problem</h2>
+  <div class="fields">
+    <div><label for="device_type_id">Device type</label>{{ type_select(groups) }}</div>
+    <div><label for="serial">Serial number</label><input type="text" name="serial" id="serial" autocomplete="off"></div>
+  </div>
+  <div class="field"><label for="problem">What the customer says is wrong</label><textarea name="problem" id="problem"></textarea></div>
+
+  <h2>Priority and arrival</h2>
+  <div class="fields">
+    <div><label for="priority">Priority</label>
+      <select name="priority" id="priority">{% for key, label in PRIORITIES.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select></div>
+    <div><label for="received_at">Received</label><input type="date" name="received_at" id="received_at" value="{{ today }}"></div>
+    <div><label for="due_at">Promised by (optional)</label><input type="date" name="due_at" id="due_at"></div>
+  </div>
+  <div class="fields">
+    <div><label for="carrier_in">Arrived by</label>
+      <select name="carrier_in" id="carrier_in">{% for c in carriers %}<option value="{{ c }}">{{ c or 'Not recorded' }}</option>{% endfor %}</select></div>
+    <div><label for="service_in">Service or speed</label><input type="text" name="service_in" id="service_in" placeholder="Priority, 2-day, Ground" autocomplete="off"></div>
+    <div><label for="tracking_in">Tracking number</label><input type="text" name="tracking_in" id="tracking_in" autocomplete="off"></div>
+  </div>
+  <button class="primary big" type="submit">Create ticket</button>
+</form>
+{% endblock %}

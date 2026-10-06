@@ -590,6 +590,7 @@ TABLE_LABELS = {
     "device_tests": "Checklist results", "device_parts": "Donor part states", "photos": "Photo records",
     "boxes": "Boxes", "lots": "Lots", "parts": "Catalog parts", "functions": "Checklist items",
     "device_types": "Device types", "part_functions": "Part and symptom links", "settings": "Settings",
+    "customers": "Customers", "tickets": "Repair tickets", "device_events": "History entries",
 }
 
 
@@ -714,6 +715,11 @@ def backup_loop():
             remote.tick()
         except Exception as exc:
             print("Remote backup check failed: %s" % exc, file=sys.stderr)
+        try:
+            import alerts
+            alerts.check()
+        except Exception as exc:
+            print("Alert check failed: %s" % exc, file=sys.stderr)
         time.sleep(3600)
 
 

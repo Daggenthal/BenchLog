@@ -36,7 +36,7 @@
     {% endfor %}
     {% if loose.count %}
       <tr>
-        <td>Bought singly (no lot)</td>
+        <td>Not in a lot (single buys and customer repairs)</td>
         <td class="num">{{ loose.cost|money }}</td>
         <td class="num">{{ loose.parts|money }}</td>
         <td class="num">{{ loose.count }}</td>

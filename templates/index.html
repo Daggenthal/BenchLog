@@ -7,6 +7,7 @@
     <a class="btn primary" href="{{ url_for('device_new') }}">New device</a>
     <a class="btn" href="{{ url_for('lots') }}">New lot</a>
     <a class="btn" href="{{ url_for('boxes') }}">New box</a>
+    <a class="btn" href="{{ url_for('ticket_new') }}">New ticket</a>
   </div>
 </div>
 <div class="tiles">
@@ -17,6 +18,22 @@
   </a>
   {% endfor %}
 </div>
+{% if tickets %}
+<section class="card">
+  <div class="head"><h2>Customer queue</h2><a class="btn small" href="{{ url_for('tickets') }}">All tickets</a></div>
+  <ul class="checklist">
+    {% for t in tickets %}
+    <li>
+      <span class="name"><a class="mono" href="{{ url_for('ticket', code=t.code) }}"><strong>{{ t.code }}</strong></a>
+        {% if t.priority == 'express' %}<span class="pill bad">Express</span>{% endif %}
+        <span class="badge">{{ TICKET_STATUSES[t.status] }}</span>
+        <span class="muted small">{{ t.type_name }}{% if t.device_code %} &middot; <a class="mono" href="{{ url_for('device', code=t.device_code) }}">{{ t.device_code }}</a>{% endif %}</span></span>
+      <span class="muted small nowrap">{% if t.due_at %}Due {{ t.due_at|date }}{% else %}{{ t.received_at|date }}{% endif %}</span>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
 <div class="grid-2">
   <section class="card">
     <h2>Repair queue</h2>

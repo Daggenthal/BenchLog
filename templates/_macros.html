@@ -10,7 +10,7 @@
   {% for d in devices %}
     <tr>
       <td class="nowrap"><a class="mono" href="{{ url_for('device', code=d.code) }}"><strong>{{ d.code }}</strong></a></td>
-      <td>{{ d.type_name }}{% if d.serial %}<br><span class="muted small">S/N {{ d.serial }}</span>{% endif %}</td>
+      <td>{{ d.type_name }}{% if d.customer_code %} <span class="pill">customer</span>{% endif %}{% if d.serial %}<br><span class="muted small">S/N {{ d.serial }}</span>{% endif %}</td>
       <td>{{ badge(d.status) }}</td>
       {% if show_box %}<td class="nowrap">{% if d.box_code %}<a href="{{ url_for('box', code=d.box_code) }}">{{ d.box_code }}</a>{% endif %}</td>{% endif %}
       <td class="nowrap">{% if d.lot_code %}<a href="{{ url_for('lot', code=d.lot_code) }}">{{ d.lot_code }}</a>{% endif %}</td>
@@ -51,7 +51,8 @@
         {% if r.part.is_upgrade %}<span class="pill good">upgrade</span>{% endif %}
         {% if r.part.microsolder %}<span class="pill">soldering</span>{% endif %}
         {% if r.part.purpose %}<br><span class="muted small">{{ r.part.purpose }}</span>{% endif %}
-        <div class="small part-links"><a href="{{ links.shopping }}" target="_blank" rel="noopener">Shopping</a><a href="{{ links.ebay }}" target="_blank" rel="noopener">eBay</a><a href="{{ url_for('part', part_id=r.part.id) }}">Price and details</a></div></td>
+        <div class="small part-links"><a href="{{ links.shopping }}" target="_blank" rel="noopener">Shopping</a><a href="{{ links.ebay }}" target="_blank" rel="noopener">eBay</a><a href="{{ r.part.ifixit_url or links.ifixit }}" target="_blank" rel="noopener">iFixit</a><a href="{{ url_for('part', part_id=r.part.id) }}">Price and details</a></div>
+            {% if r.part.last_price is not none or r.part.ifixit_price is not none %}<div class="small muted">{% if r.part.last_price is not none %}eBay {{ r.part.last_price|money }}{% endif %}{% if r.part.last_price is not none and r.part.ifixit_price is not none %} &middot; {% endif %}{% if r.part.ifixit_price is not none %}iFixit {{ r.part.ifixit_price|money }}{% endif %}</div>{% endif %}</td>
       <td><a href="{{ url_for('catalog_type', type_id=r.part.device_type_id) }}">{{ r.part.type_name }}</a></td>
       <td class="small">{{ r.fixes|join(', ') }}</td>
       <td class="num">{{ r.part.default_cost|money }}</td>

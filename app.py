@@ -9,6 +9,7 @@ import io
 import os
 import secrets
 import sqlite3
+import sys
 import time
 import uuid
 from datetime import datetime
@@ -16,13 +17,15 @@ from datetime import datetime
 from flask import (Flask, Response, abort, flash, g, jsonify, redirect, render_template, request,
                    send_file, session, url_for)
 
+import alerts
 import db as dbm
 import labels
 import pricing
+import printing
 import remote
 import system
 
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.environ.get("BENCHLOG_DATA", os.path.join(BASE_DIR, "data"))
@@ -46,8 +49,20 @@ STATUSES = {
     "needs_repair": ("Needs repair", "N"),
     "ready": ("Repaired", "R"),
     "parts": ("Parts", "P"),
-    "sold": ("Sold", "S"),
+    "sold": ("Sold or returned", "S"),
 }
+# Customer repair tickets (EXPERIMENTAL).
+TICKET_STATUSES = {
+    "received": "Received",
+    "quoted": "Quote sent",
+    "in_repair": "In repair",
+    "ready": "Ready to ship",
+    "shipped": "Shipped",
+    "cancelled": "Cancelled",
+}
+TICKET_CLOSED = ("shipped", "cancelled")
+PRIORITIES = {"standard": "Standard", "express": "Express"}
+CARRIERS = ["", "USPS", "UPS", "FedEx", "DHL", "Other"]
 TEST_RESULTS = ("working", "failed", "untested")
 PART_STATES = ("good", "suspect", "bad", "unknown", "harvested")
 SOURCES = {
@@ -120,11 +135,13 @@ def back(default_endpoint="index", **values):
 
 DEVICE_SELECT = """
     SELECT d.*, t.name AS type_name, t.category AS category,
-           b.code AS box_code, b.name AS box_name, l.code AS lot_code, l.name AS lot_name
+           b.code AS box_code, b.name AS box_name, l.code AS lot_code, l.name AS lot_name,
+           cu.code AS customer_code, cu.name AS customer_name
     FROM devices d
     JOIN device_types t ON t.id = d.device_type_id
     LEFT JOIN boxes b ON b.id = d.box_id
     LEFT JOIN lots l ON l.id = d.lot_id
+    LEFT JOIN customers cu ON cu.id = d.customer_id
 """
 
 
@@ -137,6 +154,19 @@ def device_or_404(code):
 
 def touch(device_id):
     get_db().execute("UPDATE devices SET updated_at = ? WHERE id = ?", (now(), device_id))
+
+
+def log_event(device_id, text):
+    """Add a line to a device's history (EXPERIMENTAL)."""
+    get_db().execute("INSERT INTO device_events (device_id, at, text) VALUES (?, ?, ?)",
+                     (device_id, now(), text))
+
+
+def ticket_for(device_id):
+    return get_db().execute(
+        "SELECT t.*, c.code AS customer_code, c.name AS customer_name FROM tickets t"
+        " JOIN customers c ON c.id = t.customer_id WHERE t.device_id = ? ORDER BY t.id DESC LIMIT 1",
+        (device_id,)).fetchone()
 
 
 def running_session():
@@ -198,7 +228,15 @@ def financials(device):
     target = setting_float("target_rate", 25)
 
     net, estimate = None, False
-    if device["status"] == "sold" and device["sale_price"] is not None:
+    ticket = ticket_for(device["id"]) if device["customer_id"] else None
+    if ticket is not None:
+        # A customer's device earns what the repair was charged, less return shipping you paid.
+        if ticket["charged"] is not None:
+            net = float(ticket["charged"]) - float(ticket["shipping_out_cost"] or 0)
+            estimate = ticket["status"] != "shipped"
+        elif ticket["quote"] is not None:
+            net, estimate = float(ticket["quote"]), True
+    elif device["status"] == "sold" and device["sale_price"] is not None:
         net = float(device["sale_price"]) - float(device["sale_fees"] or 0) - float(device["sale_shipping"] or 0)
     elif device["expected_price"] is not None:
         net, estimate = float(device["expected_price"]), True
@@ -213,6 +251,7 @@ def financials(device):
         "net": net,
         "estimate": estimate,
         "profit": profit,
+        "realised": net is not None and not estimate,
         "seconds": seconds,
         "hourly": (profit / hours) if profit is not None and seconds >= 60 else None,
         "target": target,
@@ -265,21 +304,25 @@ def set_status(device, status):
         build_donor_parts(device)
     if status == "sold":
         conn.execute("UPDATE devices SET box_id = NULL WHERE id = ?", (device["id"],))
+    if status != device["status"]:
+        log_event(device["id"], "Status changed from %s to %s" % (
+            STATUSES[device["status"]][0], STATUSES[status][0]))
     conn.execute(
         "UPDATE devices SET status = ?, updated_at = ? WHERE id = ?", (status, now(), device["id"])
     )
 
 
-def create_device(type_id, lot_id=None, box_id=None, manual_cost=None, serial="", notes=""):
+def create_device(type_id, lot_id=None, box_id=None, manual_cost=None, serial="", notes="", customer_id=None):
     conn = get_db()
     ts = now()
     cur = conn.execute(
-        "INSERT INTO devices (device_type_id, lot_id, box_id, manual_cost, serial, notes, created_at, updated_at)"
-        " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        (type_id, lot_id, box_id, manual_cost, serial, notes, ts, ts),
+        "INSERT INTO devices (device_type_id, lot_id, box_id, manual_cost, serial, notes, created_at, updated_at,"
+        " customer_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (type_id, lot_id, box_id, manual_cost, serial, notes, ts, ts, customer_id),
     )
     code = "D-%04d" % cur.lastrowid
     conn.execute("UPDATE devices SET code = ? WHERE id = ?", (code, cur.lastrowid))
+    log_event(cur.lastrowid, "Logged in" + (" as a customer repair" if customer_id else ""))
     return code
 
 
@@ -303,6 +346,8 @@ def record_harvest(donor, donor_part, target, cost, note=""):
     )
     touch(donor["id"])
     touch(target["id"])
+    log_event(donor["id"], "%s taken for %s" % (donor_part["name"], target["code"]))
+    log_event(target["id"], "Fitted %s from donor %s" % (donor_part["name"], donor["code"]))
 
 
 def grouped_types():
@@ -346,11 +391,12 @@ def date_filter(ts):
 
 @app.context_processor
 def inject_globals():
-    return {"running": running_session(), "now_ts": now()}
+    return {"running": running_session(), "now_ts": now(), "can_print": printing.available()}
 
 
 # Globals, not context values, so the shared macros can see them too.
-app.jinja_env.globals.update(STATUSES=STATUSES, SOURCES=SOURCES, PART_STATES=PART_STATES, VERSION=VERSION)
+app.jinja_env.globals.update(STATUSES=STATUSES, SOURCES=SOURCES, PART_STATES=PART_STATES, VERSION=VERSION,
+                             TICKET_STATUSES=TICKET_STATUSES, PRIORITIES=PRIORITIES)
 
 
 def part_links(name, number, type_name):
@@ -374,7 +420,8 @@ def index():
         DEVICE_SELECT + " WHERE d.status = 'needs_repair' ORDER BY d.created_at LIMIT 12"
     ).fetchall()
     recent = conn.execute(DEVICE_SELECT + " ORDER BY d.updated_at DESC LIMIT 8").fetchall()
-    return render_template("index.html", counts=counts, queue=queue, recent=recent)
+    return render_template("index.html", counts=counts, queue=queue, recent=recent,
+                           tickets=ticket_queue(limit=8))
 
 
 @app.route("/search")
@@ -390,13 +437,20 @@ def search():
         return redirect(url_for("box", code=code))
     if conn.execute("SELECT 1 FROM lots WHERE code = ?", (code,)).fetchone():
         return redirect(url_for("lot", code=code))
+    if conn.execute("SELECT 1 FROM tickets WHERE code = ?", (code,)).fetchone():
+        return redirect(url_for("ticket", code=code))
+    if conn.execute("SELECT 1 FROM customers WHERE code = ?", (code,)).fetchone():
+        return redirect(url_for("customer", code=code))
     like = "%" + q + "%"
     devices = conn.execute(
         DEVICE_SELECT + " WHERE d.code LIKE ? OR d.serial LIKE ? OR d.notes LIKE ? OR t.name LIKE ?"
         " ORDER BY d.updated_at DESC LIMIT 100",
         (like, like, like, like),
     ).fetchall()
-    return render_template("search.html", q=q, devices=devices, parts=find_parts(q))
+    found_customers = conn.execute(
+        "SELECT * FROM customers WHERE name LIKE ? OR email LIKE ? OR phone LIKE ? ORDER BY name LIMIT 50",
+        (like, like, like)).fetchall()
+    return render_template("search.html", q=q, devices=devices, parts=find_parts(q), customers=found_customers)
 
 
 def find_parts(q, type_id=None):
@@ -543,6 +597,9 @@ def device(code):
         photos=conn.execute("SELECT * FROM photos WHERE device_id = ? ORDER BY id", (d["id"],)).fetchall(),
         boxes=conn.execute("SELECT * FROM boxes ORDER BY code").fetchall(),
         lots=conn.execute("SELECT * FROM lots ORDER BY id DESC").fetchall(),
+        events=conn.execute("SELECT * FROM device_events WHERE device_id = ? ORDER BY id DESC LIMIT 200",
+                            (d["id"],)).fetchall(),
+        ticket=ticket_for(d["id"]) if d["customer_id"] else None,
         failed_count=sum(1 for t in tests if t["current"] == "failed"),
         untested_count=sum(1 for t in tests if t["current"] == "untested"),
     )
@@ -552,12 +609,18 @@ def device(code):
 def device_update(code):
     d = device_or_404(code)
     lot_id = fint("lot_id")
+    new = {"serial": (request.form.get("serial") or "").strip(), "notes": (request.form.get("notes") or "").strip(),
+           "box_id": fint("box_id"), "lot_id": lot_id, "manual_cost": fnum("manual_cost")}
+    labels_for = {"serial": "serial number", "notes": "notes", "box_id": "box", "lot_id": "lot",
+                  "manual_cost": "cost override"}
+    changed = [labels_for[key] for key, value in new.items() if d[key] != value]
     get_db().execute(
         "UPDATE devices SET serial = ?, notes = ?, box_id = ?, lot_id = ?, manual_cost = ?, updated_at = ?"
         " WHERE id = ?",
-        ((request.form.get("serial") or "").strip(), (request.form.get("notes") or "").strip(),
-         fint("box_id"), lot_id, fnum("manual_cost"), now(), d["id"]),
+        (new["serial"], new["notes"], new["box_id"], lot_id, new["manual_cost"], now(), d["id"]),
     )
+    if changed:
+        log_event(d["id"], "Edited " + ", ".join(changed))
     get_db().commit()
     flash("Details saved.", "ok")
     return redirect(url_for("device", code=d["code"]) + "#details")
@@ -567,6 +630,8 @@ def device_update(code):
 def device_move(code):
     d = device_or_404(code)
     get_db().execute("UPDATE devices SET box_id = ?, updated_at = ? WHERE id = ?", (fint("box_id"), now(), d["id"]))
+    target_box = get_db().execute("SELECT code FROM boxes WHERE id = ?", (fint("box_id"),)).fetchone()
+    log_event(d["id"], "Moved to box %s" % target_box["code"] if target_box else "Taken out of its box")
     get_db().commit()
     flash("Box updated.", "ok")
     return redirect(url_for("device", code=d["code"]))
@@ -577,8 +642,11 @@ def device_tests(code):
     """Save checklist results. Before intake is completed this also sets the intake record."""
     conn = get_db()
     d = device_or_404(code)
-    valid = {r["id"] for r in conn.execute(
-        "SELECT id FROM functions WHERE device_type_id = ?", (d["device_type_id"],))}
+    names = {r["id"]: r["name"] for r in conn.execute(
+        "SELECT id, name FROM functions WHERE device_type_id = ?", (d["device_type_id"],))}
+    valid = set(names)
+    before = {r["function_id"]: r["current"] for r in conn.execute(
+        "SELECT function_id, current FROM device_tests WHERE device_id = ?", (d["id"],))}
     for key, value in request.form.items():
         if not key.startswith("f_") or value not in TEST_RESULTS:
             continue
@@ -594,6 +662,8 @@ def device_tests(code):
                 " ON CONFLICT(device_id, function_id) DO UPDATE SET current = excluded.current",
                 (d["id"], fid, value),
             )
+            if before.get(fid, "untested") != value:
+                log_event(d["id"], "%s: %s, was %s" % (names[fid], value, before.get(fid, "untested")))
         else:
             conn.execute(
                 "INSERT INTO device_tests (device_id, function_id, intake, current) VALUES (?, ?, ?, ?)"
@@ -653,6 +723,11 @@ def device_intake_done(code):
         "SELECT SUM(current = 'failed') AS failed, SUM(current = 'working') AS working"
         " FROM device_tests WHERE device_id = ?", (d["id"],)).fetchone()
     failed, working = row["failed"] or 0, row["working"] or 0
+    failed_names = [r["name"] for r in conn.execute(
+        "SELECT f.name FROM device_tests dt JOIN functions f ON f.id = dt.function_id"
+        " WHERE dt.device_id = ? AND dt.current = 'failed' ORDER BY f.sort", (d["id"],))]
+    log_event(d["id"], "Intake finished: %d working, %d failed%s" % (
+        working, failed, (" (" + ", ".join(failed_names) + ")") if failed_names else ""))
     if d["status"] == "untested":
         if failed:
             set_status(d, "needs_repair")
@@ -670,6 +745,7 @@ def device_intake_done(code):
 def device_intake_reopen(code):
     d = device_or_404(code)
     get_db().execute("UPDATE devices SET intake_done = 0, updated_at = ? WHERE id = ?", (now(), d["id"]))
+    log_event(d["id"], "Intake reopened")
     get_db().commit()
     flash("Intake reopened. Changes now update the intake record again.", "ok")
     return redirect(url_for("device", code=d["code"]) + "#checklist")
@@ -781,6 +857,8 @@ def repair_add(code):
             (d["id"], part["id"] if part else None, description, source,
              0.0 if source == "in_place" and fnum("cost") is None else cost, now()))
         touch(d["id"])
+        log_event(d["id"], "Repair logged: %s (%s)" % (
+            part["name"] if part else description, SOURCES[source].lower()))
     conn.commit()
     flash("Repair step logged. Retest the affected items in the checklist.", "ok")
     return redirect(url_for("device", code=d["code"]) + "#repair")
@@ -801,6 +879,7 @@ def repair_delete(item_id):
             " WHERE device_id = ? AND part_id = ? AND state = 'harvested'",
             (item["donor_device_id"], item["donor_part_id"]))
     conn.execute("DELETE FROM repair_items WHERE id = ?", (item_id,))
+    log_event(item["device_id"], "Repair step removed")
     conn.commit()
     return redirect(url_for("device", code=item["code"]) + "#repair")
 
@@ -865,6 +944,7 @@ def device_sell(code):
         conn.execute(
             "UPDATE devices SET status = 'ready', sale_price = NULL, sale_fees = NULL, sale_shipping = NULL,"
             " sold_at = NULL, updated_at = ? WHERE id = ?", (now(), d["id"]))
+        log_event(d["id"], "Sale removed")
         conn.commit()
         flash("Sale removed. Status is back to Repaired.", "ok")
         return redirect(url_for("device", code=d["code"]) + "#money")
@@ -875,6 +955,7 @@ def device_sell(code):
     conn.execute(
         "UPDATE devices SET sale_price = ?, sale_fees = ?, sale_shipping = ?, sold_at = ? WHERE id = ?",
         (price, fnum("sale_fees", 0.0), fnum("sale_shipping", 0.0), now(), d["id"]))
+    log_event(d["id"], "Sold for %s" % money_filter(price))
     set_status(d, "sold")
     conn.commit()
     flash("Marked as sold.", "ok")
@@ -897,6 +978,8 @@ def photo_add(code):
         conn.execute("INSERT INTO photos (device_id, filename, created_at) VALUES (?, ?, ?)",
                      (d["id"], name, now()))
         saved += 1
+    if saved:
+        log_event(d["id"], "%d photo(s) added" % saved)
     conn.commit()
     flash("%d photo(s) added." % saved if saved else "No image files were uploaded.", "ok" if saved else "error")
     return redirect(url_for("device", code=d["code"]) + "#photos")
@@ -1113,7 +1196,7 @@ def lot_summary(lot):
         summary["status"][d["status"]] += 1
         summary["parts"] += fin["parts"]
         summary["seconds"] += fin["seconds"]
-        if d["status"] == "sold" and fin["net"] is not None:
+        if fin["realised"]:
             summary["net_sold"] += fin["net"]
             summary["sold"] += 1
         elif fin["net"] is not None and d["status"] != "parts":
@@ -1293,7 +1376,7 @@ def reports():
         loose["cost"] += fin["basis"]
         loose["parts"] += fin["parts"]
         loose["seconds"] += fin["seconds"]
-        if d["status"] == "sold" and fin["net"] is not None:
+        if fin["realised"]:
             loose["net_sold"] += fin["net"]
             loose["sold"] += 1
     loose["profit"] = loose["net_sold"] - loose["cost"] - loose["parts"]
@@ -1467,6 +1550,7 @@ def render_part(part, **extra):
     return render_template(
         "part.html", p=part, fixes=fixes, donors=donors, used=used, query=query,
         ebay_ready=bool(keys.get("client_id") and keys.get("client_secret")),
+        price_gap=pricing.compare(part["last_price"], part["ifixit_price"]),
         search_links=pricing.links(part["name"], part["part_number"], part["type_name"],
                                    setting("ebay_marketplace", "EBAY_US"), query=query),
         **extra)
@@ -1477,7 +1561,16 @@ def part(part_id):
     conn = get_db()
     p = part_or_404(part_id)
     if request.method == "POST":
-        if "use_price" in request.form:
+        if request.form.get("action") == "ifixit":
+            # iFixit does not allow automated price lookups, so this one is entered by hand.
+            price = fnum("ifixit_price")
+            url = (request.form.get("ifixit_url") or "").strip()
+            if url and not url.lower().startswith(("http://", "https://")):
+                url = "https://" + url
+            conn.execute("UPDATE parts SET ifixit_price = ?, ifixit_url = ?, ifixit_checked_at = ? WHERE id = ?",
+                         (price, url, now() if price is not None else None, part_id))
+            flash("iFixit price saved." if price is not None else "iFixit price cleared.", "ok")
+        elif "use_price" in request.form:
             price = fnum("use_price")
             if price is not None and price >= 0:
                 conn.execute("UPDATE parts SET default_cost = ? WHERE id = ?", (round(price, 2), part_id))
@@ -1565,7 +1658,13 @@ def system_page():
         sudo_free=system.sudo_passwordless(), has_apt=system.has_apt(),
         autostart=system.autostart_status(),
         remote_cfg=remote.config(), remote_state=remote.state(), remote_key=remote.public_key(),
-        remote_ready=remote.is_configured(), remote_setup=remote.server_setup_commands())
+        remote_ready=remote.is_configured(), remote_setup=remote.server_setup_commands(),
+        remote_passphrase=remote.passphrase() if admin_unlocked() else "",
+        alert_cfg=alerts.config(), alert_state=system.load_json("alerts-state.json"),
+        printer={"available": printing.available(), "model": setting("printer_model", "QL-800"),
+                 "address": setting("printer_address", "file:///dev/usb/lp0"),
+                 "tape": setting("printer_tape", "62")},
+        printer_models=printing.MODELS, printer_tapes=printing.TAPES)
 
 
 @app.route("/system/health")
@@ -1794,6 +1893,297 @@ def system_full_backup():
                      download_name="benchlog-full-%s.zip" % datetime.now().strftime("%Y%m%d-%H%M"))
 
 
+# ------------------------------------------- customers and tickets (EXPERIMENTAL)
+
+TICKET_SELECT = """
+    SELECT t.*, c.code AS customer_code, c.name AS customer_name, c.email AS customer_email,
+           d.code AS device_code, d.status AS device_status, dt.name AS type_name
+    FROM tickets t
+    JOIN customers c ON c.id = t.customer_id
+    LEFT JOIN devices d ON d.id = t.device_id
+    LEFT JOIN device_types dt ON dt.id = d.device_type_id
+"""
+# Express first, then whatever is due soonest, then oldest.
+QUEUE_ORDER = (" ORDER BY CASE t.priority WHEN 'express' THEN 0 ELSE 1 END,"
+               " COALESCE(t.due_at, 9999999999), t.received_at")
+
+
+def ticket_queue(limit=200):
+    return get_db().execute(
+        TICKET_SELECT + " WHERE t.status NOT IN ('shipped', 'cancelled')" + QUEUE_ORDER + " LIMIT ?",
+        (limit,)).fetchall()
+
+
+def parse_date(name):
+    raw = (request.form.get(name) or "").strip()
+    if not raw:
+        return None
+    try:
+        return int(datetime.strptime(raw, "%Y-%m-%d").timestamp())
+    except ValueError:
+        return None
+
+
+def ticket_or_404(code):
+    row = get_db().execute(TICKET_SELECT + " WHERE t.code = ?", (code.strip().upper(),)).fetchone()
+    if row is None:
+        abort(404)
+    return row
+
+
+@app.route("/tickets")
+def tickets():
+    conn = get_db()
+    show = request.args.get("show") or "open"
+    if show == "all":
+        rows = conn.execute(TICKET_SELECT + " ORDER BY t.id DESC LIMIT 500").fetchall()
+    else:
+        rows = ticket_queue()
+    return render_template("tickets.html", tickets=rows, show=show)
+
+
+@app.route("/tickets/new", methods=["GET", "POST"])
+def ticket_new():
+    conn = get_db()
+    if request.method == "POST":
+        type_id = fint("device_type_id")
+        customer_id = fint("customer_id")
+        name = (request.form.get("name") or "").strip()
+        if not type_id or not conn.execute("SELECT 1 FROM device_types WHERE id = ?", (type_id,)).fetchone():
+            flash("Pick a device type.", "error")
+            return redirect(url_for("ticket_new"))
+        if customer_id:
+            if not conn.execute("SELECT 1 FROM customers WHERE id = ?", (customer_id,)).fetchone():
+                abort(400)
+        elif name:
+            cur = conn.execute(
+                "INSERT INTO customers (name, email, phone, address, created_at) VALUES (?, ?, ?, ?, ?)",
+                (name, (request.form.get("email") or "").strip(), (request.form.get("phone") or "").strip(),
+                 (request.form.get("address") or "").strip(), now()))
+            customer_id = cur.lastrowid
+            conn.execute("UPDATE customers SET code = ? WHERE id = ?", ("C-%04d" % customer_id, customer_id))
+        else:
+            flash("Choose an existing customer or enter a name for a new one.", "error")
+            return redirect(url_for("ticket_new"))
+        priority = request.form.get("priority") if request.form.get("priority") in PRIORITIES else "standard"
+        device_code = create_device(type_id, serial=(request.form.get("serial") or "").strip(),
+                                    customer_id=customer_id)
+        device_id = conn.execute("SELECT id FROM devices WHERE code = ?", (device_code,)).fetchone()["id"]
+        cur = conn.execute(
+            "INSERT INTO tickets (customer_id, device_id, problem, priority, received_at, due_at, carrier_in,"
+            " service_in, tracking_in, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (customer_id, device_id, (request.form.get("problem") or "").strip(), priority,
+             parse_date("received_at") or now(), parse_date("due_at"),
+             (request.form.get("carrier_in") or "").strip(), (request.form.get("service_in") or "").strip(),
+             (request.form.get("tracking_in") or "").strip(), now()))
+        code = "T-%04d" % cur.lastrowid
+        conn.execute("UPDATE tickets SET code = ? WHERE id = ?", (code, cur.lastrowid))
+        log_event(device_id, "Ticket %s opened%s" % (code, ", express" if priority == "express" else ""))
+        conn.commit()
+        flash("Ticket %s created with device %s. Print its label and run the intake checklist." % (
+            code, device_code), "ok")
+        return redirect(url_for("ticket", code=code))
+    return render_template(
+        "ticket_new.html", groups=grouped_types(), carriers=CARRIERS,
+        customers=conn.execute("SELECT * FROM customers ORDER BY name").fetchall(),
+        preset_customer=request.args.get("customer", ""), today=datetime.now().strftime("%Y-%m-%d"))
+
+
+@app.route("/t/<code>", methods=["GET", "POST"])
+def ticket(code):
+    conn = get_db()
+    t = ticket_or_404(code)
+    if request.method == "POST":
+        new_status = request.form.get("status")
+        if new_status in TICKET_STATUSES and new_status != t["status"]:
+            conn.execute("UPDATE tickets SET status = ? WHERE id = ?", (new_status, t["id"]))
+            if t["device_id"]:
+                log_event(t["device_id"], "Ticket %s: %s" % (t["code"], TICKET_STATUSES[new_status]))
+            if new_status == "shipped":
+                conn.execute("UPDATE tickets SET shipped_at = COALESCE(shipped_at, ?) WHERE id = ?", (now(), t["id"]))
+                if t["device_id"]:
+                    device_row = conn.execute(DEVICE_SELECT + " WHERE d.id = ?", (t["device_id"],)).fetchone()
+                    set_status(device_row, "sold")
+            flash("Ticket is now: %s." % TICKET_STATUSES[new_status], "ok")
+        elif "problem" in request.form:
+            priority = request.form.get("priority") if request.form.get("priority") in PRIORITIES else "standard"
+            conn.execute(
+                "UPDATE tickets SET problem = ?, priority = ?, due_at = ?, quote = ?, charged = ?, carrier_in = ?,"
+                " service_in = ?, tracking_in = ?, carrier_out = ?, service_out = ?, tracking_out = ?,"
+                " shipping_out_cost = ?, notes = ? WHERE id = ?",
+                ((request.form.get("problem") or "").strip(), priority, parse_date("due_at"), fnum("quote"),
+                 fnum("charged"), (request.form.get("carrier_in") or "").strip(),
+                 (request.form.get("service_in") or "").strip(), (request.form.get("tracking_in") or "").strip(),
+                 (request.form.get("carrier_out") or "").strip(), (request.form.get("service_out") or "").strip(),
+                 (request.form.get("tracking_out") or "").strip(), fnum("shipping_out_cost"),
+                 (request.form.get("notes") or "").strip(), t["id"]))
+            if priority != t["priority"] and t["device_id"]:
+                log_event(t["device_id"], "Ticket %s priority set to %s" % (t["code"], PRIORITIES[priority]))
+            flash("Ticket saved.", "ok")
+        conn.commit()
+        return redirect(url_for("ticket", code=t["code"]))
+    device_row = conn.execute(DEVICE_SELECT + " WHERE d.id = ?", (t["device_id"],)).fetchone() if t["device_id"] else None
+    fin = financials(device_row) if device_row else None
+    end = t["shipped_at"] or now()
+    return render_template("ticket.html", t=t, d=device_row, fin=fin, carriers=CARRIERS,
+                           days=max(0, (end - t["received_at"]) // 86400), report=ticket_report(t))
+
+
+def ticket_report(t):
+    """What was wrong, what was done, and what was checked, in terms a customer can read."""
+    conn = get_db()
+    if not t["device_id"]:
+        return {"failed_at_intake": [], "work": [], "still_failing": [], "working": 0}
+    tests = conn.execute(
+        "SELECT f.name, dt.intake, dt.current FROM device_tests dt JOIN functions f ON f.id = dt.function_id"
+        " WHERE dt.device_id = ? ORDER BY f.sort", (t["device_id"],)).fetchall()
+    work = conn.execute(
+        "SELECT COALESCE(p.name, r.description) AS what, r.description, r.source, p.name AS part_name"
+        " FROM repair_items r LEFT JOIN parts p ON p.id = r.part_id WHERE r.device_id = ? ORDER BY r.id",
+        (t["device_id"],)).fetchall()
+    return {
+        "failed_at_intake": [r["name"] for r in tests if r["intake"] == "failed"],
+        "still_failing": [r["name"] for r in tests if r["current"] == "failed"],
+        "working": sum(1 for r in tests if r["current"] == "working"),
+        "work": work,
+    }
+
+
+@app.route("/t/<code>/report")
+def ticket_report_page(code):
+    t = ticket_or_404(code)
+    return render_template("ticket_report.html", t=t, report=ticket_report(t))
+
+
+@app.route("/customers")
+def customers():
+    conn = get_db()
+    q = (request.args.get("q") or "").strip()
+    sql = ("SELECT c.*, (SELECT COUNT(*) FROM tickets WHERE customer_id = c.id) AS ticket_count,"
+           " (SELECT COUNT(*) FROM tickets WHERE customer_id = c.id AND status NOT IN ('shipped', 'cancelled'))"
+           " AS open_count FROM customers c")
+    args = []
+    if q:
+        like = "%" + q + "%"
+        sql += " WHERE c.name LIKE ? OR c.email LIKE ? OR c.phone LIKE ? OR c.code LIKE ?"
+        args = [like, like, like, like]
+    return render_template("customers.html", customers=conn.execute(sql + " ORDER BY c.name LIMIT 500", args).fetchall(),
+                           q=q)
+
+
+@app.route("/c/<code>", methods=["GET", "POST"])
+def customer(code):
+    conn = get_db()
+    c = conn.execute("SELECT * FROM customers WHERE code = ?", (code.strip().upper(),)).fetchone()
+    if c is None:
+        abort(404)
+    if request.method == "POST":
+        conn.execute(
+            "UPDATE customers SET name = ?, email = ?, phone = ?, address = ?, notes = ? WHERE id = ?",
+            ((request.form.get("name") or c["name"]).strip(), (request.form.get("email") or "").strip(),
+             (request.form.get("phone") or "").strip(), (request.form.get("address") or "").strip(),
+             (request.form.get("notes") or "").strip(), c["id"]))
+        conn.commit()
+        flash("Customer saved.", "ok")
+        return redirect(url_for("customer", code=c["code"]))
+    rows = conn.execute(TICKET_SELECT + " WHERE t.customer_id = ? ORDER BY t.id DESC", (c["id"],)).fetchall()
+    return render_template("customer.html", c=c, tickets=rows)
+
+
+# ----------------------------------------------------- printing (EXPERIMENTAL)
+
+def send_to_printer(png):
+    printing.print_png(png.read(), setting("printer_model", "QL-800"),
+                       setting("printer_address", "file:///dev/usb/lp0"), setting("printer_tape", "62"))
+
+
+@app.route("/print/<kind>/<code>", methods=["POST"])
+def print_label(kind, code):
+    try:
+        if kind == "d":
+            d = device_or_404(code)
+            send_to_printer(labels.device_label(
+                base_url() + url_for("device", code=d["code"]), d["code"], d["type_name"],
+                STATUSES[d["status"]][1], date_filter(d["created_at"])))
+            log_event(d["id"], "Label printed (%s)" % STATUSES[d["status"]][1])
+            get_db().commit()
+            target = url_for("device", code=d["code"]) + "#label"
+        elif kind == "b":
+            b = get_db().execute("SELECT * FROM boxes WHERE code = ?", (code.upper(),)).fetchone()
+            if b is None:
+                abort(404)
+            send_to_printer(labels.box_label(base_url() + url_for("box", code=b["code"]), b["code"], b["name"]))
+            target = url_for("box", code=b["code"])
+        else:
+            abort(404)
+        flash("Label sent to the printer.", "ok")
+    except RuntimeError as exc:
+        flash(str(exc), "error")
+        target = request.form.get("next") or url_for("index")
+    return redirect(request.form.get("next") or target)
+
+
+@app.route("/system/printer", methods=["POST"])
+def system_printer():
+    blocked = admin_guard()
+    if blocked:
+        return blocked
+    conn = get_db()
+    action = request.form.get("action")
+    here = url_for("system_page") + "#printer"
+    if action == "install":
+        return launch("print-install", "Install printing support", [system.Step(
+            "Install the printer library", timeout=900,
+            argv=[sys.executable, "-m", "pip", "install", "-q", "-r",
+                  os.path.join(BASE_DIR, "requirements-print.txt")])])
+    model = request.form.get("printer_model") or ""
+    address = (request.form.get("printer_address") or "").strip()
+    tape = request.form.get("printer_tape") or "62"
+    if model not in printing.MODELS or tape not in printing.TAPES:
+        flash("Pick a printer model and tape from the lists.", "error")
+        return redirect(here)
+    if not address.startswith(("file://", "usb://", "tcp://")) or " " in address:
+        flash("The printer address should start with file://, usb://, or tcp://.", "error")
+        return redirect(here)
+    for key, value in (("printer_model", model), ("printer_address", address), ("printer_tape", tape)):
+        conn.execute("INSERT INTO settings (key, value) VALUES (?, ?)"
+                     " ON CONFLICT(key) DO UPDATE SET value = excluded.value", (key, value))
+    conn.commit()
+    if action == "test":
+        try:
+            send_to_printer(labels.device_label(base_url() + "/", "TEST", "Bench Log test label", "T",
+                                                datetime.now().strftime("%Y-%m-%d")))
+            flash("Test label sent to the printer.", "ok")
+        except RuntimeError as exc:
+            flash(str(exc), "error")
+    else:
+        flash("Printer settings saved.", "ok")
+    return redirect(here)
+
+
+# ------------------------------------------------------- alerts (EXPERIMENTAL)
+
+@app.route("/system/alerts", methods=["POST"])
+def system_alerts():
+    blocked = admin_guard()
+    if blocked:
+        return blocked
+    here = url_for("system_page") + "#alerts"
+    problem = alerts.save_config(request.form.get("url"), request.form.get("enabled"))
+    if problem:
+        flash(problem, "error")
+        return redirect(here)
+    if request.form.get("action") == "test":
+        try:
+            alerts.send("Bench Log test", "Alerts are working. You will hear from Bench Log when something needs attention.")
+            flash("Test alert sent. It should reach your phone within a few seconds.", "ok")
+        except RuntimeError as exc:
+            flash(str(exc), "error")
+    else:
+        flash("Alert settings saved.", "ok")
+    return redirect(here)
+
+
 # ------------------------------------------------------------ remote backup
 
 @app.route("/system/remote", methods=["POST"])
@@ -1805,7 +2195,14 @@ def system_remote():
     here = url_for("system_page") + "#remote"
     try:
         if action == "save":
+            typed = (request.form.get("passphrase") or "").strip()
+            if typed:
+                problem = remote.set_passphrase(typed)
+                if problem:
+                    flash(problem, "error")
+                    return redirect(here)
             problems = remote.save_config({
+                "encrypt": bool(request.form.get("encrypt")),
                 "enabled": bool(request.form.get("enabled")), "host": (request.form.get("host") or "").strip(),
                 "user": (request.form.get("user") or "").strip(), "port": request.form.get("port") or 22,
                 "directory": (request.form.get("directory") or "").strip(),

@@ -27,6 +27,9 @@ MARKETPLACES = {
     "EBAY_AU": ("Australia", "ebay.com.au"),
 }
 
+# Device types iFixit sells manufacturer-backed parts for, so its listing is worth checking first.
+IFIXIT_OFFICIAL = {"Steam Deck LCD", "Steam Deck OLED"}
+
 _token = {"value": "", "expires": 0, "client_id": ""}
 
 
@@ -47,11 +50,28 @@ def links(part_name, part_number, type_name, marketplace="EBAY_US", query=None):
     """Search links for a part: general web, shopping results, and eBay buy-it-now."""
     q = urllib.parse.quote_plus(query or part_query(part_name, part_number, type_name))
     domain = MARKETPLACES.get(marketplace, MARKETPLACES["EBAY_US"])[1]
+    # iFixit's own search reads better without the word "replacement" or a chip-style phrase.
+    plain = re.sub(r"\s+", " ", re.sub(r"[()/]", " ", "%s %s" % (type_name or "", part_name or ""))).strip()
     return {
         "google": "https://www.google.com/search?q=" + q,
         "shopping": "https://www.google.com/search?tbm=shop&q=" + q,
         "ebay": "https://www.%s/sch/i.html?_nkw=%s&LH_BIN=1" % (domain, q),
+        "ifixit": "https://www.ifixit.com/Search?doctype=product&query=" + urllib.parse.quote_plus(plain),
+        "ifixit_official": type_name in IFIXIT_OFFICIAL,
     }
+
+
+def compare(ebay_price, ifixit_price):
+    """Describe the gap between an eBay price and an iFixit price in plain words."""
+    if ebay_price is None or ifixit_price is None:
+        return None
+    gap = round(ifixit_price - ebay_price, 2)
+    if abs(gap) < 0.005:
+        return {"gap": 0.0, "cheaper": "same", "percent": 0}
+    # "X% less than the dearer one", so the figure can never exceed 100.
+    dearer = max(ebay_price, ifixit_price)
+    return {"gap": abs(gap), "cheaper": "ebay" if gap > 0 else "ifixit",
+            "percent": round(100.0 * abs(gap) / dearer) if dearer > 0 else None}
 
 
 def _http(request, timeout=20):

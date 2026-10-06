@@ -455,3 +455,47 @@ def test_turning_on_start_at_boot(client, monkeypatch, tmp_path):
                    (["systemctl", "--user", "enable", "benchlog"], False),
                    (["loginctl", "enable-linger", system.user_name()], True)]
     assert handed == [1]  # the hand-started copy gives way to the service
+
+
+# ------------------------------------------------------------ iFixit prices
+
+def test_ifixit_links_and_comparison_helper():
+    links = pricing.links("Fan", "", "Steam Deck LCD")
+    assert links["ifixit"] == "https://www.ifixit.com/Search?doctype=product&query=Steam+Deck+LCD+Fan"
+    assert links["ifixit_official"] is True
+    assert pricing.links("Battery", "LIP1708", DS)["ifixit_official"] is False
+    assert pricing.compare(None, 20.0) is None and pricing.compare(20.0, None) is None
+    assert pricing.compare(18.0, 24.99) == {"gap": 6.99, "cheaper": "ebay", "percent": 28}
+    assert pricing.compare(30.0, 24.0) == {"gap": 6.0, "cheaper": "ifixit", "percent": 20}
+    assert pricing.compare(10.0, 10.0)["cheaper"] == "same"
+
+
+def test_ifixit_price_is_entered_by_hand_and_compared(client, fake_ebay):
+    pid = part_id("Steam Deck LCD", "Fan")
+    page = client.get("/part/%d" % pid).get_data(as_text=True)
+    assert "iFixit (official parts)" in page and "ifixit.com/Search?doctype=product" in page
+
+    client.post("/part/%d" % pid, data={"action": "ifixit", "ifixit_price": "24.99",
+                                        "ifixit_url": "www.ifixit.com/products/steam-deck-fan"})
+    with conn() as c:
+        row = c.execute("SELECT ifixit_price, ifixit_url, ifixit_checked_at, default_cost FROM parts WHERE id = ?",
+                        (pid,)).fetchone()
+    assert row["ifixit_price"] == 24.99 and row["ifixit_url"] == "https://www.ifixit.com/products/steam-deck-fan"
+    assert row["ifixit_checked_at"] and row["default_cost"] == 25.0  # the usual cost is not changed by saving
+
+    # With an eBay median of 12.00 from the price check, the page states the difference.
+    system.set_secret("ebay", {"client_id": "app-id", "client_secret": "cert-id"})
+    client.post("/part/%d/price" % pid, data={"query": "steam deck fan"})
+    page = client.get("/part/%d" % pid).get_data(as_text=True)
+    assert "eBay is $12.99 cheaper" in page and "52% less than iFixit" in page
+    assert "https://www.ifixit.com/products/steam-deck-fan" in page
+    with conn() as c:
+        tid = c.execute("SELECT device_type_id FROM parts WHERE id = ?", (pid,)).fetchone()[0]
+    listing = client.get("/catalog/%d" % tid).get_data(as_text=True)
+    assert "eBay $12.00" in listing and "iFixit $24.99" in listing
+
+    client.post("/part/%d" % pid, data={"use_price": "24.99"})
+    client.post("/part/%d" % pid, data={"action": "ifixit", "ifixit_price": "", "ifixit_url": ""})
+    with conn() as c:
+        row = c.execute("SELECT ifixit_price, default_cost FROM parts WHERE id = ?", (pid,)).fetchone()
+    assert row["ifixit_price"] is None and row["default_cost"] == 24.99

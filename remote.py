@@ -17,13 +17,13 @@ import time
 
 import system
 
-SNAPSHOT_NAME = re.compile(r"^benchlog-(\d{8})-(\d{6})\.db$")
+SNAPSHOT_NAME = re.compile(r"^benchlog-(\d{8})-(\d{6})\.db(\.enc)?$")
 HOST = re.compile(r"^[A-Za-z0-9]([A-Za-z0-9.-]{0,251}[A-Za-z0-9])?$")
 USER = re.compile(r"^[A-Za-z_][A-Za-z0-9_.-]{0,63}$")
 DIRECTORY = re.compile(r"^[A-Za-z0-9_./~-]{1,200}$")
 
 DEFAULTS = {"enabled": False, "host": "", "user": "", "port": 22, "directory": "~/benchlog-backups",
-            "interval_days": 3, "keep": 30}
+            "interval_days": 3, "keep": 30, "encrypt": False}
 
 
 def key_path():
@@ -84,9 +84,48 @@ def save_config(cfg):
         return problems
     clean = {"enabled": bool(cfg.get("enabled")), "host": cfg["host"], "user": cfg["user"],
              "port": int(cfg["port"]), "directory": cfg["directory"].rstrip("/") or "/",
-             "interval_days": int(cfg["interval_days"]), "keep": int(cfg["keep"])}
+             "interval_days": int(cfg["interval_days"]), "keep": int(cfg["keep"]),
+             "encrypt": bool(cfg.get("encrypt"))}
+    if clean["encrypt"] and not passphrase():
+        return ["Set an encryption passphrase before turning encryption on."]
     system.save_json("remote.json", clean)
     return []
+
+
+# --------------------------------------------------- encryption (EXPERIMENTAL)
+
+def passphrase():
+    return system.get_secret("remote_encryption").get("passphrase", "")
+
+
+def set_passphrase(value):
+    value = (value or "").strip()
+    if len(value) < 12:
+        return "Use at least 12 characters for the passphrase."
+    system.set_secret("remote_encryption", {"passphrase": value})
+    return ""
+
+
+def _openssl(mode, source, target):
+    """Encrypt or decrypt a file with AES-256. The passphrase travels in the environment, not the command."""
+    if not shutil.which("openssl"):
+        raise RuntimeError("openssl is not installed. Run: sudo apt install openssl")
+    secret = passphrase()
+    if not secret:
+        raise RuntimeError("No encryption passphrase is set.")
+    command = ["openssl", "enc", "-aes-256-cbc", "-pbkdf2", "-iter", "200000", "-salt", "-in", source,
+               "-out", target, "-pass", "env:BENCHLOG_PASSPHRASE"]
+    if mode == "decrypt":
+        command.insert(2, "-d")
+    proc = subprocess.run(command, env=dict(os.environ, BENCHLOG_PASSPHRASE=secret), stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE, timeout=600)
+    if proc.returncode != 0:
+        if os.path.exists(target):
+            os.remove(target)
+        if mode == "decrypt":
+            raise RuntimeError("Could not decrypt this copy. The passphrase saved here is not the one it was "
+                               "encrypted with.")
+        raise RuntimeError("Encryption failed: " + proc.stderr.decode("utf-8", "replace").strip())
 
 
 def is_configured(cfg=None):
@@ -212,7 +251,7 @@ def parse_listing(text):
             when = int(time.mktime(time.strptime(match.group(1) + match.group(2), "%Y%m%d%H%M%S")))
         except ValueError:
             continue
-        rows.append({"name": parts[-1], "size": int(parts[4]), "when": when})
+        rows.append({"name": parts[-1], "size": int(parts[4]), "when": when, "encrypted": bool(match.group(3))})
     return sorted(rows, key=lambda r: r["name"], reverse=True)
 
 
@@ -269,9 +308,14 @@ def push(log, cfg=None):
         raise RuntimeError(health["error"])
     directory = _remote_dir(cfg)
     name = "benchlog-%s.db" % time.strftime("%Y%m%d-%H%M%S")
-    local = os.path.join(system.DATA_DIR, "remote-upload.db")
+    plain = os.path.join(system.DATA_DIR, "remote-upload.db")
+    local = plain
     try:
-        system.snapshot_to(local)
+        system.snapshot_to(plain)
+        if cfg.get("encrypt"):
+            local, name = plain + ".enc", name + ".enc"
+            _openssl("encrypt", plain, local)
+            log("Encrypted before sending.")
         expected = file_hash(local)
         log("Snapshot %s is %s." % (name, system.human_bytes(os.path.getsize(local))))
 
@@ -291,8 +335,9 @@ def push(log, cfg=None):
             raise RuntimeError("Could not finish the upload: " + friendly_error(out))
         log("Uploaded and verified.")
     finally:
-        if os.path.exists(local):
-            os.remove(local)
+        for leftover in (plain, plain + ".enc"):
+            if os.path.exists(leftover):
+                os.remove(leftover)
 
     photos_note = sync_photos(log, cfg, health, direction="up")
 
@@ -362,12 +407,18 @@ def fetch(name, cfg=None):
     local_name = "fetched-%s-%s.db" % (match.group(1), match.group(2))
     target = os.path.join(system.DATA_DIR, "backups", local_name)
     partial = target + ".part"
+    download = partial + ".enc" if match.group(3) else partial
     code, out = run_remote(cfg, "cat %s/%s" % (_remote_dir(cfg), shlex.quote(name)), timeout=600,
-                           stdout_path=partial)
+                           stdout_path=download)
     if code != 0:
-        if os.path.exists(partial):
-            os.remove(partial)
+        if os.path.exists(download):
+            os.remove(download)
         raise RuntimeError("Download failed: " + friendly_error(out))
+    if match.group(3):
+        try:
+            _openssl("decrypt", download, partial)
+        finally:
+            os.remove(download)
     try:
         check_db = sqlite3.connect(partial)
         ok = check_db.execute("PRAGMA integrity_check").fetchone()[0] == "ok"

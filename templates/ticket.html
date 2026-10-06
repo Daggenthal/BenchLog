@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, signed %}
+{% block title %}{{ t.code }} - Bench Log{% endblock %}
+{% block content %}
+<p class="small"><a href="{{ url_for('tickets') }}">Customer repairs</a></p>
+<section class="card">
+  <div class="dev-head">
+    <div style="flex:1 1 220px; min-width:0">
+      <div class="muted small">Ticket <span class="pill">experimental</span></div>
+      <div class="dev-code mono">{{ t.code }}</div>
+      <div>
+        {% if t.priority == 'express' %}<span class="pill bad">Express</span>{% endif %}
+        <span class="badge">{{ TICKET_STATUSES[t.status] }}</span>
+        <a href="{{ url_for('customer', code=t.customer_code) }}">{{ t.customer_name }}</a> <span class="muted small">{{ t.customer_code }}</span>
+      </div>
+      <div class="muted small">Received {{ t.received_at|date }}{% if t.due_at %} &middot; promised by {{ t.due_at|date }}{% endif %}{% if t.shipped_at %} &middot; shipped {{ t.shipped_at|date }}{% endif %}</div>
+    </div>
+    {% if d %}
+    <a class="btn primary" href="{{ url_for('device', code=d.code) }}">Open device {{ d.code }}</a>
+    {% endif %}
+  </div>
+  <div class="grid" style="margin-top:14px">
+    <div class="stat"><div class="v">{{ days }} day(s)</div><div class="k">{{ 'Turnaround, received to shipped' if t.shipped_at else 'Since it arrived' }}</div></div>
+    <div class="stat"><div class="v">{% if fin %}{{ fin.seconds|dur }}{% else %}n/a{% endif %}</div><div class="k">Bench time</div></div>
+    <div class="stat"><div class="v">{% if fin %}{{ fin.parts|money }}{% else %}n/a{% endif %}</div><div class="k">Parts</div></div>
+    {% if fin and fin.profit is not none %}
+    <div class="stat"><div class="v">{{ signed(fin.profit) }}</div><div class="k">Profit{{ ' (expected)' if fin.estimate }}</div></div>
+    <div class="stat"><div class="v">{% if fin.hourly is not none %}{{ signed(fin.hourly) }}/h{% else %}<span class="muted">n/a</span>{% endif %}</div><div class="k">Earned per hour{{ ' (expected)' if fin.estimate }}</div></div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="card">
+  <h2>Status</h2>
+  <div class="row">
+    {% for key, label in TICKET_STATUSES.items() %}
+    <form method="post"><input type="hidden" name="status" value="{{ key }}">
+      <button type="submit" class="{{ 'primary' if t.status == key }}" {{ 'disabled' if t.status == key }}>{{ label }}</button></form>
+    {% endfor %}
+  </div>
+  <p class="muted small" style="margin-top:8px">Marking it shipped stamps the date, stops any running timer, and takes the device out of stock.</p>
+</section>
+
+<div class="grid-2">
+<form class="card" method="post">
+  <h2>Job details</h2>
+  <div class="field"><label for="problem">What the customer says is wrong</label><textarea name="problem" id="problem">{{ t.problem }}</textarea></div>
+  <div class="fields">
+    <div><label for="priority">Priority</label>
+      <select name="priority" id="priority">{% for key, label in PRIORITIES.items() %}<option value="{{ key }}" {{ 'selected' if t.priority == key }}>{{ label }}</option>{% endfor %}</select></div>
+    <div><label for="due_at">Promised by</label><input type="date" name="due_at" id="due_at" value="{{ t.due_at|date }}"></div>
+  </div>
+  <div class="fields">
+    <div><label for="quote">Quote given</label><input type="number" step="0.01" min="0" name="quote" id="quote" inputmode="decimal" value="{{ '%.2f'|format(t.quote) if t.quote is not none }}"></div>
+    <div><label for="charged">Amount charged</label><input type="number" step="0.01" min="0" name="charged" id="charged" inputmode="decimal" value="{{ '%.2f'|format(t.charged) if t.charged is not none }}"></div>
+  </div>
+  <h3>How it arrived</h3>
+  <div class="fields">
+    <div><label for="carrier_in">Carrier</label><select name="carrier_in" id="carrier_in">{% for c in carriers %}<option value="{{ c }}" {{ 'selected' if t.carrier_in == c }}>{{ c or 'Not recorded' }}</option>{% endfor %}</select></div>
+    <div><label for="service_in">Service or speed</label><input type="text" name="service_in" id="service_in" value="{{ t.service_in }}" autocomplete="off"></div>
+    <div><label for="tracking_in">Tracking</label><input type="text" name="tracking_in" id="tracking_in" value="{{ t.tracking_in }}" autocomplete="off"></div>
+  </div>
+  <h3>How it goes back</h3>
+  <div class="fields">
+    <div><label for="carrier_out">Carrier</label><select name="carrier_out" id="carrier_out">{% for c in carriers %}<option value="{{ c }}" {{ 'selected' if t.carrier_out == c }}>{{ c or 'Not recorded' }}</option>{% endfor %}</select></div>
+    <div><label for="service_out">Service or speed</label><input type="text" name="service_out" id="service_out" value="{{ t.service_out }}" autocomplete="off"></div>
+    <div><label for="tracking_out">Tracking</label><input type="text" name="tracking_out" id="tracking_out" value="{{ t.tracking_out }}" autocomplete="off"></div>
+  </div>
+  <div class="field"><label for="shipping_out_cost">Return shipping you paid</label><input type="number" step="0.01" min="0" name="shipping_out_cost" id="shipping_out_cost" inputmode="decimal" value="{{ '%.2f'|format(t.shipping_out_cost) if t.shipping_out_cost is not none }}" style="max-width:220px"></div>
+  <div class="field"><label for="notes">Internal notes</label><textarea name="notes" id="notes">{{ t.notes }}</textarea></div>
+  <button type="submit">Save ticket</button>
+</form>
+
+<section class="card">
+  <div class="head">
+    <h2>Repair summary</h2>
+    <a class="btn small" href="{{ url_for('ticket_report_page', code=t.code) }}">Printable report</a>
+  </div>
+  <h3>Failed when it arrived</h3>
+  {% if report.failed_at_intake %}<div class="pill-list">{% for name in report.failed_at_intake %}<span class="pill bad">{{ name }}</span>{% endfor %}</div>{% else %}<p class="muted small">Nothing recorded yet. Run the intake checklist on the device.</p>{% endif %}
+  <h3>Work done</h3>
+  {% if report.work %}<ul style="margin:0; padding-left:20px">{% for w in report.work %}<li>{{ w.what or 'Repair step' }}{% if w.part_name and w.description %} <span class="muted small">{{ w.description }}</span>{% endif %}</li>{% endfor %}</ul>{% else %}<p class="muted small">No repair steps logged yet.</p>{% endif %}
+  <h3>Now</h3>
+  <p class="small">{{ report.working }} check(s) passing{% if report.still_failing %}, <span class="neg">{{ report.still_failing|length }} still failing: {{ report.still_failing|join(', ') }}</span>{% endif %}.</p>
+</section>
+</div>
+{% endblock %}

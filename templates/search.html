@@ -7,6 +7,14 @@
   <h2>Devices</h2>
   {{ device_table(devices) }}
 </section>
+{% if customers %}
+<section class="card">
+  <h2>Customers</h2>
+  <ul class="checklist">
+    {% for c in customers %}<li><span class="name"><a class="mono" href="{{ url_for('customer', code=c.code) }}"><strong>{{ c.code }}</strong></a> {{ c.name }} <span class="muted small">{{ c.email }} {{ c.phone }}</span></span></li>{% endfor %}
+  </ul>
+</section>
+{% endif %}
 <section class="card">
   <h2>Parts</h2>
   <p class="muted small">Matches part names, part numbers, and the symptoms each part fixes. "On donors" lists donor devices that still have a usable one.</p>
