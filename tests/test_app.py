@@ -327,3 +327,16 @@ def test_reports_group_repair_types(client):
     client.post("/d/%s/status" % code, data={"status": "ready"})
     page = client.get("/reports").get_data(as_text=True)
     assert "USB-C charging port" in page and "50m" in page
+
+
+def test_every_plain_page_renders_as_a_full_page(client):
+    """Guards against a template losing its layout, which once broke Settings."""
+    for path in ("/", "/devices", "/devices/new", "/boxes", "/lots", "/catalog", "/reports",
+                 "/settings", "/system", "/tickets", "/tickets/new", "/customers", "/labels"):
+        response = client.get(path)
+        assert response.status_code == 200, path
+        html = response.get_data(as_text=True)
+        assert "<nav" in html and html.count("<h1") == 1, path
+        assert len(html) < 200000, path
+    page = client.get("/settings").get_data(as_text=True)
+    assert "Save settings" in page and page.count("Open System") == 1

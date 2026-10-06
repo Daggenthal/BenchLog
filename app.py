@@ -25,7 +25,7 @@ import printing
 import remote
 import system
 
-VERSION = "1.3.0"
+VERSION = "1.3.1"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.environ.get("BENCHLOG_DATA", os.path.join(BASE_DIR, "data"))
