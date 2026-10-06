@@ -24,6 +24,7 @@ gets a QR label that links straight to its page.
 - Reverse search by part name, part number, or symptom ("drift", "no charge", "M92T36")
 - Part names link to a web search, Google Shopping, and eBay buy-it-now
 - A saved supplier link per part
+- Upgrades and mods listed beside like-for-like parts, starting with GuliKit drift-proof sticks for the Steam Deck, Joy-Con, Switch Lite, DualSense, DualShock 4, Xbox, and Switch Pro controllers
 - Optional live price check through the eBay Browse API, with the result shown as a suggestion you confirm
 
 **Donor boards**
@@ -51,7 +52,11 @@ gets a QR label that links straight to its page.
 **System page**
 - Device health: storage, memory, swap, CPU load and temperature, GPU load where the hardware reports it, uptime, and Raspberry Pi power and throttling warnings
 - Automatic daily database backups, plus one before every update, restore, and reboot
-- One-click restore of any backup, with the previous state saved first
+- Compare any backup with the current data before touching anything
+- Bring back only the records that are missing, or restore a backup in full. Either way the previous state is saved first
+- Remote backup to your own server over SSH: dated copies of the database plus the photos, on a schedule, with the server checked every hour
+- Pick any copy on the server, download it, and compare or restore it
+- One button to make Bench Log start by itself after a reboot
 - Check for and install operating system updates, with the package list shown before anything is installed
 - Check for and apply Bench Log updates from the git repository, with a database backup first and a button to return to the previous version
 - Restart the app or reboot the device
@@ -116,7 +121,7 @@ Then tell SSH to use that key for this repository:
 
 ### 2. Install and run
 
-    sudo apt install git python3-venv fonts-dejavu-core
+    sudo apt install git python3-venv fonts-dejavu-core rsync openssh-client
     git clone git@github.com-benchlog:Daggenthal/BenchLog.git ~/benchlog
     cd ~/benchlog
     python3 -m venv .venv
@@ -128,11 +133,25 @@ network. `hostname` on the Pi prints its name.
 
 ### 3. Start at boot
 
+Open System in the app, unlock it, and press "Turn on start at boot". It
+writes the service file for wherever the app is installed, enables it, and
+lets it run while nobody is logged in. The app restarts once and from then on
+comes back by itself after a reboot or power cut.
+
+To do the same by hand:
+
     mkdir -p ~/.config/systemd/user
     cp ~/benchlog/benchlog.service ~/.config/systemd/user/
     systemctl --user daemon-reload
     systemctl --user enable --now benchlog
     sudo loginctl enable-linger $USER
+
+### Why `.venv/bin/python` and not `python`
+
+The libraries Bench Log needs are installed into the `.venv` folder, not into
+the system Python, which Raspberry Pi OS does not let pip modify. Running
+`.venv/bin/python app.py` uses the copy of Python that can see them. Once
+start at boot is on, you never type this again.
 
 ## First steps
 
@@ -184,9 +203,66 @@ Everything you enter lives in the `data` folder, which git ignores:
 - `secrets.json`: the admin password hash and eBay keys, readable only by your user
 - `logs/`: output of update tasks
 
+The database is SQLite: one ordinary file that the app opens directly. There
+is no database server to install or keep running.
+
 The last 14 daily backups are kept. They sit on the same disk as the app, so
-download a copy from the System page now and then. Remote backup to another
-server is planned.
+set up remote backup or download a copy from the System page now and then.
+
+Also in the `data` folder once remote backup is set up:
+
+- `remote_backup_key` and `remote_backup_key.pub`: the key this device uses to sign in to the backup server
+- `remote_known_hosts`: the backup server's recorded identity
+- `remote.json`: the server address and schedule
+
+## Remote backup
+
+Bench Log can copy its data to any server you can reach over SSH.
+
+1. On the System page, under Remote backup, enter the server address, the user
+   name (capitals matter), and the folder to use, then save. This creates a
+   key pair for this device.
+2. The page then shows four lines to paste once on the server. They create the
+   folder and allow this device's key to sign in. No password is stored
+   anywhere.
+3. Press "Test connection", then "Back up to server now".
+4. Tick "Back up automatically" to repeat it every few days.
+
+What gets sent:
+
+- A copy of the database named with the date and time, like
+  `benchlog-20261006-151002.db`. Each upload is checked against the original
+  before it is accepted.
+- Photos, into a `photos` folder. Only new files are sent when rsync is on
+  both machines. Photos are never deleted on the server.
+
+Older database copies beyond the number you choose to keep are removed,
+oldest first. Nothing else on the server is touched.
+
+The server is checked every hour. The System page shows whether it is
+reachable, when the last backup landed, how many copies it holds, and how
+much space is left, and it warns when a backup is overdue.
+
+### Getting data back
+
+Every copy on the server is listed on the System page. "Download and compare"
+fetches one and shows how it differs from what you have now, without changing
+anything. From there:
+
+- "Bring back only what is missing" adds records that are in the backup but
+  not in the current data, and leaves everything current alone. Use it when
+  something was deleted by mistake.
+- "Full restore" replaces the database with the backup.
+
+Both make a safety backup first. "Fetch photos from the server" copies photo
+files back.
+
+After a total loss, install Bench Log again, enter the same server details,
+and add the new key to the server. The copies are then listed and can be
+restored.
+
+The connection is encrypted, but the copies on the server are ordinary files.
+Use a server and account that only you control.
 
 ## Live part prices
 
@@ -219,7 +295,7 @@ cheap results for small parts are often the wrong item or a bulk lot.
 - Direct printing to a Brother QL label printer
 - Customer repair tickets with IDs, shipping details, and an express queue
 - Stock counts for purchased parts
-- Remote backup to another server
+- Encrypting remote backups before they leave the device
 - Customer email notifications
 
 ## Development
@@ -235,11 +311,13 @@ cheap results for small parts are often the wrong item or a bulk lot.
 | `labels.py` | Label images |
 | `pricing.py` | Part search links and the eBay price check |
 | `system.py` | Health, backups, updates, and background tasks |
+| `remote.py` | Remote backup over SSH |
 | `templates/`, `static/` | The pages |
 | `tests/` | Automated tests |
 
-`catalog.py` only seeds a new database. After the first run, edit the catalog
-in the app.
+`catalog.py` seeds a new database. On later starts, entries that are new in
+`catalog.py` are added to an existing database, but nothing already there is
+changed, so costs and names you edited in the app are kept.
 
 Set `BENCHLOG_PORT` to change the port and `BENCHLOG_DATA` to move the data
 folder.

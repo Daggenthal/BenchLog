@@ -149,6 +149,7 @@ MIGRATIONS = [
     ("parts", "last_price", "REAL"),
     ("parts", "last_price_at", "INTEGER"),
     ("parts", "last_price_query", "TEXT NOT NULL DEFAULT ''"),
+    ("parts", "is_upgrade", "INTEGER NOT NULL DEFAULT 0"),
 ]
 
 
@@ -158,6 +159,23 @@ def connect(path):
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")
     return conn
+
+
+def add_part(conn, type_id, function_ids, part, sort):
+    name, number, purpose, cost, micro, fixes = part[:6]
+    upgrade = part[6] if len(part) > 6 else False
+    cur = conn.execute(
+        "INSERT INTO parts (device_type_id, name, part_number, purpose, default_cost, microsolder, sort, is_upgrade)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (type_id, name, number, purpose, cost, 1 if micro else 0, sort, 1 if upgrade else 0),
+    )
+    for fname in fixes:
+        if fname in function_ids:
+            conn.execute(
+                "INSERT OR IGNORE INTO part_functions (part_id, function_id) VALUES (?, ?)",
+                (cur.lastrowid, function_ids[fname]),
+            )
+    return cur.lastrowid
 
 
 def add_device_type(conn, name, category, functions, parts, sort=0):
@@ -172,19 +190,46 @@ def add_device_type(conn, name, category, functions, parts, sort=0):
             "INSERT INTO functions (device_type_id, name, sort) VALUES (?, ?, ?)", (type_id, fname, i)
         )
         function_ids[fname] = c.lastrowid
-    for i, (pname, number, purpose, cost, micro, fixes) in enumerate(parts):
-        c = conn.execute(
-            "INSERT INTO parts (device_type_id, name, part_number, purpose, default_cost, microsolder, sort)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (type_id, pname, number, purpose, cost, 1 if micro else 0, i),
-        )
-        for fname in fixes:
-            if fname in function_ids:
-                conn.execute(
-                    "INSERT OR IGNORE INTO part_functions (part_id, function_id) VALUES (?, ?)",
-                    (c.lastrowid, function_ids[fname]),
-                )
+    for i, part in enumerate(parts):
+        add_part(conn, type_id, function_ids, part, i)
     return type_id
+
+
+def sync_catalog(conn):
+    """Add catalog entries that are new since this database was created.
+
+    Only adds: device types, checklist items, and parts that do not exist yet by
+    name. Nothing already in the database is changed or removed, so edited costs
+    and renamed parts are left alone.
+    """
+    added = 0
+    for index, t in enumerate(catalog.CATALOG):
+        row = conn.execute("SELECT id FROM device_types WHERE name = ?", (t["name"],)).fetchone()
+        if row is None:
+            add_device_type(conn, t["name"], t["category"], t["functions"], t["parts"], sort=index)
+            added += 1
+            continue
+        type_id = row[0]
+        function_ids = {r[1]: r[0] for r in conn.execute(
+            "SELECT id, name FROM functions WHERE device_type_id = ?", (type_id,))}
+        top = conn.execute("SELECT COALESCE(MAX(sort), 0) FROM functions WHERE device_type_id = ?",
+                           (type_id,)).fetchone()[0]
+        for fname in t["functions"]:
+            if fname not in function_ids:
+                top += 1
+                cur = conn.execute("INSERT INTO functions (device_type_id, name, sort) VALUES (?, ?, ?)",
+                                   (type_id, fname, top))
+                function_ids[fname] = cur.lastrowid
+                added += 1
+        existing = {r[0] for r in conn.execute("SELECT name FROM parts WHERE device_type_id = ?", (type_id,))}
+        top = conn.execute("SELECT COALESCE(MAX(sort), 0) FROM parts WHERE device_type_id = ?",
+                           (type_id,)).fetchone()[0]
+        for part in t["parts"]:
+            if part[0] not in existing:
+                top += 1
+                add_part(conn, type_id, function_ids, part, top)
+                added += 1
+    return added
 
 
 def init(conn):
@@ -195,7 +240,5 @@ def init(conn):
             conn.execute("ALTER TABLE %s ADD COLUMN %s %s" % (table, column, declaration))
     for key, value in DEFAULT_SETTINGS.items():
         conn.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (key, value))
-    if conn.execute("SELECT COUNT(*) FROM device_types").fetchone()[0] == 0:
-        for i, t in enumerate(catalog.CATALOG):
-            add_device_type(conn, t["name"], t["category"], t["functions"], t["parts"], sort=i)
+    sync_catalog(conn)
     conn.commit()

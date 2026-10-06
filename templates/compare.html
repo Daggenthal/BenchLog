@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Compare backup - Bench Log{% endblock %}
+{% block content %}
+<p class="small"><a href="{{ url_for('system_page') }}#backups">System</a></p>
+<h1>Compare a backup with now</h1>
+<p class="muted"><span class="mono">{{ name }}</span>{% if info %} &middot; made {{ info.mtime|dt }} &middot; {{ info.size|bytes }}{% endif %}</p>
+
+<section class="card">
+  <div class="grid">
+    <div class="stat"><div class="v {{ 'pos' if gain }}">{{ gain }}</div><div class="k">In the backup but missing now. A restore or merge brings these back</div></div>
+    <div class="stat"><div class="v {{ 'neg' if lose }}">{{ lose }}</div><div class="k">Added since the backup. A full restore would lose these</div></div>
+    <div class="stat"><div class="v">{{ changed }}</div><div class="k">In both, but edited since. A merge leaves these as they are now</div></div>
+  </div>
+</section>
+
+<div class="grid-2">
+<form class="card" method="post">
+  <h2>Bring back only what is missing</h2>
+  <p class="small">Adds the {{ gain }} record(s) that exist in the backup but not now. Everything you have now stays exactly as it is, and a safety backup is made first. Use this when something was deleted by mistake.</p>
+  <button class="primary" type="submit" name="action" value="merge" {{ 'disabled' if not gain }}>Bring back {{ gain }} missing record(s)</button>
+</form>
+<form class="card" method="post">
+  <h2>Replace everything with this backup</h2>
+  <p class="small">Puts the database back exactly as it was. The {{ lose }} record(s) added since then are removed, and edits since then are undone. A safety backup is made first, so this can itself be undone.</p>
+  <div class="row">
+    <input type="text" name="confirm" placeholder="Type RESTORE" autocomplete="off" style="width:160px" aria-label="Type RESTORE to confirm">
+    <button class="danger" type="submit" name="action" value="restore">Full restore</button>
+  </div>
+</form>
+</div>
+
+<section class="card">
+  <h2>Details by type of record</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th style="min-width:150px">Records</th><th class="num">Missing now</th><th class="num">Added since</th><th class="num">Edited since</th><th class="num">Unchanged</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td><strong>{{ r.label }}</strong>
+          {% if r.note %}<br><span class="muted small">{{ r.note }}</span>{% endif %}
+          {% if r.backup_samples %}<div class="small"><span class="muted">Missing now:</span> {{ r.backup_samples|join(', ') }}{% if r.only_backup > r.backup_samples|length %} and {{ r.only_backup - r.backup_samples|length }} more{% endif %}</div>{% endif %}
+          {% if r.live_samples %}<div class="small"><span class="muted">Added since:</span> {{ r.live_samples|join(', ') }}{% if r.only_live > r.live_samples|length %} and {{ r.only_live - r.live_samples|length }} more{% endif %}</div>{% endif %}
+        </td>
+        <td class="num {{ 'pos' if r.only_backup }}">{{ r.only_backup or '' }}</td>
+        <td class="num {{ 'neg' if r.only_live }}">{{ r.only_live or '' }}</td>
+        <td class="num">{{ r.changed or '' }}</td>
+        <td class="num muted">{{ r.same }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="muted small" style="margin-top:8px">Photos themselves are files, not database records. If photo files are missing after a disk failure, use "Fetch photos from the server" on the System page.</p>
+</section>
+{% endblock %}

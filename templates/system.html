@@ -155,7 +155,8 @@
         <span class="muted small">{{ b.mtime|dt }} &middot; {{ b.size|bytes }}</span>
       </div>
       <details>
-        <summary class="small">Restore or delete</summary>
+        <summary class="small">Compare, restore, or delete</summary>
+        <p class="small"><a href="{{ url_for('system_backup_compare', name=b.name) }}">Compare with the current data</a> to see what a restore would change, or to bring back only what is missing.</p>
         <form method="post" action="{{ url_for('system_backups') }}" class="row">
           <input type="hidden" name="name" value="{{ b.name }}">
           <input type="text" name="confirm" placeholder="Type RESTORE" autocomplete="off" style="width:150px" aria-label="Type RESTORE to confirm">
@@ -168,11 +169,112 @@
     <li class="muted">No backups yet. The first automatic one is made within an hour of starting.</li>
     {% endfor %}
   </ul>
-  <h3>Remote backup</h3>
-  <p class="muted small">Not set up yet. Planned: a nightly copy of the database and photos to your own server. Until then, use the download buttons above.</p>
+</section>
+
+<section class="card" id="remote">
+  <div class="head">
+    <h2>Remote backup</h2>
+    {% if remote_ready %}
+    <div class="row">
+      <form method="post" action="{{ url_for('system_remote') }}"><button type="submit" name="action" value="test">Test connection</button></form>
+      <form method="post" action="{{ url_for('system_remote') }}"><button class="primary" type="submit" name="action" value="backup">Back up to server now</button></form>
+    </div>
+    {% endif %}
+  </div>
+  <p class="muted small">Sends a dated copy of the database and any new photos to your own server over SSH. Old copies are kept, so you can go back to a specific day. The server is checked every hour.</p>
+
+  {% set rc = remote_state.check or {} %}
+  {% if remote_ready %}
+  <div class="grid">
+    <div class="stat">
+      <div class="k">Server</div>
+      {% if not rc %}<div class="v">Not checked</div><div class="k">Press Test connection</div>
+      {% elif rc.reachable %}<div class="v pos">Reachable</div><div class="k">{{ rc.latency_ms }} ms, checked {{ rc.checked_at|dt }}</div>
+      {% else %}<div class="v neg">Problem</div><div class="k">{{ rc.error }}</div>{% endif %}
+    </div>
+    <div class="stat">
+      <div class="k">Last remote backup</div>
+      <div class="v">{% if remote_state.last_backup_at %}{{ remote_state.last_backup_at|date }}{% else %}Never{% endif %}</div>
+      <div class="k">{% if remote_state.last_backup_at %}{{ remote_state.last_backup_at|dt }}{% endif %}{% if remote_state.last_error %} <span class="neg">Last attempt failed: {{ remote_state.last_error }}</span>{% endif %}</div>
+    </div>
+    <div class="stat">
+      <div class="k">Copies on the server</div>
+      <div class="v">{{ (rc.snapshots or [])|length }}</div>
+      <div class="k">Keeping the newest {{ remote_cfg.keep }}</div>
+    </div>
+    <div class="stat">
+      <div class="k">Server free space</div>
+      <div class="v">{% if rc.free is not none and rc.free is defined %}{{ rc.free|bytes }}{% else %}n/a{% endif %}</div>
+      <div class="k">{% if rc.path %}{{ rc.path }}{% endif %}</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <h3>Server details</h3>
+  <form method="post" action="{{ url_for('system_remote') }}">
+    <input type="hidden" name="action" value="save">
+    <div class="fields">
+      <div><label for="r_host">Server address</label><input type="text" name="host" id="r_host" value="{{ remote_cfg.host }}" placeholder="203.0.113.10 or backup.example.com" autocomplete="off" autocapitalize="off"></div>
+      <div><label for="r_user">User on the server (capitals matter)</label><input type="text" name="user" id="r_user" value="{{ remote_cfg.user }}" autocomplete="off" autocapitalize="off"></div>
+      <div><label for="r_port">SSH port</label><input type="number" name="port" id="r_port" value="{{ remote_cfg.port }}" min="1" max="65535" inputmode="numeric"></div>
+    </div>
+    <div class="fields">
+      <div><label for="r_dir">Folder on the server</label><input type="text" name="directory" id="r_dir" value="{{ remote_cfg.directory }}" autocomplete="off" autocapitalize="off"></div>
+      <div><label for="r_int">Back up every (days)</label><input type="number" name="interval_days" id="r_int" value="{{ remote_cfg.interval_days }}" min="1" max="90" inputmode="numeric"></div>
+      <div><label for="r_keep">Copies to keep</label><input type="number" name="keep" id="r_keep" value="{{ remote_cfg.keep }}" min="2" max="1000" inputmode="numeric"></div>
+    </div>
+    <div class="field"><label class="check"><input type="checkbox" name="enabled" value="1" {{ 'checked' if remote_cfg.enabled }}> Back up automatically on this schedule</label></div>
+    <button type="submit">Save server details</button>
+  </form>
+
+  {% if remote_key %}
+  <h3>One-time setup on the server</h3>
+  <p class="small">This device signs in with its own key, so no password is stored. Log in to the server as {{ remote_cfg.user or 'the backup user' }} and paste these four lines once. Then press Test connection.</p>
+  <pre class="log">{{ remote_setup }}</pre>
+  <details>
+    <summary class="small">If the connection is refused after reinstalling the server</summary>
+    <p class="small">The first connection records the server's identity, and later connections refuse a server that answers with a different one. If you reinstalled the server yourself, clear the recorded identity here.</p>
+    <form method="post" action="{{ url_for('system_remote') }}"><button class="small" type="submit" name="action" value="forget_host">Forget server identity</button></form>
+  </details>
+  {% else %}
+  <p class="muted small" style="margin-top:10px">Save the server details to create this device's backup key and see the setup steps for the server.</p>
+  {% endif %}
+
+  {% if rc.snapshots %}
+  <h3>Copies on the server</h3>
+  <ul class="checklist">
+    {% for snap in rc.snapshots %}
+    <li>
+      <span class="name"><span class="mono small">{{ snap.name }}</span> <span class="muted small">{{ snap.when|dt }} &middot; {{ snap.size|bytes }}</span></span>
+      <form method="post" action="{{ url_for('system_remote') }}">
+        <input type="hidden" name="name" value="{{ snap.name }}">
+        <button class="small" type="submit" name="action" value="fetch">Download and compare</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="muted small" style="margin-top:8px">Downloading changes nothing. You see what differs first, then choose to bring back only missing records or to restore fully.</p>
+  <form method="post" action="{{ url_for('system_remote') }}"><button class="small" type="submit" name="action" value="photos">Fetch photos from the server</button></form>
+  {% endif %}
 </section>
 
 <section class="card" id="power">
+  <h2>Start at boot</h2>
+  {% if not autostart.available %}
+  <p class="muted">This system does not use systemd, so start at boot has to be set up by hand.</p>
+  {% elif autostart.ready %}
+  <p class="state-good">On. Bench Log starts by itself after a reboot or power cut{% if not autostart.as_service %}, but this copy was started by hand. Press the button to switch over to the service{% endif %}.</p>
+  {% else %}
+  <p class="neg">Off. After a reboot, Bench Log stays down until someone starts it by hand.</p>
+  <p class="muted small">Missing: {% if not autostart.installed %}service file. {% endif %}{% if not autostart.enabled %}start at boot. {% endif %}{% if not autostart.linger %}permission to run while nobody is logged in.{% endif %}</p>
+  {% endif %}
+  {% if autostart.available and (not autostart.ready or not autostart.as_service) %}
+  <form method="post" action="{{ url_for('system_autostart') }}" style="margin-bottom:16px">
+    {{ sudo_field() }}
+    <button class="primary" type="submit">Turn on start at boot</button>
+    {% if not autostart.as_service %}<p class="muted small" style="margin-top:8px">The app restarts once as part of this, and comes back within a few seconds.</p>{% endif %}
+  </form>
+  {% endif %}
   <h2>Restart</h2>
   <div class="grid-2">
     <form method="post" action="{{ url_for('system_restart') }}">

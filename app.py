@@ -19,9 +19,10 @@ from flask import (Flask, Response, abort, flash, g, jsonify, redirect, render_t
 import db as dbm
 import labels
 import pricing
+import remote
 import system
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.environ.get("BENCHLOG_DATA", os.path.join(BASE_DIR, "data"))
@@ -1208,7 +1209,7 @@ def catalog_index():
                         "SELECT f.name FROM part_functions pf JOIN functions f ON f.id = pf.function_id"
                         " WHERE pf.part_id = ?", (p["id"],))]
                     parts.append((p["name"], p["part_number"], p["purpose"], p["default_cost"],
-                                  p["microsolder"], fixes))
+                                  p["microsolder"], fixes, p["is_upgrade"]))
             type_id = dbm.add_device_type(
                 conn, name, (request.form.get("category") or "Other").strip() or "Other", functions, parts,
                 sort=1000)
@@ -1245,11 +1246,12 @@ def catalog_type(type_id):
                 top = conn.execute("SELECT COALESCE(MAX(sort), 0) FROM parts WHERE device_type_id = ?",
                                    (type_id,)).fetchone()[0]
                 cur = conn.execute(
-                    "INSERT INTO parts (device_type_id, name, part_number, purpose, default_cost, microsolder, sort)"
-                    " VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO parts (device_type_id, name, part_number, purpose, default_cost, microsolder, sort,"
+                    " is_upgrade) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                     (type_id, name, (request.form.get("part_number") or "").strip(),
                      (request.form.get("purpose") or "").strip(), fnum("default_cost", 0.0) or 0.0,
-                     1 if request.form.get("microsolder") else 0, top + 1))
+                     1 if request.form.get("microsolder") else 0, top + 1,
+                     1 if request.form.get("is_upgrade") else 0))
                 for fid in request.form.getlist("fixes"):
                     conn.execute("INSERT OR IGNORE INTO part_functions (part_id, function_id) VALUES (?, ?)",
                                  (cur.lastrowid, int(fid)))
@@ -1484,11 +1486,11 @@ def part(part_id):
             name = (request.form.get("name") or "").strip() or p["name"]
             conn.execute(
                 "UPDATE parts SET name = ?, part_number = ?, purpose = ?, default_cost = ?, buy_url = ?,"
-                " microsolder = ? WHERE id = ?",
+                " microsolder = ?, is_upgrade = ? WHERE id = ?",
                 (name, (request.form.get("part_number") or "").strip(),
                  (request.form.get("purpose") or "").strip(), fnum("default_cost", p["default_cost"]) or 0.0,
                  (request.form.get("buy_url") or "").strip(), 1 if request.form.get("microsolder") else 0,
-                 part_id))
+                 1 if request.form.get("is_upgrade") else 0, part_id))
             flash("Part saved.", "ok")
         conn.commit()
         return redirect(url_for("part", part_id=part_id))
@@ -1560,7 +1562,10 @@ def system_page():
         app_update=system.load_json("app-update.json"), os_updates=system.load_json("os-updates.json"),
         update_state=system.load_json("update-state.json"), backups=system.list_backups(),
         job=system.running_job(), admin_set=system.admin_is_set(), unlocked=admin_unlocked(),
-        sudo_free=system.sudo_passwordless(), has_apt=system.has_apt())
+        sudo_free=system.sudo_passwordless(), has_apt=system.has_apt(),
+        autostart=system.autostart_status(),
+        remote_cfg=remote.config(), remote_state=remote.state(), remote_key=remote.public_key(),
+        remote_ready=remote.is_configured(), remote_setup=remote.server_setup_commands())
 
 
 @app.route("/system/health")
@@ -1637,6 +1642,28 @@ def system_restart():
         return blocked
     system.restart_app()
     return render_template("reboot.html", started=int(system.STARTED_AT), app_only=True)
+
+
+@app.route("/system/autostart", methods=["POST"])
+def system_autostart():
+    """Make Bench Log start by itself after a reboot."""
+    blocked = admin_guard()
+    if blocked:
+        return blocked
+    status = system.autostart_status()
+    if not status["available"]:
+        flash("This system does not use systemd, so start at boot has to be set up by hand.", "error")
+        return redirect(url_for("system_page") + "#power")
+    password, ok = sudo_password()
+    if not ok:
+        return redirect(url_for("system_page") + "#power")
+    hand_over = not status["as_service"]
+    if hand_over:
+        stop_timers()
+        get_db().commit()
+    return launch("autostart", "Start Bench Log at boot", system.autostart_steps(password),
+                  on_success=(lambda log: system.hand_over_to_service()) if hand_over else None,
+                  restarts=hand_over)
 
 
 @app.route("/system/os/<action>", methods=["POST"])
@@ -1765,6 +1792,106 @@ def system_full_backup():
         return redirect(url_for("system_page") + "#admin")
     return send_file(system.full_archive(), as_attachment=True,
                      download_name="benchlog-full-%s.zip" % datetime.now().strftime("%Y%m%d-%H%M"))
+
+
+# ------------------------------------------------------------ remote backup
+
+@app.route("/system/remote", methods=["POST"])
+def system_remote():
+    blocked = admin_guard()
+    if blocked:
+        return blocked
+    action = request.form.get("action")
+    here = url_for("system_page") + "#remote"
+    try:
+        if action == "save":
+            problems = remote.save_config({
+                "enabled": bool(request.form.get("enabled")), "host": (request.form.get("host") or "").strip(),
+                "user": (request.form.get("user") or "").strip(), "port": request.form.get("port") or 22,
+                "directory": (request.form.get("directory") or "").strip(),
+                "interval_days": request.form.get("interval_days") or 3, "keep": request.form.get("keep") or 30})
+            for problem in problems:
+                flash(problem, "error")
+            if not problems:
+                remote.ensure_key()
+                flash("Remote backup settings saved.", "ok")
+        elif action == "test":
+            health = remote.check()
+            if health["reachable"]:
+                flash("Connected in %d ms. %d snapshot(s) on the server, %s free." % (
+                    health["latency_ms"], len(health["snapshots"]),
+                    system.human_bytes(health["free"]) if health["free"] is not None else "unknown space"), "ok")
+            else:
+                flash(health["error"], "error")
+        elif action == "forget_host":
+            remote.forget_host()
+            flash("Forgot the server's identity. The next connection will record it again.", "ok")
+        elif action == "backup":
+            if not remote.is_configured() or not remote.has_key():
+                flash("Save the server details first.", "error")
+                return redirect(here)
+
+            def run(log):
+                log("Finished: %s" % remote.push(log))
+
+            return launch("remote-backup", "Remote backup", [system.Step("Send a snapshot to the server", func=run)])
+        elif action == "photos":
+            def pull(log):
+                cfg = remote.config()
+                health = remote.check(cfg)
+                if not health["reachable"]:
+                    raise RuntimeError(health["error"])
+                remote.sync_photos(log, cfg, health, direction="down")
+
+            return launch("remote-photos", "Fetch photos from the server",
+                          [system.Step("Copy photos back", func=pull)])
+        elif action == "fetch":
+            local = remote.fetch(request.form.get("name") or "")
+            flash("Downloaded as %s. Review the differences before restoring anything." % local, "ok")
+            return redirect(url_for("system_backup_compare", name=local))
+    except Exception as exc:
+        flash(str(exc), "error")
+    return redirect(here)
+
+
+@app.route("/system/backups/<name>/compare", methods=["GET", "POST"])
+def system_backup_compare(name):
+    blocked = admin_guard()
+    if blocked:
+        return blocked
+    if system.backup_path(name) is None:
+        abort(404)
+    if request.method == "POST":
+        try:
+            if request.form.get("action") == "merge":
+                stop_timers()
+                get_db().commit()
+                saved, added = system.merge_backup(name)
+                flash("Brought back %d missing record(s). Nothing current was changed. The state from just "
+                      "before was kept as %s." % (added, saved), "ok")
+            elif request.form.get("action") == "restore":
+                if request.form.get("confirm") != "RESTORE":
+                    flash("Type RESTORE to confirm a full restore.", "error")
+                else:
+                    stop_timers()
+                    get_db().commit()
+                    saved = system.restore_backup(name)
+                    flash("Restored %s. The database from just before was kept as %s." % (name, saved), "ok")
+                    return redirect(url_for("system_page") + "#backups")
+        except Exception as exc:
+            flash(str(exc), "error")
+        return redirect(url_for("system_backup_compare", name=name))
+    try:
+        rows = system.compare_backup(name)
+    except Exception as exc:
+        flash(str(exc), "error")
+        return redirect(url_for("system_page") + "#backups")
+    info = next((b for b in system.list_backups() if b["name"] == name), None)
+    return render_template(
+        "compare.html", name=name, info=info, rows=rows,
+        lose=sum(r["only_live"] for r in rows if r["table"] != "settings"),
+        gain=sum(r["only_backup"] for r in rows if r["table"] != "settings"),
+        changed=sum(r["changed"] for r in rows if r["table"] != "settings"))
 
 
 @app.errorhandler(404)

@@ -18,6 +18,7 @@
         <tr>
           {% set links = part_links(p.name, p.part_number, t.name) %}
           <td><a href="{{ links.google }}" target="_blank" rel="noopener" title="Search the web for this part"><strong>{{ p.name }}</strong></a>{% if p.part_number %} <span class="mono small">{{ p.part_number }}</span>{% endif %}
+            {% if p.is_upgrade %}<span class="pill good">upgrade</span>{% endif %}
             {% if p.microsolder %}<span class="pill">soldering</span>{% endif %}
             {% if p.purpose %}<br><span class="muted small">{{ p.purpose }}</span>{% endif %}
             <div class="small part-links">{% if p.buy_url %}<a href="{{ p.buy_url }}" target="_blank" rel="noopener">Supplier</a>{% endif %}<a href="{{ links.shopping }}" target="_blank" rel="noopener">Shopping</a><a href="{{ links.ebay }}" target="_blank" rel="noopener">eBay</a><a href="{{ url_for('part', part_id=p.id) }}">Price and details</a></div></td>
@@ -51,6 +52,7 @@
     </select>
   </div>
   <div class="field"><label class="check"><input type="checkbox" name="microsolder" value="1"> Needs soldering</label></div>
+  <div class="field"><label class="check"><input type="checkbox" name="is_upgrade" value="1"> This is an upgrade or mod, not a like-for-like replacement</label></div>
   <button type="submit">Add part</button>
 </form>
 

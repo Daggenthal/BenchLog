@@ -179,8 +179,13 @@
         </optgroup>
         {% endif %}
         <optgroup label="All parts for this device">
-          {% for p in parts if p.id not in suggested %}<option value="{{ p.id }}" data-cost="{{ '%.2f'|format(p.default_cost) }}" data-name="{{ p.name }}">{{ p.name }}{% if p.part_number %} ({{ p.part_number }}){% endif %}</option>{% endfor %}
+          {% for p in parts if p.id not in suggested and not p.is_upgrade %}<option value="{{ p.id }}" data-cost="{{ '%.2f'|format(p.default_cost) }}" data-name="{{ p.name }}">{{ p.name }}{% if p.part_number %} ({{ p.part_number }}){% endif %}</option>{% endfor %}
         </optgroup>
+        {% if parts|selectattr('is_upgrade')|list %}
+        <optgroup label="Upgrades and mods">
+          {% for p in parts if p.is_upgrade and p.id not in suggested %}<option value="{{ p.id }}" data-cost="{{ '%.2f'|format(p.default_cost) }}" data-name="{{ p.name }}">{{ p.name }}{% if p.part_number %} ({{ p.part_number }}){% endif %}</option>{% endfor %}
+        </optgroup>
+        {% endif %}
       </select>
     </div>
     <div class="fields">

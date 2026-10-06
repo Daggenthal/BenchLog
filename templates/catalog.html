@@ -8,6 +8,7 @@
   <div class="row">
     <input type="search" name="q" value="{{ q }}" placeholder="drift, M92T36, no charge, HDMI" style="flex:1 1 220px" aria-label="Search parts">
     <button class="primary" type="submit">Search parts</button>
+    <a class="btn" href="{{ url_for('catalog_index', q='upgrade') }}">Show upgrades and mods</a>
   </div>
 </form>
 {% if q %}

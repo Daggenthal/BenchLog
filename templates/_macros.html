@@ -48,6 +48,7 @@
     <tr>
       {% set links = part_links(r.part.name, r.part.part_number, r.part.type_name) %}
       <td><a href="{{ links.google }}" target="_blank" rel="noopener" title="Search the web for this part"><strong>{{ r.part.name }}</strong></a>{% if r.part.part_number %} <span class="mono small">{{ r.part.part_number }}</span>{% endif %}
+        {% if r.part.is_upgrade %}<span class="pill good">upgrade</span>{% endif %}
         {% if r.part.microsolder %}<span class="pill">soldering</span>{% endif %}
         {% if r.part.purpose %}<br><span class="muted small">{{ r.part.purpose }}</span>{% endif %}
         <div class="small part-links"><a href="{{ links.shopping }}" target="_blank" rel="noopener">Shopping</a><a href="{{ links.ebay }}" target="_blank" rel="noopener">eBay</a><a href="{{ url_for('part', part_id=r.part.id) }}">Price and details</a></div></td>

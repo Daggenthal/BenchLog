@@ -10,6 +10,7 @@ import json
 import os
 import platform
 import re
+import shlex
 import shutil
 import socket
 import sqlite3
@@ -280,6 +281,13 @@ def read_health():
         warnings.append("The system runs from an SD card. Keep backups current until it moves to an SSD.")
     if h["last_backup"] is None or time.time() - h["last_backup"] > 2 * 86400:
         warnings.append("No local database backup in the last two days.")
+    try:
+        import remote
+        warnings.extend(remote.warnings())
+    except Exception:
+        pass
+    if shutil.which("systemctl") and os.path.isdir("/run/systemd/system") and not autostart_status()["ready"]:
+        warnings.append("Bench Log will not start by itself after a reboot. Turn on start at boot below.")
     h["warnings"] = warnings
     return h
 
@@ -350,9 +358,10 @@ class Step:
     """One step of a job: either a command or a Python function."""
 
     def __init__(self, title, argv=None, func=None, sudo_password=None, use_sudo=False, timeout=3600,
-                 cwd=None):
+                 cwd=None, env=None):
         self.title, self.argv, self.func = title, argv, func
         self.sudo_password, self.use_sudo, self.timeout, self.cwd = sudo_password, use_sudo, timeout, cwd
+        self.env = env
 
 
 def _job_paths(job_id):
@@ -457,7 +466,7 @@ def _run_step(step, log):
         argv, stdin_text = sudo_argv(argv, step.sudo_password)
     shown = step.argv if step.use_sudo else argv
     log("$ %s%s" % ("sudo " if step.use_sudo else "", " ".join(shown)))
-    env = dict(os.environ, GIT_TERMINAL_PROMPT="0", LC_ALL="C")
+    env = dict(step.env or os.environ, GIT_TERMINAL_PROMPT="0", LC_ALL="C")
     try:
         proc = subprocess.Popen(argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                 text=True, cwd=step.cwd, env=env)
@@ -485,10 +494,10 @@ def _run_step(step, log):
 
 # ------------------------------------------------------------------ backups
 
-def create_backup(kind="manual"):
-    """Write a consistent copy of the live database and return its file name."""
-    name = "%s-%s.db" % (kind, time.strftime("%Y%m%d-%H%M%S"))
-    path = os.path.join(DATA_DIR, "backups", name)
+def snapshot_to(path):
+    """Write a consistent, verified copy of the live database to any path."""
+    if os.path.exists(path):
+        os.remove(path)
     source = sqlite3.connect(DB_PATH)
     target = sqlite3.connect(path)
     try:
@@ -501,6 +510,12 @@ def create_backup(kind="manual"):
     if check != "ok":
         os.remove(path)
         raise RuntimeError("Backup failed its integrity check: %s" % check)
+
+
+def create_backup(kind="manual"):
+    """Write a consistent copy of the live database and return its file name."""
+    name = "%s-%s.db" % (kind, time.strftime("%Y%m%d-%H%M%S"))
+    snapshot_to(os.path.join(DATA_DIR, "backups", name))
     prune_backups()
     return name
 
@@ -558,6 +573,119 @@ def restore_backup(name):
     return saved
 
 
+def _tables(conn, schema):
+    return [r[0] for r in conn.execute(
+        "SELECT name FROM %s.sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%%' ORDER BY name"
+        % schema)]
+
+
+def _columns(conn, schema, table):
+    info = conn.execute("PRAGMA %s.table_info(%s)" % (schema, table)).fetchall()
+    keys = [row[1] for row in sorted((r for r in info if r[5]), key=lambda r: r[5])]
+    return [row[1] for row in info], keys
+
+
+TABLE_LABELS = {
+    "devices": "Devices", "repair_items": "Repair steps", "work_sessions": "Time sessions",
+    "device_tests": "Checklist results", "device_parts": "Donor part states", "photos": "Photo records",
+    "boxes": "Boxes", "lots": "Lots", "parts": "Catalog parts", "functions": "Checklist items",
+    "device_types": "Device types", "part_functions": "Part and symptom links", "settings": "Settings",
+}
+
+
+def compare_backup(name):
+    """Describe how a backup differs from the live database, table by table.
+
+    For each table: rows only in the live data (a full restore would lose them),
+    rows only in the backup (a restore or merge would bring them back), and rows
+    present in both but different.
+    """
+    path = backup_path(name)
+    if path is None:
+        raise RuntimeError("That backup no longer exists.")
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        conn.execute("ATTACH DATABASE ? AS bk", (path,))
+        live_tables, backup_tables = _tables(conn, "main"), set(_tables(conn, "bk"))
+        result = []
+        for table in live_tables:
+            entry = {"table": table, "label": TABLE_LABELS.get(table, table), "only_live": 0, "only_backup": 0,
+                     "changed": 0, "same": 0, "live_samples": [], "backup_samples": []}
+            if table not in backup_tables:
+                entry["only_live"] = conn.execute("SELECT COUNT(*) FROM main.%s" % table).fetchone()[0]
+                entry["note"] = "This table did not exist when the backup was made."
+                result.append(entry)
+                continue
+            live_cols, keys = _columns(conn, "main", table)
+            backup_cols, _ = _columns(conn, "bk", table)
+            shared = [c for c in live_cols if c in backup_cols]
+            keys = [k for k in keys if k in shared] or shared
+            key_index = [shared.index(k) for k in keys]
+            select = "SELECT %s FROM %%s.%s" % (", ".join(shared), table)
+            live = {tuple(row[i] for i in key_index): row for row in conn.execute(select % "main")}
+            backup = {tuple(row[i] for i in key_index): row for row in conn.execute(select % "bk")}
+            code_index = shared.index("code") if "code" in shared else None
+
+            def sample(row, key):
+                return str(row[code_index]) if code_index is not None else "/".join(str(k) for k in key)
+
+            for key, row in live.items():
+                if key not in backup:
+                    entry["only_live"] += 1
+                    if len(entry["live_samples"]) < 40:
+                        entry["live_samples"].append(sample(row, key))
+                elif backup[key] != row:
+                    entry["changed"] += 1
+                else:
+                    entry["same"] += 1
+            for key, row in backup.items():
+                if key not in live:
+                    entry["only_backup"] += 1
+                    if len(entry["backup_samples"]) < 40:
+                        entry["backup_samples"].append(sample(row, key))
+            result.append(entry)
+        return result
+    finally:
+        conn.close()
+
+
+def merge_backup(name):
+    """Bring back records that exist in a backup but are missing now. Nothing current is changed.
+
+    Returns (name of the safety backup made first, number of records added).
+    """
+    path = backup_path(name)
+    if path is None:
+        raise RuntimeError("That backup no longer exists.")
+    saved = create_backup("pre-restore")
+    conn = sqlite3.connect(DB_PATH, isolation_level=None)
+    try:
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("ATTACH DATABASE ? AS bk", (path,))
+        backup_tables = set(_tables(conn, "bk"))
+        conn.execute("BEGIN IMMEDIATE")
+        conn.execute("PRAGMA defer_foreign_keys = ON")
+        before = conn.total_changes
+        for table in _tables(conn, "main"):
+            if table not in backup_tables or table == "settings":
+                continue
+            live_cols, _ = _columns(conn, "main", table)
+            backup_cols, _ = _columns(conn, "bk", table)
+            shared = ", ".join(c for c in live_cols if c in backup_cols)
+            conn.execute("INSERT OR IGNORE INTO main.%s (%s) SELECT %s FROM bk.%s" % (table, shared, shared, table))
+        added = conn.total_changes - before
+        broken = conn.execute("PRAGMA main.foreign_key_check").fetchall()
+        if broken:
+            conn.execute("ROLLBACK")
+            raise RuntimeError(
+                "Some missing records depend on others that conflict with current data, so nothing was "
+                "changed. Use a full restore instead, or copy what you need by hand.")
+        conn.execute("COMMIT")
+        return saved, added
+    finally:
+        conn.close()
+
+
 def full_archive():
     """Zip the database and every photo into one file and return its path."""
     path = os.path.join(DATA_DIR, "full-backup.zip")
@@ -581,6 +709,11 @@ def backup_loop():
                 create_backup("auto")
         except Exception as exc:
             print("Automatic backup failed: %s" % exc, file=sys.stderr)
+        try:
+            import remote
+            remote.tick()
+        except Exception as exc:
+            print("Remote backup check failed: %s" % exc, file=sys.stderr)
         time.sleep(3600)
 
 
@@ -700,14 +833,101 @@ def rollback_steps(restart):
 
 def restart_app(delay=1.5):
     """Restart the app process shortly after the current request has been answered."""
-    unit = os.environ.get("BENCHLOG_UNIT", "benchlog")
-
     def go():
         time.sleep(delay)
         if os.environ.get("INVOCATION_ID") and shutil.which("systemctl"):
-            subprocess.Popen(["systemctl", "--user", "restart", unit])
+            subprocess.Popen(["systemctl", "--user", "restart", UNIT_NAME], env=_user_env())
         else:
             os.execv(sys.executable, [sys.executable] + sys.argv)
+
+    threading.Thread(target=go, daemon=True).start()
+
+
+# ------------------------------------------------------------ start at boot
+
+UNIT_NAME = os.environ.get("BENCHLOG_UNIT", "benchlog")
+
+
+def _user_env():
+    """systemctl --user needs to know where the user's session bus lives."""
+    env = dict(os.environ)
+    runtime = "/run/user/%d" % os.getuid()
+    if "XDG_RUNTIME_DIR" not in env and os.path.isdir(runtime):
+        env["XDG_RUNTIME_DIR"] = runtime
+    return env
+
+
+def unit_path():
+    return os.path.join(os.path.expanduser("~"), ".config", "systemd", "user", UNIT_NAME + ".service")
+
+
+def unit_text():
+    """The service definition, written for wherever this copy is actually installed."""
+    return "\n".join([
+        "[Unit]",
+        "Description=Bench Log repair tracker",
+        "After=network-online.target",
+        "",
+        "[Service]",
+        "WorkingDirectory=%s" % APP_DIR,
+        "ExecStart=%s %s" % (sys.executable, os.path.join(APP_DIR, "app.py")),
+        "Environment=BENCHLOG_PORT=%s" % os.environ.get("BENCHLOG_PORT", "8080"),
+        "Environment=BENCHLOG_DATA=%s" % DATA_DIR,
+        "Restart=on-failure",
+        "RestartSec=3",
+        "",
+        "[Install]",
+        "WantedBy=default.target",
+        "",
+    ])
+
+
+def user_name():
+    try:
+        import pwd
+        return pwd.getpwuid(os.getuid()).pw_name
+    except (ImportError, KeyError):
+        return os.environ.get("USER", "")
+
+
+def autostart_status():
+    """Whether Bench Log comes back by itself after a reboot, and what is missing if not."""
+    status = {"available": bool(shutil.which("systemctl")), "installed": os.path.exists(unit_path()),
+              "enabled": False, "linger": False, "as_service": bool(os.environ.get("INVOCATION_ID"))}
+    if status["available"]:
+        status["enabled"] = _run(["systemctl", "--user", "is-enabled", UNIT_NAME], timeout=5,
+                                 env=_user_env())[0] == 0
+        rc, out = _run(["loginctl", "show-user", user_name(), "-p", "Linger"], timeout=5)
+        status["linger"] = rc == 0 and "Linger=yes" in out
+    status["ready"] = status["installed"] and status["enabled"] and status["linger"]
+    return status
+
+
+def autostart_steps(sudo_password):
+    """Install and enable the user service, and let it run while nobody is logged in."""
+    def write_unit(log):
+        os.makedirs(os.path.dirname(unit_path()), exist_ok=True)
+        with open(unit_path(), "w") as fh:
+            fh.write(unit_text())
+        log("Wrote %s" % unit_path())
+
+    return [
+        Step("Write the service file", func=write_unit),
+        Step("Reload the service list", argv=["systemctl", "--user", "daemon-reload"], env=_user_env()),
+        Step("Start at boot", argv=["systemctl", "--user", "enable", UNIT_NAME], env=_user_env()),
+        Step("Keep running when logged out", argv=["loginctl", "enable-linger", user_name()], use_sudo=True,
+             sudo_password=sudo_password),
+    ]
+
+
+def hand_over_to_service(delay=1.5):
+    """Stop this hand-started copy and let the service take over the same port."""
+    def go():
+        time.sleep(delay)
+        subprocess.Popen(["sh", "-c", "sleep 2; systemctl --user start %s" % shlex.quote(UNIT_NAME)],
+                         start_new_session=True, env=_user_env(), stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL)
+        os._exit(0)
 
     threading.Thread(target=go, daemon=True).start()
 

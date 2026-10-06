@@ -1,7 +1,7 @@
 """Seed catalog: device types, their test checklists, and common failure parts.
 
 Each part is a tuple:
-    (name, part_number, purpose, default_cost, needs_microsoldering, [functions it fixes])
+    (name, part_number, purpose, default_cost, needs_microsoldering, [functions it fixes], is_upgrade)
 
 Default costs are rough placeholders in USD. Edit them in the Catalog page to
 match what you actually pay. Part numbers are only filled in where they are
@@ -9,8 +9,20 @@ well known, so an empty part number does not mean the part has none.
 """
 
 
-def P(name, number, purpose, cost, micro, fixes):
-    return (name, number, purpose, cost, micro, fixes)
+def P(name, number, purpose, cost, micro, fixes, upgrade=False):
+    return (name, number, purpose, cost, micro, fixes, upgrade)
+
+
+# GuliKit drift-proof sticks. They read position with magnets instead of a wiper on a
+# carbon track, so there is nothing to wear out. Prices are per stick, taken from
+# pair prices seen in late 2026: check current listings before quoting a customer.
+TMR_NOTE = ("Contactless TMR sensor that does not wear out. Needs soldering, then calibration with "
+            "GuliKit's tool. Sold in pairs. Check the listing covers this controller")
+
+
+def gulikit_tmr(side, stick_function, click_function):
+    return P("GuliKit TMR stick, %s (drift-proof upgrade)" % side, "", TMR_NOTE, 15.0, 1,
+             [stick_function, click_function], upgrade=True)
 
 
 # ---------------------------------------------------------------- controllers
@@ -34,6 +46,8 @@ DUALSENSE = {
           ["Right stick (no drift)", "R3 click"]),
         P("Stick potentiometers (pair)", "", "Cheaper drift fix that keeps the original stick body", 1.0, 1,
           ["Left stick (no drift)", "Right stick (no drift)"]),
+        gulikit_tmr("left", "Left stick (no drift)", "L3 click"),
+        gulikit_tmr("right", "Right stick (no drift)", "R3 click"),
         P("Thumbstick caps", "", "Worn or torn rubber caps", 1.0, 0, ["Shell and cosmetics"]),
         P("USB-C charging port", "", "No charge, loose cable, no wired connection", 2.0, 1,
           ["Charges over USB-C", "Works wired over USB"]),
@@ -80,6 +94,8 @@ DUALSHOCK4 = {
           ["Left stick (no drift)", "L3 click"]),
         P("Analog stick module (right)", "", "Fixes drift and a dead R3 click", 2.5, 1,
           ["Right stick (no drift)", "R3 click"]),
+        gulikit_tmr("left", "Left stick (no drift)", "L3 click"),
+        gulikit_tmr("right", "Right stick (no drift)", "R3 click"),
         P("Thumbstick caps", "", "Worn or torn rubber caps", 1.0, 0, ["Shell and cosmetics"]),
         P("Micro-USB charging port board", "", "No charge or loose cable. Match the JDS/JDM board revision", 3.0, 0,
           ["Charges over micro-USB", "Works wired over USB"]),
@@ -123,6 +139,8 @@ def xbox_controller(name, port_name, port_function):
               ["Left stick (no drift)", "LS click"]),
             P("Analog stick module (right)", "", "Fixes drift and a dead RS click", 2.5, 1,
               ["Right stick (no drift)", "RS click"]),
+            gulikit_tmr("left", "Left stick (no drift)", "LS click"),
+            gulikit_tmr("right", "Right stick (no drift)", "RS click"),
             P("Thumbstick caps", "", "Worn or torn rubber caps", 1.0, 0, ["Shell and cosmetics"]),
             P("LB / RB bumper assembly", "", "Snapped plastic bumper bar, the most common Xbox fault", 3.0, 0,
               ["LB", "RB"]),
@@ -175,6 +193,10 @@ def joycon(name, side, extra_functions, extra_parts, generation=1):
     ]
     if generation == 1:
         parts += [
+            P("GuliKit TMR stick (drift-proof upgrade)", "NS40T",
+              "Contactless sensor that does not wear out. Drop-in, no soldering. Recalibrate the sticks in "
+              "system settings afterwards. Sold in pairs, and the same stick fits left and right", 12.5, 0,
+              ["Stick (no drift)", "Stick click"], upgrade=True),
             P("Slider rail with flex cable", "", "Not detected or not charging when attached", 4.0, 0,
               ["Charges on the console", "Detected when attached"]),
             P("Lock latch (metal buckle)", "", "Joy-Con slides off the console", 1.0, 0,
@@ -226,6 +248,8 @@ SWITCH_PRO = {
           ["Left stick (no drift)", "L3 click"]),
         P("Analog stick module (right)", "", "Fixes drift and a dead R3 click", 3.0, 1,
           ["Right stick (no drift)", "R3 click"]),
+        gulikit_tmr("left", "Left stick (no drift)", "L3 click"),
+        gulikit_tmr("right", "Right stick (no drift)", "R3 click"),
         P("Thumbstick caps", "", "Worn caps and the white dust they leave in the stick", 1.0, 0,
           ["Shell and cosmetics"]),
         P("USB-C charging port", "", "No charge or no wired connection", 2.0, 1,
@@ -344,6 +368,10 @@ def switch_console(name, kind):
             P("Analog stick module (left)", "", "Fixes drift on the left stick", 4.0, 0, ["Left stick (no drift)"]),
             P("Analog stick module (right)", "", "Fixes drift on the right stick", 4.0, 0,
               ["Right stick (no drift)"]),
+            P("GuliKit TMR stick (drift-proof upgrade)", "NS40T",
+              "Contactless sensor that does not wear out. The Joy-Con stick also fits the Lite. Recalibrate "
+              "the sticks in system settings afterwards. Sold in pairs", 12.5, 0,
+              ["Left stick (no drift)", "Right stick (no drift)"], upgrade=True),
             P("Button conductive pads", "", "Mushy or dead buttons", 3.0, 0, ["D-pad and face buttons"]),
             P("L / R / ZL / ZR flex and switches", "", "Dead shoulder buttons or triggers", 4.0, 0,
               ["L / R / ZL / ZR"]),
@@ -378,6 +406,16 @@ def steam_deck(name, oled):
               ["Left stick (no drift)", "L3 / R3 click", "Stick touch sensing"]),
             P("Thumbstick module (right)", "", "Fixes drift. Match the stick type printed on the old module", 20.0, 0,
               ["Right stick (no drift)", "L3 / R3 click", "Stick touch sensing"]),
+            P("GuliKit Hall stick, left (drift-proof upgrade)", "" if oled else "SD02",
+              ("Contactless Hall sensor. OLED version only: the LCD kit does not fit. " if oled else
+               "Contactless Hall sensor. Fits Type A and Type B LCD models, not the OLED. ")
+              + "Drop-in, no soldering. Press the calibration button on the module before closing up. Sold in pairs",
+              12.5 if oled else 9.5, 0, ["Left stick (no drift)", "L3 / R3 click"], upgrade=True),
+            P("GuliKit Hall stick, right (drift-proof upgrade)", "" if oled else "SD02",
+              ("Contactless Hall sensor. OLED version only: the LCD kit does not fit. " if oled else
+               "Contactless Hall sensor. Fits Type A and Type B LCD models, not the OLED. ")
+              + "Drop-in, no soldering. Press the calibration button on the module before closing up. Sold in pairs",
+              12.5 if oled else 9.5, 0, ["Right stick (no drift)", "L3 / R3 click"], upgrade=True),
             P("USB-C charging port", "", "No charge or loose cable. This is the real soldering job on a Deck", 4.0, 1,
               ["Charges over USB-C", "USB-C data and video out"]),
             P("Charging circuit (charge IC, fuses)", "", "Port is good but still no charge or no power", 8.0, 1,

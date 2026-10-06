@@ -412,3 +412,46 @@ def test_remote_address_hides_embedded_credentials(git_install):
     run(install, "remote", "set-url", "origin", "https://someone:secret-token@github.com/Daggenthal/BenchLog.git")
     remote = system.app_version()["remote"]
     assert remote == "https://github.com/Daggenthal/BenchLog.git"
+
+
+# ------------------------------------------------------------- start at boot
+
+def test_service_file_points_at_this_install(monkeypatch, tmp_path):
+    monkeypatch.setattr(system, "APP_DIR", "/home/pi/benchlog")
+    text = system.unit_text()
+    assert "WorkingDirectory=/home/pi/benchlog" in text
+    assert "ExecStart=%s /home/pi/benchlog/app.py" % sys.executable in text
+    assert "Restart=on-failure" in text and "WantedBy=default.target" in text
+    assert "BENCHLOG_DATA=%s" % system.DATA_DIR in text
+
+
+def test_turning_on_start_at_boot(client, monkeypatch, tmp_path):
+    ran, handed = [], []
+    unit = tmp_path / "systemd" / "benchlog.service"
+    monkeypatch.setattr(system, "unit_path", lambda: str(unit))
+    monkeypatch.setattr(system, "sudo_passwordless", lambda: True)
+    monkeypatch.setattr(system, "hand_over_to_service", lambda: handed.append(1))
+    monkeypatch.setattr(system, "autostart_status", lambda: {
+        "available": True, "installed": False, "enabled": False, "linger": False, "as_service": False,
+        "ready": False})
+
+    def fake_run_step(step, log):
+        ran.append((step.argv, step.use_sudo))
+        return True
+
+    monkeypatch.setattr(system, "_run_step", fake_run_step)
+    client.post("/system/admin", data={"action": "lock"})
+    assert "/system#admin" in client.post("/system/autostart").headers["Location"]
+    unlock(client)
+    page = client.get("/system").get_data(as_text=True)
+    assert "Turn on start at boot" in page and "stays down until someone starts it by hand" in page
+    time.sleep(1.1)
+    r = client.post("/system/autostart")
+    assert r.status_code == 302 and "/system/job/autostart-" in r.headers["Location"]
+    job = system.get_job(r.headers["Location"].rsplit("/", 1)[1])
+    assert wait_for(job)["status"] == "done"
+    assert unit.read_text() == system.unit_text()
+    assert ran == [(["systemctl", "--user", "daemon-reload"], False),
+                   (["systemctl", "--user", "enable", "benchlog"], False),
+                   (["loginctl", "enable-linger", system.user_name()], True)]
+    assert handed == [1]  # the hand-started copy gives way to the service

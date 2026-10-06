@@ -3,7 +3,7 @@
 {% block content %}
 <p class="small"><a href="{{ url_for('catalog_index') }}">Parts catalog</a> &rsaquo; <a href="{{ url_for('catalog_type', type_id=p.device_type_id) }}">{{ p.type_name }}</a></p>
 <h1>{{ p.name }}{% if p.part_number %} <span class="mono muted">{{ p.part_number }}</span>{% endif %}</h1>
-<p class="muted">{{ p.purpose }}</p>
+<p class="muted">{% if p.is_upgrade %}<span class="pill good">upgrade</span> {% endif %}{{ p.purpose }}</p>
 
 <div class="grid-2">
 <section class="card">
@@ -44,6 +44,7 @@
   <div class="field"><label for="purpose">What it is for</label><input type="text" name="purpose" id="purpose" value="{{ p.purpose }}"></div>
   <div class="field"><label for="buy_url">Link to the listing or supplier you buy from</label><input type="text" name="buy_url" id="buy_url" value="{{ p.buy_url }}" placeholder="https://" inputmode="url" autocomplete="off"></div>
   <div class="field"><label class="check"><input type="checkbox" name="microsolder" value="1" {{ 'checked' if p.microsolder }}> Needs soldering</label></div>
+  <div class="field"><label class="check"><input type="checkbox" name="is_upgrade" value="1" {{ 'checked' if p.is_upgrade }}> This is an upgrade or mod, not a like-for-like replacement</label></div>
   <button type="submit">Save part</button>
 </form>
 </div>
