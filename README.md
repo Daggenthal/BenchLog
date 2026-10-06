@@ -316,7 +316,9 @@ cheap results for small parts are often the wrong item or a bulk lot.
 ### iFixit prices
 
 Every part has an iFixit link. Steam Deck parts are marked, because iFixit
-sells Valve's official ones. iFixit does not allow programs to read its
+sells Valve's official ones. For those, the link opens the exact product page
+where one is known (thumbsticks, battery, fan), and the Steam Deck parts page
+otherwise. For other devices it searches iFixit's site through Google. iFixit does not allow programs to read its
 prices, so that price is typed in by hand on the part page, along with the
 link to the product. The part page then shows iFixit and eBay side by side and
 says which is cheaper and by how much.

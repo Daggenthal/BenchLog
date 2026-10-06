@@ -15,6 +15,7 @@
     <a class="btn" href="{{ search_links.ebay }}" target="_blank" rel="noopener">eBay, buy it now</a>
     <a class="btn {{ 'good' if search_links.ifixit_official }}" href="{{ p.ifixit_url or search_links.ifixit }}" target="_blank" rel="noopener">iFixit{{ ' (official parts)' if search_links.ifixit_official }}</a>
   </div>
+  {% if search_links.ifixit_name and not p.ifixit_url %}<p class="muted small" style="margin-top:8px">iFixit sells this as "{{ search_links.ifixit_name }}".</p>{% endif %}
   <div class="grid" style="margin-top:14px">
     <div class="stat"><div class="v">{{ p.default_cost|money }}</div><div class="k">Usual cost, prefilled on repairs</div></div>
     <div class="stat"><div class="v">{% if p.last_price is not none %}{{ p.last_price|money }}{% else %}<span class="muted">n/a</span>{% endif %}</div><div class="k">{% if p.last_price_at %}eBay median, checked {{ p.last_price_at|date }}{% else %}No price check yet{% endif %}</div></div>

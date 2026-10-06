@@ -461,7 +461,15 @@ def test_turning_on_start_at_boot(client, monkeypatch, tmp_path):
 
 def test_ifixit_links_and_comparison_helper():
     links = pricing.links("Fan", "", "Steam Deck LCD")
-    assert links["ifixit"] == "https://www.ifixit.com/Search?doctype=product&query=Steam+Deck+LCD+Fan"
+    assert links["ifixit"] == "https://www.ifixit.com/Parts/Steam_Deck" and links["ifixit_name"] == ""
+    exact = pricing.links("Thumbstick module (left)", "", "Steam Deck OLED")
+    assert exact["ifixit"] == "https://www.ifixit.com/products/steam-deck-oled-left-thumbstick"
+    assert exact["ifixit_name"] == "Steam Deck OLED Left Thumbstick"
+    other = pricing.links("Battery", "LIP1708", DS)["ifixit"]
+    assert other.startswith("https://www.google.com/search?q=site%3Aifixit.com+")
+    assert "ifixit.com/Search" not in other
+    for (type_name, part_name) in pricing.IFIXIT_PRODUCTS:  # every exact page points at a real catalog part
+        assert part_id(type_name, part_name)
     assert links["ifixit_official"] is True
     assert pricing.links("Battery", "LIP1708", DS)["ifixit_official"] is False
     assert pricing.compare(None, 20.0) is None and pricing.compare(20.0, None) is None
@@ -473,7 +481,7 @@ def test_ifixit_links_and_comparison_helper():
 def test_ifixit_price_is_entered_by_hand_and_compared(client, fake_ebay):
     pid = part_id("Steam Deck LCD", "Fan")
     page = client.get("/part/%d" % pid).get_data(as_text=True)
-    assert "iFixit (official parts)" in page and "ifixit.com/Search?doctype=product" in page
+    assert "iFixit (official parts)" in page and "ifixit.com/Parts/Steam_Deck" in page
 
     client.post("/part/%d" % pid, data={"action": "ifixit", "ifixit_price": "24.99",
                                         "ifixit_url": "www.ifixit.com/products/steam-deck-fan"})

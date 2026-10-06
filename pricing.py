@@ -30,6 +30,36 @@ MARKETPLACES = {
 # Device types iFixit sells manufacturer-backed parts for, so its listing is worth checking first.
 IFIXIT_OFFICIAL = {"Steam Deck LCD", "Steam Deck OLED"}
 
+# iFixit's parts page for a device type. Used when there is no exact product page below.
+IFIXIT_PARTS_PAGES = {
+    "Steam Deck LCD": "https://www.ifixit.com/Parts/Steam_Deck",
+    "Steam Deck OLED": "https://www.ifixit.com/Parts/Steam_Deck_OLED",
+}
+
+# Exact iFixit product pages, keyed by (device type, catalog part name).
+# The value is iFixit's own product name and the last piece of its address.
+IFIXIT_PRODUCTS = {
+    ("Steam Deck OLED", "Thumbstick module (left)"): ("Steam Deck OLED Left Thumbstick", "steam-deck-oled-left-thumbstick"),
+    ("Steam Deck OLED", "Thumbstick module (right)"): ("Steam Deck OLED Right Thumbstick", "steam-deck-oled-right-thumbstick"),
+    ("Steam Deck OLED", "Battery"): ("Steam Deck OLED Battery", "steam-deck-oled-battery"),
+    ("Steam Deck OLED", "Fan"): ("Steam Deck OLED Fan", "steam-deck-oled-fan"),
+    ("Steam Deck LCD", "Thumbstick module (left)"): ("Steam Deck LCD Left Thumbstick", "steam-deck-left-thumbstick"),
+    ("Steam Deck LCD", "Thumbstick module (right)"): ("Steam Deck LCD Right Thumbstick", "steam-deck-right-thumbstick"),
+    ("Steam Deck LCD", "Battery"): ("Steam Deck LCD Battery", "steam-deck-lcd-battery"),
+}
+
+
+def ifixit_link(part_name, type_name):
+    """Best iFixit address for a part, and the product name when it is an exact page."""
+    exact = IFIXIT_PRODUCTS.get((type_name, part_name))
+    if exact:
+        return "https://www.ifixit.com/products/" + exact[1], exact[0]
+    if type_name in IFIXIT_PARTS_PAGES:
+        return IFIXIT_PARTS_PAGES[type_name], ""
+    # iFixit's own search address is not dependable, so search its site through Google.
+    plain = re.sub(r"\s+", " ", re.sub(r"[()/]", " ", "%s %s" % (type_name or "", part_name or ""))).strip()
+    return "https://www.google.com/search?q=" + urllib.parse.quote_plus("site:ifixit.com " + plain), ""
+
 _token = {"value": "", "expires": 0, "client_id": ""}
 
 
@@ -50,13 +80,13 @@ def links(part_name, part_number, type_name, marketplace="EBAY_US", query=None):
     """Search links for a part: general web, shopping results, and eBay buy-it-now."""
     q = urllib.parse.quote_plus(query or part_query(part_name, part_number, type_name))
     domain = MARKETPLACES.get(marketplace, MARKETPLACES["EBAY_US"])[1]
-    # iFixit's own search reads better without the word "replacement" or a chip-style phrase.
-    plain = re.sub(r"\s+", " ", re.sub(r"[()/]", " ", "%s %s" % (type_name or "", part_name or ""))).strip()
+    ifixit, ifixit_name = ifixit_link(part_name, type_name)
     return {
         "google": "https://www.google.com/search?q=" + q,
         "shopping": "https://www.google.com/search?tbm=shop&q=" + q,
         "ebay": "https://www.%s/sch/i.html?_nkw=%s&LH_BIN=1" % (domain, q),
-        "ifixit": "https://www.ifixit.com/Search?doctype=product&query=" + urllib.parse.quote_plus(plain),
+        "ifixit": ifixit,
+        "ifixit_name": ifixit_name,
         "ifixit_official": type_name in IFIXIT_OFFICIAL,
     }
 
